@@ -81,13 +81,13 @@ export function StatCard({
               <AreaChart data={sparkData} margin={{ top: 2, right: 0, bottom: 2, left: 0 }}>
                 <defs>
                   <linearGradient id={`spark-${label.replace(/\s/g, '')}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%"   stopColor={toneFg[tone] === 'var(--adm-fg-muted)' ? '#E43356' : (toneFg[tone] as string)} stopOpacity={0.4} />
-                    <stop offset="100%" stopColor={toneFg[tone] === 'var(--adm-fg-muted)' ? '#E43356' : (toneFg[tone] as string)} stopOpacity={0} />
+                    <stop offset="0%"   stopColor={toneFg[tone] === 'var(--adm-fg-muted)' ? '#FF003F' : (toneFg[tone] as string)} stopOpacity={0.4} />
+                    <stop offset="100%" stopColor={toneFg[tone] === 'var(--adm-fg-muted)' ? '#FF003F' : (toneFg[tone] as string)} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <Area
                   type="monotone" dataKey="v" strokeWidth={1.5} isAnimationActive={false}
-                  stroke={toneFg[tone] === 'var(--adm-fg-muted)' ? '#E43356' : (toneFg[tone] as string)}
+                  stroke={toneFg[tone] === 'var(--adm-fg-muted)' ? '#FF003F' : (toneFg[tone] as string)}
                   fill={`url(#spark-${label.replace(/\s/g, '')})`}
                 />
               </AreaChart>

@@ -24,64 +24,64 @@ const config: Config = {
     extend: {
       colors: {
         /* -------------------------------------------------------- */
-        /* Primary system — Eris Orange scale (legacy `brand-*` keys) */
+        /* Primary system — eSawda RED scale, matches HomeHero      */
+        /* Hero uses #FF003F red on #FFF1E6 cream. All sections     */
+        /* below re-use these tokens for palette continuity.        */
         /* -------------------------------------------------------- */
         brand: {
-          950: '#3A1408', // deepest text on orange tint
-          900: '#5E1F0D', // hero body text on light tint
-          800: '#8A2E12', // pressed / heading on tint
-          700: '#F16A2B', // 🔑 primary CTA — Eris orange
-          600: '#F47B45', // hover
-          500: '#F79663', // active highlight
-          400: '#FAB289',
-          300: '#FCCFB0',
-          200: '#FDDFC7',
-          100: '#FEEDDD', // chip bg
-           50: '#FFF6EC', // soft tint surface
+          950: '#3A0212',
+          900: '#5E051D',
+          800: '#8A092A',
+          700: '#FF003F',  // 🔑 primary CTA — hero red
+          600: '#FF2557',
+          500: '#FF4A70',
+          400: '#FF7191',
+          300: '#FFA0B5',
+          200: '#FFC7D2',
+          100: '#FFE0E6',
+           50: '#FFF0F3',
         },
         primary: {
-          DEFAULT:   '#F16A2B',  // Eris orange CTA
-          dark:      '#0F1E3D',  // 🔑 deep navy for headings
-          light:     '#FCCFB0',
-          fixed:     '#FEEDDD',
-          fixedDim:  '#FDDFC7',
+          DEFAULT:   '#FF003F',
+          dark:      '#0F1524',   // near-navy ink
+          light:     '#FFC7D2',
+          fixed:     '#FFE0E6',
+          fixedDim:  '#FFC7D2',
         },
-        // Secondary accent — deep navy. Used for headings, chips,
-        // secondary buttons. This is the counterweight to the orange.
         secondary: {
-          DEFAULT:   '#0F1E3D',  // navy 950
-          dark:      '#06122A',  // near-black navy
-          container: '#E2E8F5',  // navy chip bg
-          fixed:     '#E2E8F5',
-          fixedDim:  '#C7D3E6',
+          DEFAULT:   '#0F1524',
+          dark:      '#06091A',
+          container: '#E7E9F2',
+          fixed:     '#E7E9F2',
+          fixedDim:  '#C7CBDE',
         },
-        // Tertiary — warm cream tint used on hero + featured surfaces.
+        // Tertiary — cream tint that matches the hero canvas exactly.
         tertiary: {
-          DEFAULT:   '#FFF6EC',
-          fixed:     '#FBEEDF',
-          fixedDim:  '#F5DFC7',
+          DEFAULT:   '#FFF1E6',   // 🔑 cream (hero canvas)
+          fixed:     '#FCE7D4',
+          fixedDim:  '#F5D5B8',
         },
         surface: {
           DEFAULT: '#FFFFFF',
-          muted:   '#FAF6F0',   // 🔑 cream canvas (Eris "off-white")
-          dim:     '#F1E9DE',
+          muted:   '#FFF1E6',    // cream canvas
+          dim:     '#F4E4D3',
           bright:  '#FFFDF9',
         },
         ink: {
-          DEFAULT: '#0F1E3D',   // 🔑 deep navy — replaces "warm charcoal"
-          muted:   '#4C5B78',   // slate muted body
-          faint:   '#8A96AE',
+          DEFAULT: '#0F1524',    // deep near-navy (matches hero heading)
+          muted:   '#4C5B78',
+          faint:   '#8A94A6',
         },
-        line: '#EBE3D6',        // 1px borders — soft warm neutral
+        line: '#EDE1D5',
         outline: {
           DEFAULT: '#6B7794',
           variant: '#C7CDD8',
         },
-        bg: '#FAF6F0',          // 🔑 cream canvas
+        bg: '#FFF1E6',            // 🔑 cream canvas — matches hero
         danger:  '#DC2626',
         warning: '#D97706',
-        success: '#22C55E',     // 🔑 bright green for success pills (Eris)
-        featured: '#F16A2B',
+        success: '#16A34A',
+        featured: '#FF003F',
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'ui-sans-serif', 'system-ui', 'sans-serif'],

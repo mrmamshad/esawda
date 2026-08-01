@@ -31,8 +31,8 @@ export function SalesPanel({ series, subtitle }: { series: SalesPoint[]; subtitl
           <AreaChart data={series} margin={{ top: 10, right: 8, bottom: 0, left: -12 }}>
             <defs>
               <linearGradient id="shp-sales-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="#E43356" stopOpacity={0.3} />
-                <stop offset="100%" stopColor="#E43356" stopOpacity={0} />
+                <stop offset="0%"   stopColor="#FF003F" stopOpacity={0.3} />
+                <stop offset="100%" stopColor="#FF003F" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="4 4" stroke="var(--shp-border)" vertical={false} />
@@ -50,7 +50,7 @@ export function SalesPanel({ series, subtitle }: { series: SalesPoint[]; subtitl
               cursor={{ stroke: 'var(--shp-border-strong)', strokeDasharray: 4 }}
               formatter={(v) => [`৳${new Intl.NumberFormat('en-IN').format(Math.round(Number(v ?? 0)))}`, 'Sales']}
             />
-            <Area type="monotone" dataKey="total" stroke="#E43356" strokeWidth={2} fill="url(#shp-sales-fill)" />
+            <Area type="monotone" dataKey="total" stroke="#FF003F" strokeWidth={2} fill="url(#shp-sales-fill)" />
           </AreaChart>
         </ResponsiveContainer>
       </div>

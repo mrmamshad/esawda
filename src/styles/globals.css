@@ -8,30 +8,31 @@
    we can bolt on dark mode later.                                     */
 /* ------------------------------------------------------------------ */
 :root {
-  --bg:            #F7F8F9;   /* canvas — Stitch "background" */
+  /* eSawda RED palette — matches HomeHero (2026-08-01) */
+  --bg:            #FFF1E6;   /* cream canvas (hero) */
   --surface:       #FFFFFF;
-  --surface-muted: #E7F3F1;   /* mint tint / tertiary */
+  --surface-muted: #FFF1E6;   /* cream */
 
-  --brand-950: #001A15;
-  --brand-900: #00251E;
-  --brand-800: #00342B;
-  --brand-700: #004D40;       /* 🔑 primary CTA */
-  --brand-600: #006C4F;
-  --brand-500: #1EB286;       /* 🔑 vibrant accent */
-  --brand-400: #59DDAE;
-  --brand-100: #AFEFDD;
-  --brand-50:  #E7F3F1;
+  --brand-950: #3A0212;
+  --brand-900: #5E051D;
+  --brand-800: #8A092A;
+  --brand-700: #FF003F;       /* 🔑 primary CTA — hero red */
+  --brand-600: #FF2557;
+  --brand-500: #FF4A70;
+  --brand-400: #FF7191;
+  --brand-100: #FFE0E6;
+  --brand-50:  #FFF0F3;
 
-  --primary:       #004D40;
-  --primary-dark:  #00342B;
-  --secondary:     #1EB286;
-  --tertiary:      #E7F3F1;
+  --primary:       #FF003F;
+  --primary-dark:  #0F1524;
+  --secondary:     #0F1524;   /* near-navy ink */
+  --tertiary:      #FFF1E6;   /* cream */
 
-  --ink:        #041D17;      /* near-black green — Stitch "text-main" */
-  --ink-muted:  #6E6D7A;      /* Stitch "text-muted" */
-  --ink-faint:  #9CA3AF;
-  --line:       #E7F3F1;      /* subtle borders — tertiary tint */
-  --outline:    #707975;
+  --ink:        #0F1524;      /* near-navy heading */
+  --ink-muted:  #4C5B78;
+  --ink-faint:  #8A94A6;
+  --line:       #EDE1D5;
+  --outline:    #6B7794;
 }
 
 html, body { background: var(--bg); color: var(--ink); }
@@ -59,9 +60,9 @@ html       { scrollbar-gutter: stable; }
   .type-body-sm            { @apply text-body-sm; }
   .type-label-caps         { @apply text-label-caps uppercase; }
 
-  /* Hero gradient — matches Stitch homepage exactly */
+  /* Hero gradient — soft cream-to-blush wash matching HomeHero */
   .hero-gradient {
-    background: linear-gradient(135deg, #00342B 0%, #004D40 55%, #006C4F 100%);
+    background: linear-gradient(135deg, #FFF1E6 0%, #FFE0E6 60%, #FFC7D2 100%);
   }
 }
 

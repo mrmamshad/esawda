@@ -4,7 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 export type Slice = { name: string; value: number };
 
-const COLORS = ['#E43356', '#4F46E5', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#EF4444'];
+const COLORS = ['#FF003F', '#4F46E5', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#EF4444'];
 
 export function CategoryDonut({
   data, title = 'Ads by category', total,

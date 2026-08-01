@@ -76,8 +76,8 @@ export function RevenueChart({
           <AreaChart data={data} margin={{ top: 10, right: 8, bottom: 0, left: -12 }}>
             <defs>
               <linearGradient id="rev-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="#E43356" stopOpacity={0.28} />
-                <stop offset="100%" stopColor="#E43356" stopOpacity={0} />
+                <stop offset="0%"   stopColor="#FF003F" stopOpacity={0.28} />
+                <stop offset="100%" stopColor="#FF003F" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="4 4" stroke="var(--adm-border)" vertical={false} />
@@ -99,7 +99,7 @@ export function RevenueChart({
               cursor={{ stroke: 'var(--adm-border-strong)', strokeDasharray: 4 }}
               formatter={(v) => [`${currency}${new Intl.NumberFormat('en-IN').format(Math.round(Number(v ?? 0)))}`, 'Revenue']}
             />
-            <Area type="monotone" dataKey="total" stroke="#E43356" strokeWidth={2} fill="url(#rev-fill)" />
+            <Area type="monotone" dataKey="total" stroke="#FF003F" strokeWidth={2} fill="url(#rev-fill)" />
           </AreaChart>
         </ResponsiveContainer>
       </div>

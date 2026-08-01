@@ -148,7 +148,7 @@ export function AdminTopbar({ user }: { user: User }) {
             onClick={() => { setAvatarOpen((v) => !v); setNewOpen(false); }}
             aria-label="Account menu"
             className="ml-1 grid h-8 w-8 place-items-center rounded-full text-[10px] font-semibold text-white transition hover:opacity-90 active:scale-95"
-            style={{ background: 'linear-gradient(135deg, #E43356 0%, #4F46E5 100%)' }}
+            style={{ background: 'linear-gradient(135deg, #FF003F 0%, #4F46E5 100%)' }}
             title={user.name || user.username}
           >
             {initials}

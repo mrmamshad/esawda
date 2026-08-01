@@ -22,10 +22,10 @@ import type { Ad, Category } from '@/types/api';
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: 'Browse Ads',
-  description: 'Explore the newest classified ads on eSawda — vehicles, mobiles, houses, electronics and more.',
+  title: 'Browse Products',
+  description: 'Explore the newest products on eSawda — vehicles, mobiles, houses, electronics and more.',
   alternates: { canonical: '/ads' },
-  openGraph: { title: 'Browse Ads · eSawda', type: 'website' },
+  openGraph: { title: 'Browse Products · eSawda', type: 'website' },
 };
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -66,8 +66,8 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
       <HeaderScrollAdapter darkUntil={360} />
       <div className="bg-brand-900 pt-[92px]">
         <HeroBanner
-          title="Browse Ads"
-          crumbs={[{ label: 'Home', href: '/' }, { label: 'Ads' }]}
+          title="Browse Products"
+          crumbs={[{ label: 'Home', href: '/' }, { label: 'Products' }]}
           collage={[
             '/thumb-fallback.png',
             '/thumb-fallback.png',
@@ -117,7 +117,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
 
             <div className="flex items-center gap-2">
               <span className="text-sm text-ink-muted">
-                <span className="block text-xs">Ads</span>
+                <span className="block text-xs">Products</span>
                 <span className="block font-semibold text-ink leading-tight">Views</span>
               </span>
               <IconButton icon={<span className="text-brand-700">☰</span>} label="List view" tone="muted" size="sm" />
@@ -145,7 +145,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
           {/* Grid */}
           {ads.data.length === 0 ? (
             <div className="rounded-card border border-dashed border-line p-12 text-center text-ink-muted">
-              No ads match the current filters. <Button variant="ghost" size="sm">Reset</Button>
+              No products match the current filters. <Button variant="ghost" size="sm">Reset</Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

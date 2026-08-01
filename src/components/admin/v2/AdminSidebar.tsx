@@ -136,7 +136,7 @@ export function AdminSidebar({
           >
             <span
               className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[11px] font-semibold text-white"
-              style={{ background: 'linear-gradient(135deg, #E43356 0%, #4F46E5 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #FF003F 0%, #4F46E5 100%)' }}
             >
               {(user.name || user.username || '?').slice(0, 2).toUpperCase()}
             </span>

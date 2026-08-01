@@ -29,7 +29,7 @@ export function TopCategoriesBar({
               <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--adm-bg)' }}>
                 <div
                   className="h-full rounded-full transition-[width] duration-500"
-                  style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #E43356, #EC5470)' }}
+                  style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #FF003F, #FF2557)' }}
                 />
               </div>
             </li>

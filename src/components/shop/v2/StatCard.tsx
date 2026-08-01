@@ -31,8 +31,8 @@ export function StatCard({
     neutral: 'var(--shp-fg-muted)',
   };
   const stroke: Record<string, string> = {
-    brand: '#E43356', accent: '#F97316', success: '#10B981',
-    warning: '#F59E0B', info: '#3B82F6', neutral: '#E43356',
+    brand: '#FF003F', accent: '#FF003F', success: '#10B981',
+    warning: '#F59E0B', info: '#3B82F6', neutral: '#FF003F',
   };
 
   const display = typeof value === 'number'

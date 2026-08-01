@@ -5,8 +5,6 @@ import {
   ShieldCheck,
   Truck,
   Award,
-  MapPin,
-  Search,
   Car,
   Smartphone,
   WashingMachine,
@@ -15,6 +13,7 @@ import {
   Sofa,
   Bike,
 } from 'lucide-react';
+import { HeroSearchBar } from './HeroSearchBar';
 
 /**
  * eSawda Hero — reference-matched marketplace layout (2026-08-01).
@@ -93,36 +92,8 @@ export function HomeHero({ siteName = 'eSawda' }: HomeHeroProps = {}) {
             Fast delivery, secure payments, happy you.
           </p>
 
-          {/* Search bar */}
-          <form
-            action="/ads"
-            method="get"
-            className="mt-7 flex h-16 w-full max-w-[600px] items-stretch rounded-full bg-white p-2 shadow-[0_18px_40px_-24px_rgba(15,20,40,0.35)]"
-          >
-            <div className="flex items-center gap-2 border-r border-[#EDE1D5] px-5 text-[15px] font-semibold text-[#0F1524]">
-              <MapPin size={18} style={{ color: BRAND_RED }} />
-              Bangladesh
-            </div>
-
-            <div className="flex flex-1 items-center gap-2.5 px-5">
-              <Search size={18} className="text-[#8A94A6]" />
-              <input
-                name="q"
-                type="search"
-                placeholder="What are you looking for?"
-                className="h-full w-full bg-transparent text-[15px] text-[#0F1524] placeholder:text-[#8A94A6] focus:outline-none"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="inline-flex items-center gap-2 rounded-full px-7 text-[15px] font-semibold text-white transition hover:brightness-95"
-              style={{ backgroundColor: BRAND_RED }}
-            >
-              <Search size={16} />
-              Search
-            </button>
-          </form>
+          {/* Search bar with district picker */}
+          <HeroSearchBar />
 
           {/* Category quick-links */}
           <div className="mt-8 flex w-full max-w-[600px] flex-wrap items-start justify-between gap-y-4">

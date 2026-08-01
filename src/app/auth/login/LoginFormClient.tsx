@@ -57,6 +57,14 @@ export function LoginFormClient() {
     }
   };
 
+  // Shared input styling — white background with a soft warm border and
+  // a red focus ring. This is the ONLY thing we tweaked from the original
+  // form: the old `bg-surface-muted` cream fill looked flat, so it now
+  // sits on white with a subtle border and a proper focus state.
+  const inputCls =
+    'mt-1 h-11 w-full rounded-field border border-[#EDE1D5] bg-white px-3 text-[15px] text-ink outline-none transition ' +
+    'focus:border-transparent focus:ring-2 focus:ring-brand-700';
+
   return (
     <form onSubmit={submit} className="w-full max-w-md space-y-5 surface-card p-8">
       <div>
@@ -71,7 +79,8 @@ export function LoginFormClient() {
           value={identifier}
           onChange={(e) => setId(e.target.value)}
           required
-          className="mt-1 h-11 w-full rounded-field bg-surface-muted px-3 outline-none focus:ring-2 focus:ring-brand-500"
+          autoComplete="username"
+          className={inputCls}
         />
       </label>
 
@@ -83,7 +92,8 @@ export function LoginFormClient() {
           onChange={(e) => setPw(e.target.value)}
           required
           minLength={8}
-          className="mt-1 h-11 w-full rounded-field bg-surface-muted px-3 outline-none focus:ring-2 focus:ring-brand-500"
+          autoComplete="current-password"
+          className={inputCls}
         />
       </label>
 

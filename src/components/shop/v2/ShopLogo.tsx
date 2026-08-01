@@ -21,7 +21,7 @@ export function ShopLogo({ collapsed = false, className }: { collapsed?: boolean
       {collapsed ? (
         <span
           className="grid h-8 w-8 place-items-center rounded-lg text-sm font-bold text-white"
-          style={{ background: 'linear-gradient(135deg, #E43356 0%, #F97316 100%)' }}
+          style={{ background: 'linear-gradient(135deg, #FF003F 0%, #FF003F 100%)' }}
         >
           eS
         </span>

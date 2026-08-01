@@ -34,7 +34,6 @@ type View = 'pick' | 'email' | 'signup';
 type Lang = 'en' | 'bn';
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? '';
-const FB_APP_ID        = process.env.NEXT_PUBLIC_FB_APP_ID ?? '';
 
 export function LoginPopup({ open, onClose, onSuccess, reason }: LoginPopupProps) {
   const [view,   setView]   = useState<View>('pick');
@@ -115,18 +114,6 @@ export function LoginPopup({ open, onClose, onSuccess, reason }: LoginPopupProps
     openOAuthPopup(url, 'google');
   };
 
-  const loginFacebook = () => {
-    setError(null); setNotice(null);
-    if (!FB_APP_ID) {
-      setNotice(t.facebookMissing);
-      return;
-    }
-    const redirect = encodeURIComponent(`${window.location.origin}/auth/oauth-callback?provider=facebook`);
-    const url =
-      `https://www.facebook.com/v18.0/dialog/oauth?client_id=${FB_APP_ID}` +
-      `&redirect_uri=${redirect}&scope=email,public_profile&response_type=token`;
-    openOAuthPopup(url, 'facebook');
-  };
 
   const submitEmail = async (e: FormEvent) => {
     e.preventDefault();
@@ -196,24 +183,14 @@ export function LoginPopup({ open, onClose, onSuccess, reason }: LoginPopupProps
 
           {view === 'pick' && (
             <div className="mt-4 space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={loginGoogle}
-                  className="flex items-center justify-center gap-2 rounded-md border border-line bg-white py-3 text-sm font-semibold text-ink shadow-sm hover:bg-surface-muted"
-                >
-                  <GoogleGlyph />
-                  Google
-                </button>
-                <button
-                  type="button"
-                  onClick={loginFacebook}
-                  className="flex items-center justify-center gap-2 rounded-md bg-[#1877F2] py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#166FE0]"
-                >
-                  <FacebookGlyph />
-                  Facebook
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={loginGoogle}
+                className="flex w-full items-center justify-center gap-2 rounded-md border border-line bg-white py-3 text-sm font-semibold text-ink shadow-sm hover:bg-surface-muted"
+              >
+                <GoogleGlyph />
+                Continue with Google
+              </button>
 
               <button
                 type="button"
@@ -335,7 +312,7 @@ type StringKey =
   | 'confirmPassword' | 'fullName' | 'signIn' | 'signingIn' | 'createAccount'
   | 'creating' | 'backToOptions' | 'noAccount' | 'registration' | 'byContinuing'
   | 'policy' | 'loginFailed' | 'signupFailed' | 'pwMismatch'
-  | 'googleMissing' | 'facebookMissing' | 'popupBlocked';
+  | 'googleMissing' | 'popupBlocked';
 
 const STRINGS: Record<Lang, Record<StringKey, string>> = {
   en: {
@@ -359,7 +336,6 @@ const STRINGS: Record<Lang, Record<StringKey, string>> = {
     signupFailed:    'Registration failed. Please try again.',
     pwMismatch:      'Passwords do not match.',
     googleMissing:   'Google sign-in is being configured. Please use e-mail for now.',
-    facebookMissing: 'Facebook sign-in is being configured. Please use e-mail for now.',
     popupBlocked:    'Your browser blocked the sign-in popup — please allow it and try again.',
   },
   bn: {
@@ -383,7 +359,6 @@ const STRINGS: Record<Lang, Record<StringKey, string>> = {
     signupFailed:    'রেজিস্ট্রেশন ব্যর্থ হয়েছে। আবার চেষ্টা করুন।',
     pwMismatch:      'পাসওয়ার্ড মিলছে না।',
     googleMissing:   'Google সাইন-ইন কনফিগার হচ্ছে। এখন ই-মেইল ব্যবহার করুন।',
-    facebookMissing: 'Facebook সাইন-ইন কনফিগার হচ্ছে। এখন ই-মেইল ব্যবহার করুন।',
     popupBlocked:    'ব্রাউজার পপ-আপ ব্লক করেছে — অনুমতি দিন এবং আবার চেষ্টা করুন।',
   },
 };
@@ -399,10 +374,3 @@ function GoogleGlyph() {
   );
 }
 
-function FacebookGlyph() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden fill="#fff">
-      <path d="M22 12a10 10 0 1 0-11.6 9.9v-7H8v-2.9h2.4V9.8c0-2.4 1.4-3.7 3.6-3.7 1 0 2.1.2 2.1.2v2.3h-1.2c-1.2 0-1.5.7-1.5 1.5v1.8h2.6l-.4 2.9h-2.2v7A10 10 0 0 0 22 12z" />
-    </svg>
-  );
-}

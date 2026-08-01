@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Mail, MapPin, Phone } from 'lucide-react';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { ContactForm } from './ContactForm';
 import { ToastProvider } from '@/components/ui/Toast';
 import { getSessionUser } from '@/lib/session';
@@ -54,6 +55,7 @@ export default async function ContactPage() {
           </aside>
         </div>
       </main>
+      <Footer />
     </ToastProvider>
   );
 }

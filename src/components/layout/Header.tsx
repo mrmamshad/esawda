@@ -33,8 +33,7 @@ type NavItem = { label: string; href: Route };
 
 const NAV: NavItem[] = [
   { label: 'Home',      href: '/' as Route },
-  { label: 'Services',  href: '/ads' as Route },
-  { label: 'Features',  href: '/about' as Route },
+  { label: 'Products',  href: '/ads' as Route },
   { label: 'About Us',  href: '/about' as Route },
   { label: 'Contact',   href: '/contact' as Route },
 ];

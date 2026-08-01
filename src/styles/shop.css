@@ -27,14 +27,14 @@
   --shp-fg-invert:     #FAFAFA;
 
   /* ── Brand ── */
-  --shp-brand:         #E43356;   /* eSawda coral */
+  --shp-brand:         #FF003F;   /* eSawda coral */
   --shp-brand-fg:      #FFFFFF;
   --shp-brand-soft:    #FFE7EC;
   --shp-brand-strong:  #C41F42;
   --shp-brand-ring:    rgba(228, 51, 86, 0.18);
 
   /* Secondary — warm sunset for shop vibe (orange rather than indigo) */
-  --shp-accent:        #F97316;   /* orange-500 */
+  --shp-accent:        #FF003F;   /* eSawda red */
   --shp-accent-soft:   #FFEDD5;
 
   /* ── Semantic ── */
