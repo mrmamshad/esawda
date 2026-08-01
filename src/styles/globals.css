@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------ */
+/* Emerald Marketplace design tokens (Stitch project 1710235101965331835)
+   Exposed as CSS vars so Server Components can theme without JS and
+   we can bolt on dark mode later.                                     */
+/* ------------------------------------------------------------------ */
+:root {
+  --bg:            #F7F8F9;   /* canvas — Stitch "background" */
+  --surface:       #FFFFFF;
+  --surface-muted: #E7F3F1;   /* mint tint / tertiary */
+
+  --brand-950: #001A15;
+  --brand-900: #00251E;
+  --brand-800: #00342B;
+  --brand-700: #004D40;       /* 🔑 primary CTA */
+  --brand-600: #006C4F;
+  --brand-500: #1EB286;       /* 🔑 vibrant accent */
+  --brand-400: #59DDAE;
+  --brand-100: #AFEFDD;
+  --brand-50:  #E7F3F1;
+
+  --primary:       #004D40;
+  --primary-dark:  #00342B;
+  --secondary:     #1EB286;
+  --tertiary:      #E7F3F1;
+
+  --ink:        #041D17;      /* near-black green — Stitch "text-main" */
+  --ink-muted:  #6E6D7A;      /* Stitch "text-muted" */
+  --ink-faint:  #9CA3AF;
+  --line:       #E7F3F1;      /* subtle borders — tertiary tint */
+  --outline:    #707975;
+}
+
+html, body { background: var(--bg); color: var(--ink); }
+body       { font-feature-settings: "cv02","cv03","cv04","cv11"; }
+
+/* Prevent Chrome / Safari layout shift when scrollbar appears. */
+html       { scrollbar-gutter: stable; }
+
+/* One-shot utilities that don't quite deserve component status. */
+@layer components {
+  .container-page { @apply mx-auto w-full max-w-container px-6; }
+  .surface-card   { @apply bg-white rounded-card shadow-card ring-1 ring-line; }
+  .pill           { @apply rounded-pill; }
+  .btn-focus      { @apply focus-visible:outline-none focus-visible:ring-2
+                          focus-visible:ring-brand-500 focus-visible:ring-offset-2; }
+
+  /* Stitch typography presets — use in NEW code, keep Tailwind
+     numeric scale usable everywhere. */
+  .type-headline-xl        { @apply text-headline-xl; }
+  .type-headline-lg        { @apply text-headline-lg; }
+  .type-headline-lg-mobile { @apply text-headline-lg-mobile; }
+  .type-headline-md        { @apply text-headline-md; }
+  .type-body-lg            { @apply text-body-lg; }
+  .type-body-md            { @apply text-body-md; }
+  .type-body-sm            { @apply text-body-sm; }
+  .type-label-caps         { @apply text-label-caps uppercase; }
+
+  /* Hero gradient — matches Stitch homepage exactly */
+  .hero-gradient {
+    background: linear-gradient(135deg, #00342B 0%, #004D40 55%, #006C4F 100%);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Reveal-on-scroll — used together with <SmoothScroll /> to fade + rise
+   sections as they enter the viewport. Any element tagged `.reveal`
+   starts hidden and gets `.is-in` toggled by the IntersectionObserver
+   once ~12% of it is on-screen. Stagger children with `.reveal-1..6`. */
+/* ------------------------------------------------------------------ */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+  transition:
+    opacity   700ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.reveal.is-in { opacity: 1; transform: translate3d(0, 0, 0); }
+
+/* Cascading delays for stacked children in a hero / section. */
+.reveal-1 { transition-delay: 60ms;  }
+.reveal-2 { transition-delay: 140ms; }
+.reveal-3 { transition-delay: 220ms; }
+.reveal-4 { transition-delay: 300ms; }
+.reveal-5 { transition-delay: 380ms; }
+.reveal-6 { transition-delay: 460ms; }
+
+/* Direction variants — subtle horizontal drift for adjacent columns. */
+.reveal-left  { transform: translate3d(-32px, 0, 0); }
+.reveal-right { transform: translate3d( 32px, 0, 0); }
+.reveal-left.is-in,
+.reveal-right.is-in { transform: translate3d(0, 0, 0); }
+
+/* Respect the user's OS-level motion preferences. */
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* Lenis smooth-scroll needs the html element to be its own scroller.
+   The lib adds .lenis / .lenis-smooth automatically; we just make sure
+   the standard scroll chain works when it's active. */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth               { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped              { overflow: hidden; }
+.lenis.lenis-smooth iframe        { pointer-events: none; }

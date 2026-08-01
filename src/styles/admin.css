@@ -1,0 +1,98 @@
+/*
+ * eSawda Admin Design Tokens (2026-07-24).
+ *
+ * Scoped under `.admin-scope` so admin styles never leak into the
+ * marketplace pages. Consumed via CSS variables + Tailwind arbitrary
+ * values (e.g. `bg-[var(--adm-surface)]`).
+ *
+ * Colour system:
+ *   - Neutral: zinc-tinted greys (never pure black)
+ *   - Brand:   eSawda coral (single primary accent)
+ *   - Status:  emerald / amber / rose / sky (semantic)
+ *
+ * Dark mode: activated by `.dark` class higher in the tree (via
+ * next-themes). All tokens are re-declared with dark values.
+ */
+
+.admin-scope {
+  /* ── Neutral system ── */
+  --adm-bg:            #F7F7F8;   /* app canvas */
+  --adm-surface:       #FFFFFF;   /* cards, panels */
+  --adm-surface-2:     #FBFBFC;   /* muted panels */
+  --adm-elevated:      #FFFFFF;   /* popovers, dialogs */
+  --adm-border:        #E5E7EB;
+  --adm-border-strong: #D1D5DB;
+  --adm-ring:          rgba(24, 24, 27, 0.08);
+
+  /* ── Text ── */
+  --adm-fg:            #18181B;   /* primary text */
+  --adm-fg-muted:      #52525B;   /* secondary */
+  --adm-fg-faint:      #A1A1AA;   /* captions */
+  --adm-fg-invert:     #FAFAFA;
+
+  /* ── Brand ── */
+  --adm-brand:         #E43356;   /* eSawda coral (single accent) */
+  --adm-brand-fg:      #FFFFFF;
+  --adm-brand-soft:    #FFE7EC;
+  --adm-brand-ring:    rgba(228, 51, 86, 0.18);
+
+  /* ── Semantic ── */
+  --adm-success:       #10B981;
+  --adm-success-soft:  #D1FAE5;
+  --adm-warning:       #F59E0B;
+  --adm-warning-soft:  #FEF3C7;
+  --adm-danger:        #EF4444;
+  --adm-danger-soft:   #FEE2E2;
+  --adm-info:          #3B82F6;
+  --adm-info-soft:     #DBEAFE;
+
+  /* ── Elevation ── */
+  --adm-shadow-sm:  0 1px 2px 0 rgba(24, 24, 27, 0.04);
+  --adm-shadow:     0 1px 3px 0 rgba(24, 24, 27, 0.06), 0 1px 2px 0 rgba(24, 24, 27, 0.04);
+  --adm-shadow-md:  0 4px 12px -2px rgba(24, 24, 27, 0.08), 0 2px 4px -2px rgba(24, 24, 27, 0.04);
+  --adm-shadow-lg:  0 12px 32px -8px rgba(24, 24, 27, 0.12);
+}
+
+/* ── Dark theme override ── */
+.dark .admin-scope {
+  --adm-bg:            #09090B;
+  --adm-surface:       #18181B;
+  --adm-surface-2:     #101013;
+  --adm-elevated:      #1F1F23;
+  --adm-border:        #27272A;
+  --adm-border-strong: #3F3F46;
+  --adm-ring:          rgba(255, 255, 255, 0.08);
+
+  --adm-fg:            #FAFAFA;
+  --adm-fg-muted:      #A1A1AA;
+  --adm-fg-faint:      #71717A;
+  --adm-fg-invert:     #18181B;
+
+  --adm-brand-soft:    rgba(228, 51, 86, 0.15);
+  --adm-brand-ring:    rgba(228, 51, 86, 0.35);
+
+  --adm-success-soft:  rgba(16, 185, 129, 0.14);
+  --adm-warning-soft:  rgba(245, 158, 11, 0.14);
+  --adm-danger-soft:   rgba(239, 68, 68, 0.14);
+  --adm-info-soft:     rgba(59, 130, 246, 0.14);
+
+  --adm-shadow-sm:  0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --adm-shadow:     0 2px 6px -1px rgba(0, 0, 0, 0.5);
+  --adm-shadow-md:  0 8px 16px -4px rgba(0, 0, 0, 0.5);
+  --adm-shadow-lg:  0 20px 40px -12px rgba(0, 0, 0, 0.55);
+}
+
+/* Utility helpers so components don't need Tailwind arbitrary syntax
+   everywhere. */
+.adm-card       { background: var(--adm-surface); border: 1px solid var(--adm-border); border-radius: 12px; box-shadow: var(--adm-shadow-sm); }
+.adm-panel      { background: var(--adm-surface-2); border: 1px solid var(--adm-border); border-radius: 12px; }
+.adm-bg         { background: var(--adm-bg); color: var(--adm-fg); }
+.adm-fg         { color: var(--adm-fg); }
+.adm-fg-muted   { color: var(--adm-fg-muted); }
+.adm-fg-faint   { color: var(--adm-fg-faint); }
+.adm-border     { border-color: var(--adm-border); }
+.adm-brand      { color: var(--adm-brand); }
+.adm-brand-bg   { background: var(--adm-brand); color: var(--adm-brand-fg); }
+
+/* Tabular numerics everywhere in admin */
+.admin-scope { font-feature-settings: 'tnum' on, 'lnum' on; }

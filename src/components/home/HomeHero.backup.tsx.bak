@@ -1,0 +1,193 @@
+import Link from 'next/link';
+import type { Route } from 'next';
+import { ArrowUpRight, Play, TrendingUp, ShieldCheck } from 'lucide-react';
+
+export type _RouteAlias = Route;
+
+/**
+ * eSawda Eris-style hero (2026-07-25).
+ *
+ * Warm cream canvas, two-column split:
+ *   LEFT  — small green stat pill ("30% cheaper" style), chunky navy
+ *           headline with a single orange accent word, muted-slate
+ *           body copy, dual CTA (orange pill + white ghost with icon).
+ *   RIGHT — product-photo collage stacked at a 3-degree tilt, with a
+ *           floating navy "stat card" (like Eris's Energy Overview
+ *           card) overlapping the collage's lower-left. Photos are
+ *           real marketplace listings so the essence stays commerce.
+ *
+ * The pill nav header floats above this on `top-5`; the section itself
+ * uses `pt-[136px]` to reserve space and start the collage below it.
+ */
+
+export type HomeHeroProps = {
+  siteName?:  string;
+  bgImageUrl?: string;
+};
+
+// Right-column collage — five real marketplace photos. Unsplash sources
+// are deliberately mixed (interior, phone, car, watch, home) to signal
+// eSawda's breadth. Swap to CDN thumbnails once seeded.
+const COLLAGE = [
+  { src: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&auto=format&fit=crop&q=75', alt: 'City view apartment', span: 'row-span-2', ring: 'ring-brand-200' },
+  { src: 'https://images.unsplash.com/photo-1580927752452-89d86da3fa0a?w=600&auto=format&fit=crop&q=75', alt: 'Smartphone',           span: '',           ring: 'ring-secondary-container' },
+  { src: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&auto=format&fit=crop&q=75', alt: 'Sports car',            span: '',           ring: 'ring-brand-100' },
+];
+
+export function HomeHero({
+  siteName   = 'eSawda',
+}: HomeHeroProps = {}) {
+  return (
+    <section
+      className="relative overflow-hidden bg-tertiary"
+      // Reserve header pill space (header sits at top:20px, 72px tall
+      // → 92px + 44px breathing room = 136px).
+    >
+      {/* Soft radial warmth in the top-left, matching Eris's subtle glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(1100px_620px_at_10%_-10%,rgba(241,106,43,0.10),transparent_60%),radial-gradient(900px_500px_at_100%_0%,rgba(15,30,61,0.05),transparent_55%)]"
+      />
+
+      <div className="container-page relative pt-[136px] pb-20 md:pb-28">
+        <div className="grid gap-12 lg:grid-cols-[1.05fr_1fr] lg:items-center">
+          {/* ── Left column ────────────────────────────────────────── */}
+          <div className="max-w-xl">
+            {/* Green stat pill — Eris "30% of users save…" moment */}
+            <p className="reveal reveal-1 inline-flex items-center gap-2 rounded-pill bg-success/10 pl-1.5 pr-4 py-1.5 text-body-sm font-semibold text-success">
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-success text-white">
+                <TrendingUp size={12} strokeWidth={3} />
+              </span>
+              <span className="text-ink">
+                <span className="text-success">4M+</span> deals closed on {siteName}
+              </span>
+            </p>
+
+            {/* Chunky navy headline with single orange accent */}
+            <h1 className="reveal reveal-2 mt-6 text-[52px] leading-[1.02] tracking-[-0.02em] font-bold text-ink md:text-[64px]">
+              Buy Smarter, <br />
+              <span className="text-brand-700">Sell Faster.</span>
+            </h1>
+
+            <p className="reveal reveal-3 mt-6 max-w-md text-body-lg text-ink-muted">
+              Meet {siteName} — Bangladesh's most trusted classifieds.
+              Thousands of verified sellers list vehicles, phones, homes and
+              more, with buyer-safe messaging built in.
+            </p>
+
+            {/* Dual CTA — Eris "Start Saving Today" + "Book A Demo" */}
+            <div className="reveal reveal-4 mt-8 flex flex-wrap items-center gap-3">
+              <Link href={'/ads' as Route} className="contents">
+                <button className="group inline-flex items-center gap-2 rounded-pill bg-brand-700 pl-6 pr-2 py-2 text-body-md font-semibold text-white shadow-[0_10px_24px_-8px_rgba(241,106,43,0.55)] transition hover:bg-brand-600 active:translate-y-[1px]">
+                  <span>Start Browsing</span>
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/20 transition-transform group-hover:rotate-45">
+                    <ArrowUpRight size={16} />
+                  </span>
+                </button>
+              </Link>
+              <Link href={'/shop/ads/new' as Route} className="contents">
+                <button className="inline-flex items-center gap-2 rounded-pill border border-line bg-white px-5 py-3 text-body-md font-semibold text-ink transition hover:border-ink/40">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand-100 text-brand-700">
+                    <Play size={10} fill="currentColor" />
+                  </span>
+                  Post an Ad
+                </button>
+              </Link>
+            </div>
+
+            {/* Trust row */}
+            <div className="reveal reveal-5 mt-10 flex items-center gap-6 text-body-sm text-ink-muted">
+              <div className="flex items-center gap-2">
+                <ShieldCheck size={16} className="text-success" />
+                Verified sellers
+              </div>
+              <div className="h-4 w-px bg-line" />
+              <div>
+                <span className="font-semibold text-ink">4.9</span>
+                <span className="ml-1">★ avg rating</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Right column — tilted photo collage ────────────────── */}
+          <div className="relative mx-auto w-full max-w-md lg:max-w-none">
+            {/* Decorative dashed frame behind the collage */}
+            <div
+              aria-hidden
+              className="absolute -right-4 -top-4 hidden h-full w-full rounded-[36px] border-[1.5px] border-dashed border-brand-500/70 lg:block"
+            />
+
+            <div className="relative grid grid-cols-2 grid-rows-2 gap-4">
+              {/* Main hero photo — spans two rows on the left */}
+              <div className="relative row-span-2 aspect-[3/4] overflow-hidden rounded-[28px] shadow-[0_20px_60px_-24px_rgba(15,30,61,0.35)]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={COLLAGE[0].src} alt={COLLAGE[0].alt} className="h-full w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent" />
+                <div className="absolute bottom-4 left-4 right-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/80">Real Estate</p>
+                  <p className="mt-1 text-lg font-semibold text-white">Modern city loft</p>
+                </div>
+              </div>
+
+              {/* Top-right smaller photo */}
+              <div className="relative aspect-square overflow-hidden rounded-[24px] shadow-card">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={COLLAGE[1].src} alt={COLLAGE[1].alt} className="h-full w-full object-cover" />
+              </div>
+
+              {/* Bottom-right smaller photo */}
+              <div className="relative aspect-square overflow-hidden rounded-[24px] shadow-card">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={COLLAGE[2].src} alt={COLLAGE[2].alt} className="h-full w-full object-cover" />
+              </div>
+            </div>
+
+            {/* Floating stat card — Eris "Energy Overview" analogue */}
+            <div className="absolute -bottom-6 -left-6 hidden w-[240px] rounded-2xl bg-ink p-5 text-white shadow-[0_20px_50px_-12px_rgba(15,30,61,0.45)] md:block">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand-700 text-[10px] font-bold">
+                  ↑
+                </span>
+                <p className="text-xs font-semibold uppercase tracking-wide text-white/70">Marketplace pulse</p>
+              </div>
+              <p className="mt-3 text-[10px] uppercase tracking-widest text-white/50">Ads posted today</p>
+              <p className="mt-1 text-3xl font-bold">
+                1,450
+                <span className="ml-2 rounded-pill bg-success/20 px-2 py-0.5 text-xs font-semibold text-success">+82%</span>
+              </p>
+              <p className="mt-1 text-[11px] text-white/60">From last week</p>
+            </div>
+
+            {/* Small circular badge — mimics Eris's tiny detail overlay */}
+            <div className="absolute -right-3 top-1/2 hidden h-16 w-16 -translate-y-1/2 items-center justify-center rounded-full bg-brand-700 text-center text-white shadow-lg md:flex">
+              <div>
+                <p className="text-lg font-bold leading-none">30%</p>
+                <p className="text-[8px] uppercase tracking-widest">saved</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom stat strip — echoes Eris's "30% / 20% / 25%" row */}
+        <div className="reveal reveal-6 mt-16 grid grid-cols-2 gap-6 border-t border-line pt-8 md:grid-cols-4">
+          {[
+            { icon: <TrendingUp size={16} />, num: '4M+',   label: 'Active listings' },
+            { icon: <ShieldCheck size={16} />, num: '120k+', label: 'Verified sellers' },
+            { icon: <TrendingUp size={16} />, num: '98%',    label: 'Buyer satisfaction' },
+            { icon: <TrendingUp size={16} />, num: '25%',    label: 'Faster than average' },
+          ].map((s) => (
+            <div key={s.label} className="flex items-start gap-3">
+              <span className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-brand-700">
+                {s.icon}
+              </span>
+              <div>
+                <p className="text-2xl font-bold text-ink">{s.num}</p>
+                <p className="text-body-sm text-ink-muted">{s.label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

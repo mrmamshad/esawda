@@ -1,0 +1,278 @@
+import Link from 'next/link';
+import type { Route } from 'next';
+import { Play, ShieldCheck, Truck, Award, Search, ShoppingCart, Smartphone, Shirt, Home as HomeIcon, Sparkle, Sparkles, MoreHorizontal } from 'lucide-react';
+
+export type _RouteAlias = Route;
+
+/**
+ * eSawda Hero v3 — Full-bleed Stitch redesign (2026-07-31).
+ *
+ * Old collage hero preserved in HomeHero.backup.tsx.bak. Prior v2 (mid card)
+ * has been replaced. The v3 layout removes the framed white "poster card":
+ * hero content now sits directly on the cream page canvas and stretches
+ * edge-to-edge, matching the reference sample.
+ *
+ * Right column composition (Figma reference #643:9192 informed geometry):
+ *   • 532×532 ellipse behind the phone with a linear vertical gradient
+ *     (soft top → brand red bottom). Acts like a "half sun".
+ *   • Phone mockup (~271×538) rotated -12deg (tilt-right) for the classic
+ *     Stitch marketing tilt.
+ *   • Small floating shopping-bag chip in the bottom-right, echoing the
+ *     Stitch sample's brand accent.
+ *   • Floating trust pills (Secure Payment, Fast Delivery, Best Quality)
+ *     stacked on the far right edge.
+ *
+ * Brand red locked to #FF003F per product direction.
+ */
+
+export type HomeHeroProps = {
+  siteName?:  string;
+  bgImageUrl?: string;
+};
+
+const BRAND_RED = '#FF003F';
+const CANVAS_CREAM = '#FFF1E6';
+
+export function HomeHero({
+  siteName = 'eSawda',
+}: HomeHeroProps = {}) {
+  return (
+    <section
+      className="relative w-full overflow-hidden"
+      style={{ backgroundColor: CANVAS_CREAM }}
+    >
+      {/* Reserve space for the floating pill header (top-20 + 72px tall). */}
+      <div className="relative w-full pt-[120px] pb-16 md:pb-24">
+        <div className="mx-auto grid max-w-[1440px] items-center gap-8 px-6 md:px-12 lg:grid-cols-[1.1fr_1fr] lg:gap-10 lg:px-16">
+          {/* ── Left column ─────────────────────────────────────── */}
+          <div className="max-w-xl">
+            {/* Red dot + eyebrow */}
+            <p className="reveal reveal-1 inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.14em]" style={{ color: BRAND_RED }}>
+              <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: BRAND_RED }} />
+              Smarter Shopping, Better Living
+            </p>
+
+            {/* Chunky two-line headline */}
+            <h1 className="reveal reveal-2 mt-6 text-[56px] leading-[1.02] font-extrabold tracking-[-0.03em] text-[#0F1524] md:text-[76px]">
+              Shop Smarter. <br />
+              <span style={{ color: BRAND_RED }}>Live Better.</span>
+            </h1>
+
+            <p className="reveal reveal-3 mt-6 max-w-md text-[17px] leading-[1.55] text-[#4C5B78]">
+              {siteName} brings you the best products at the best prices.
+              Fast delivery, secure payments, happy you.
+            </p>
+
+            {/* CTA row */}
+            <div className="reveal reveal-4 mt-9 flex flex-wrap items-center gap-6">
+              <Link href={'/ads' as Route} className="contents">
+                <button
+                  className="group inline-flex items-center gap-2 rounded-full px-8 py-4 text-[15px] font-semibold text-white transition active:translate-y-[1px] hover:brightness-90"
+                  style={{
+                    backgroundColor: BRAND_RED,
+                    boxShadow: '0 14px 30px -10px rgba(255,0,63,0.55)',
+                  }}
+                >
+                  Shop Now
+                </button>
+              </Link>
+
+              <Link
+                href={'/about' as Route}
+                className="group inline-flex items-center gap-3 text-[15px] font-semibold text-[#0F1524]"
+              >
+                <span
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full transition-transform group-hover:scale-105"
+                  style={{ backgroundColor: 'rgba(255,0,63,0.10)', color: BRAND_RED }}
+                >
+                  <Play size={14} fill="currentColor" className="translate-x-[1px]" />
+                </span>
+                How It Works
+              </Link>
+            </div>
+
+            {/* Corner dot decoration */}
+            <div aria-hidden className="reveal reveal-5 mt-14 hidden lg:grid grid-cols-6 gap-2 opacity-40">
+              {Array.from({ length: 18 }).map((_, i) => (
+                <span key={i} className="h-1 w-1 rounded-full" style={{ backgroundColor: BRAND_RED }} />
+              ))}
+            </div>
+          </div>
+
+          {/* ── Right column — phone on half-sun ─────────────────── */}
+          <div className="relative mx-auto flex h-[560px] w-full max-w-[620px] items-center justify-center lg:h-[620px]">
+            {/* Dashed decorative ring — behind everything */}
+            <div
+              aria-hidden
+              className="absolute right-[-40px] top-1/2 h-[600px] w-[600px] -translate-y-1/2 rounded-full border-2 border-dashed"
+              style={{ borderColor: 'rgba(255,0,63,0.35)' }}
+            />
+            {/* Solid red circle behind phone */}
+            <div
+              aria-hidden
+              className="absolute right-[-20px] top-1/2 h-[540px] w-[540px] -translate-y-1/2 rounded-full"
+              style={{ backgroundColor: BRAND_RED }}
+            />
+
+            {/* Big red shopping bag graphic — bottom-right behind phone */}
+            <div
+              aria-hidden
+              className="absolute bottom-2 right-[-30px] z-[5] flex h-[180px] w-[160px] items-end justify-center pb-6"
+              style={{
+                backgroundColor: '#E60039',
+                clipPath: 'polygon(15% 12%, 85% 12%, 95% 100%, 5% 100%)',
+                transform: 'rotate(4deg)',
+              }}
+            >
+              {/* Bag handles */}
+              <div
+                aria-hidden
+                className="absolute left-[28%] top-[-14px] h-[26px] w-[44%] rounded-t-full border-[3px] border-b-0"
+                style={{ borderColor: '#0F1524' }}
+              />
+              <span className="text-[22px] font-extrabold italic text-white drop-shadow">e{'Sawda'.replace(/^e/i,'')}</span>
+            </div>
+
+            {/* Phone mockup — tilt -10deg like reference */}
+            <div
+              className="relative z-10 h-[540px] w-[268px] rounded-[46px] border-[11px] border-[#0F1524] bg-white shadow-[0_40px_70px_-24px_rgba(15,20,40,0.55)]"
+              style={{ transform: 'rotate(-10deg)' }}
+            >
+              {/* Notch */}
+              <div className="absolute left-1/2 top-0 z-20 h-5 w-24 -translate-x-1/2 rounded-b-2xl bg-[#0F1524]" />
+
+              {/* Screen */}
+              <div className="relative h-full w-full overflow-hidden rounded-[32px] bg-white">
+                {/* Top red header inside app */}
+                <div className="flex items-center justify-between px-4 pt-5 pb-3" style={{ backgroundColor: BRAND_RED }}>
+                  <span className="text-[15px] font-bold italic text-white">{siteName}</span>
+                  <div className="relative flex items-center text-white">
+                    <ShoppingCart size={16} />
+                    <span className="absolute -right-1 -top-0.5 inline-block h-1.5 w-1.5 rounded-full bg-white" />
+                  </div>
+                </div>
+
+                {/* Search bar */}
+                <div className="px-3 py-3" style={{ backgroundColor: BRAND_RED }}>
+                  <div className="flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[10px] text-[#8A96AE]">
+                    <Search size={11} />
+                    Search products
+                  </div>
+                </div>
+
+                {/* Big Deals banner — with model figure */}
+                <div className="relative mx-3 mt-3 flex items-center justify-between overflow-hidden rounded-xl bg-[#FFE7EC] p-3">
+                  <div className="relative z-10">
+                    <p className="text-[11px] font-bold text-[#0F1524]">Big Deals</p>
+                    <p className="text-[9px] text-[#4C5B78]">Up to 50% OFF</p>
+                    <button
+                      className="mt-1.5 rounded-full px-2.5 py-1 text-[8px] font-bold text-white"
+                      style={{ backgroundColor: BRAND_RED }}
+                    >
+                      Shop Now
+                    </button>
+                  </div>
+                  {/* Simple model figure silhouette */}
+                  <div className="relative h-14 w-12">
+                    {/* Head */}
+                    <div className="absolute left-1/2 top-0 h-4 w-4 -translate-x-1/2 rounded-full bg-[#2A3548]" />
+                    {/* Body / suit */}
+                    <div
+                      className="absolute left-1/2 top-3 h-9 w-9 -translate-x-1/2 rounded-t-lg"
+                      style={{ backgroundColor: '#2A3548' }}
+                    />
+                    {/* Tie */}
+                    <div
+                      className="absolute left-1/2 top-4 h-5 w-1.5 -translate-x-1/2"
+                      style={{ backgroundColor: BRAND_RED }}
+                    />
+                  </div>
+                </div>
+
+                {/* Category row — 5 items with full labels + More */}
+                <div className="mx-3 mt-3 grid grid-cols-5 gap-1.5">
+                  {[
+                    { label: 'Electronics', Icon: Smartphone },
+                    { label: 'Fashion',     Icon: Shirt },
+                    { label: 'Home',        Icon: HomeIcon },
+                    { label: 'Beauty',      Icon: Sparkle },
+                    { label: 'More',        Icon: MoreHorizontal },
+                  ].map(({ label, Icon }) => (
+                    <div key={label} className="flex flex-col items-center gap-1">
+                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#FFE7EC]" style={{ color: BRAND_RED }}>
+                        <Icon size={11} />
+                      </span>
+                      <span className="text-[7px] font-semibold text-[#0F1524] leading-tight text-center">{label}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Best selling */}
+                <div className="mx-3 mt-3 flex items-center justify-between">
+                  <p className="text-[10px] font-bold text-[#0F1524]">Best Selling</p>
+                  <span className="text-[8px] font-semibold" style={{ color: BRAND_RED }}>View all</span>
+                </div>
+                <div className="mx-3 mt-2 grid grid-cols-2 gap-2">
+                  <div className="rounded-lg bg-[#F6F7FA] p-2">
+                    {/* Headphone visual */}
+                    <div className="flex h-14 w-full items-center justify-center rounded-md bg-white">
+                      <div className="relative h-8 w-10">
+                        <div className="absolute inset-x-0 top-0 h-4 rounded-t-full border-[3px] border-b-0 border-[#0F1524]" />
+                        <div className="absolute left-0 bottom-0 h-3 w-2.5 rounded-md bg-[#0F1524]" />
+                        <div className="absolute right-0 bottom-0 h-3 w-2.5 rounded-md bg-[#0F1524]" />
+                      </div>
+                    </div>
+                    <p className="mt-1 text-[8px] font-bold text-[#0F1524]">Wireless Headphone</p>
+                    <p className="text-[8px] font-bold" style={{ color: BRAND_RED }}>৳4,999</p>
+                  </div>
+                  <div className="rounded-lg bg-[#F6F7FA] p-2">
+                    {/* Smart watch visual */}
+                    <div className="flex h-14 w-full items-center justify-center rounded-md bg-white">
+                      <div className="relative h-9 w-6">
+                        <div className="absolute inset-x-1 top-0 h-1 rounded-t-sm bg-[#0F1524]" />
+                        <div className="absolute inset-x-1 bottom-0 h-1 rounded-b-sm bg-[#0F1524]" />
+                        <div className="absolute inset-0 top-1 bottom-1 rounded-md bg-[#0F1524]">
+                          <div className="absolute inset-0.5 rounded-sm" style={{ backgroundColor: BRAND_RED, opacity: 0.7 }} />
+                        </div>
+                      </div>
+                    </div>
+                    <p className="mt-1 text-[8px] font-bold text-[#0F1524]">Smart Watch</p>
+                    <p className="text-[8px] font-bold" style={{ color: BRAND_RED }}>৳3,499</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Floating trust badges — right edge stack */}
+            <div className="pointer-events-none absolute right-[-8px] top-1/2 hidden -translate-y-1/2 flex-col gap-4 lg:flex">
+              <FloatingBadge icon={<ShieldCheck size={16} />} label="Secure Payment" />
+              <FloatingBadge icon={<Truck size={16} />}       label="Fast Delivery" />
+              <FloatingBadge icon={<Award size={16} />}       label="Best Quality" />
+            </div>
+          </div>
+        </div>
+
+        {/* Corner dot decoration bottom-left of section */}
+        <div aria-hidden className="pointer-events-none absolute bottom-10 left-10 hidden grid-cols-4 gap-1.5 md:grid">
+          {Array.from({ length: 16 }).map((_, i) => (
+            <span key={i} className="h-1 w-1 rounded-full bg-[#0F1524] opacity-20" />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FloatingBadge({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <div className="pointer-events-auto flex items-center gap-2 rounded-full bg-white pl-2 pr-5 py-2 shadow-[0_10px_24px_-10px_rgba(15,20,40,0.25)]">
+      <span
+        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white"
+        style={{ backgroundColor: BRAND_RED }}
+      >
+        {icon}
+      </span>
+      <span className="text-[13px] font-semibold text-[#0F1524]">{label}</span>
+    </div>
+  );
+}

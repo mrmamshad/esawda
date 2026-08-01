@@ -1,0 +1,61 @@
+/*
+ * eSawda Shop Panel Design Tokens (2026-07-24).
+ *
+ * Same discipline as admin.css but with a "shop / storefront" vibe:
+ *   - Warmer canvas (subtle cream)
+ *   - Coral primary — same brand mark as admin but the surfaces feel
+ *     softer, more product-focused, less "corporate SaaS"
+ *   - Ratings/orders semantic colors mapped to warm tones
+ *
+ * Scoped under `.shop-scope` so tokens never leak into either the
+ * marketplace pages or the admin panel.
+ */
+
+.shop-scope {
+  /* ── Neutral system ── */
+  --shp-bg:            #FBF9F7;   /* warm off-white canvas */
+  --shp-surface:       #FFFFFF;   /* cards, panels */
+  --shp-surface-2:     #FBFAF8;   /* muted panels */
+  --shp-elevated:      #FFFFFF;   /* popovers */
+  --shp-border:        #EEE7E5;   /* rose-tinted 1px border */
+  --shp-border-strong: #E1D6D3;
+
+  /* ── Text ── */
+  --shp-fg:            #1B1418;
+  --shp-fg-muted:      #6B5C63;
+  --shp-fg-faint:      #A6959B;
+  --shp-fg-invert:     #FAFAFA;
+
+  /* ── Brand ── */
+  --shp-brand:         #E43356;   /* eSawda coral */
+  --shp-brand-fg:      #FFFFFF;
+  --shp-brand-soft:    #FFE7EC;
+  --shp-brand-strong:  #C41F42;
+  --shp-brand-ring:    rgba(228, 51, 86, 0.18);
+
+  /* Secondary — warm sunset for shop vibe (orange rather than indigo) */
+  --shp-accent:        #F97316;   /* orange-500 */
+  --shp-accent-soft:   #FFEDD5;
+
+  /* ── Semantic ── */
+  --shp-success:       #10B981;
+  --shp-success-soft:  #D1FAE5;
+  --shp-warning:       #F59E0B;
+  --shp-warning-soft:  #FEF3C7;
+  --shp-danger:        #EF4444;
+  --shp-danger-soft:   #FEE2E2;
+  --shp-info:          #3B82F6;
+  --shp-info-soft:     #DBEAFE;
+
+  /* Rating gold — used for star icons + score chips */
+  --shp-gold:          #F59E0B;
+  --shp-gold-soft:     #FEF3C7;
+
+  /* ── Elevation ── */
+  --shp-shadow-sm:  0 1px 2px 0 rgba(27, 20, 24, 0.04);
+  --shp-shadow:     0 1px 3px 0 rgba(27, 20, 24, 0.06), 0 1px 2px 0 rgba(27, 20, 24, 0.04);
+  --shp-shadow-md:  0 6px 20px -6px rgba(228, 51, 86, 0.14), 0 2px 4px -2px rgba(27, 20, 24, 0.06);
+  --shp-shadow-lg:  0 20px 40px -12px rgba(228, 51, 86, 0.18);
+}
+
+.shop-scope { font-feature-settings: 'tnum' on, 'lnum' on; }
