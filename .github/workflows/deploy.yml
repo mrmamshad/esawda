@@ -28,6 +28,7 @@ jobs:
             echo "==> pm2:  $(pm2 -v 2>/dev/null || echo MISSING)"
             cd /home/esawda-demo/htdocs/demo.esawda.com
             echo "==> before pull:"; git log --oneline -1
+            export GIT_SSH_COMMAND="ssh -i /home/esawda-demo/.ssh/github_actions_deploy -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
             git fetch origin main
             git reset --hard origin/main
             echo "==> after pull:"; git log --oneline -1
