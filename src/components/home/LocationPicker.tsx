@@ -5,7 +5,6 @@ import { Search, MapPin, X, ChevronRight, ChevronLeft } from 'lucide-react';
 import {
   BANGLADESH_DISTRICTS,
   groupDistrictsByLetter,
-  TOTAL_ADS,
   type District,
   type Upazila,
 } from '@/lib/bangladesh-districts';
@@ -31,8 +30,6 @@ export type LocationPickerProps = {
   onSelect: (choice: { name: string; slug: string; parentName?: string }) => void;
   currentSlug?: string;
 };
-
-const fmt = (n: number) => n.toLocaleString('en-IN');
 
 export function LocationPicker({ open, onClose, onSelect, currentSlug }: LocationPickerProps) {
   const [query, setQuery]     = useState('');
@@ -121,7 +118,7 @@ export function LocationPicker({ open, onClose, onSelect, currentSlug }: Locatio
                     className="text-[13px] font-semibold uppercase tracking-[0.16em]"
                     style={{ color: BRAND_RED }}
                   >
-                    All Bangladesh · {fmt(TOTAL_ADS)} ads
+                    All Bangladesh
                   </p>
                   <h2 className="mt-2 text-[22px] font-bold text-ink">Choose your district</h2>
                 </>
@@ -189,7 +186,7 @@ export function LocationPicker({ open, onClose, onSelect, currentSlug }: Locatio
               style={{ backgroundColor: BRAND_RED }}
             >
               <MapPin size={14} />
-              All {drill.name} · {fmt(drill.ads)}
+              All {drill.name}
             </button>
           )}
         </div>
@@ -213,7 +210,6 @@ export function LocationPicker({ open, onClose, onSelect, currentSlug }: Locatio
                         key={d.slug}
                         letter={i === 0 ? letter : ''}
                         title={d.name}
-                        meta={`${fmt(d.ads)} ads`}
                         chevron
                         active={d.slug === currentSlug}
                         onClick={() => setDrill(d)}
@@ -234,7 +230,6 @@ export function LocationPicker({ open, onClose, onSelect, currentSlug }: Locatio
                       key={u.slug}
                       letter={i === 0 ? letter : ''}
                       title={u.name}
-                      meta={`${fmt(u.ads)} ads`}
                       subtitle={drill.name}
                       active={u.slug === currentSlug}
                       onClick={() => {
@@ -258,11 +253,10 @@ export function LocationPicker({ open, onClose, onSelect, currentSlug }: Locatio
 /* ────────────────────────────────────────────────────────────────── */
 
 function RowButton({
-  letter, title, meta, subtitle, active, chevron, onClick,
+  letter, title, subtitle, active, chevron, onClick,
 }: {
   letter: string;
   title: string;
-  meta: string;
   subtitle?: string;
   active?: boolean;
   chevron?: boolean;
@@ -287,12 +281,7 @@ function RowButton({
           {letter}
         </span>
         <span className="flex flex-col leading-tight">
-          <span className="font-medium">
-            {title}
-            <span className={`ml-2 text-[13px] ${active ? 'text-white/85' : 'text-ink-muted'}`}>
-              · {meta}
-            </span>
-          </span>
+          <span className="font-medium">{title}</span>
           {subtitle && (
             <span className={`mt-0.5 text-[12px] ${active ? 'text-white/70' : 'text-ink-faint'}`}>
               {subtitle}

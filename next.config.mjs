@@ -10,6 +10,8 @@ const nextConfig = {
       { protocol: 'http',  hostname: 'localhost', port: '8100', pathname: '/uploads/**' },
       { protocol: 'https', hostname: '*.eshauda.com',         pathname: '/storage/**' },
       { protocol: 'https', hostname: '*.eshauda.com',         pathname: '/uploads/**' },
+      { protocol: 'https', hostname: 'api.esawda.com',        pathname: '/storage/**' },
+      { protocol: 'https', hostname: 'api.esawda.com',        pathname: '/uploads/**' },
     ],
     formats: ['image/avif', 'image/webp'],
   },

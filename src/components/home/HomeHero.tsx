@@ -40,7 +40,7 @@ export type HomeHeroProps = {
 };
 
 const BRAND_RED = '#FF003F';
-const CANVAS_CREAM = '#FFF1E6';
+const CANVAS_CREAM = '#FFFFFF';
 
 type Category = {
   label: string;

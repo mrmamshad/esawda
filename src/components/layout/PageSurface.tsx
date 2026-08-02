@@ -12,6 +12,6 @@ import { cn } from '@/lib/cn';
  */
 export function PageSurface({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn('min-h-screen bg-brand-50', className)}>{children}</div>
+    <div className={cn('min-h-screen bg-white', className)}>{children}</div>
   );
 }

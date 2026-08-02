@@ -9,9 +9,9 @@
 /* ------------------------------------------------------------------ */
 :root {
   /* eSawda RED palette — matches HomeHero (2026-08-01) */
-  --bg:            #FFF1E6;   /* cream canvas (hero) */
+  --bg:            #FFFFFF;   /* classic white page canvas */
   --surface:       #FFFFFF;
-  --surface-muted: #FFF1E6;   /* cream */
+  --surface-muted: #F4F4F5;   /* subtle neutral zinc-100 (was cream) */
 
   --brand-950: #3A0212;
   --brand-900: #5E051D;
@@ -26,7 +26,7 @@
   --primary:       #FF003F;
   --primary-dark:  #0F1524;
   --secondary:     #0F1524;   /* near-navy ink */
-  --tertiary:      #FFF1E6;   /* cream */
+  --tertiary:      #FFFFFF;   /* classic white (was cream) */
 
   --ink:        #0F1524;      /* near-navy heading */
   --ink-muted:  #4C5B78;
@@ -60,9 +60,9 @@ html       { scrollbar-gutter: stable; }
   .type-body-sm            { @apply text-body-sm; }
   .type-label-caps         { @apply text-label-caps uppercase; }
 
-  /* Hero gradient — soft cream-to-blush wash matching HomeHero */
+  /* Hero gradient — classic white (was cream-to-blush wash) */
   .hero-gradient {
-    background: linear-gradient(135deg, #FFF1E6 0%, #FFE0E6 60%, #FFC7D2 100%);
+    background: #FFFFFF;
   }
 }
 

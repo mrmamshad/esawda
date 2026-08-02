@@ -106,8 +106,8 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
       <Header variant="default" />
       <HeaderSpacer />
 
-      {/* Soft brand-tinted page background so the white cards pop. */}
-      <div className="bg-brand-50/40">
+      {/* Classic white page background. */}
+      <div className="bg-white">
         <div className="container-page py-6 md:py-8">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
 

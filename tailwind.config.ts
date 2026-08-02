@@ -55,17 +55,17 @@ const config: Config = {
           fixed:     '#E7E9F2',
           fixedDim:  '#C7CBDE',
         },
-        // Tertiary — cream tint that matches the hero canvas exactly.
+        // Tertiary — classic white (was cream, matches new white canvas).
         tertiary: {
-          DEFAULT:   '#FFF1E6',   // 🔑 cream (hero canvas)
-          fixed:     '#FCE7D4',
-          fixedDim:  '#F5D5B8',
+          DEFAULT:   '#FFFFFF',   // 🔑 classic white
+          fixed:     '#FFFFFF',
+          fixedDim:  '#F4F4F5',   // subtle zinc-100 for depth if needed
         },
         surface: {
           DEFAULT: '#FFFFFF',
-          muted:   '#FFF1E6',    // cream canvas
-          dim:     '#F4E4D3',
-          bright:  '#FFFDF9',
+          muted:   '#F4F4F5',     // subtle neutral zinc-100 (was cream)
+          dim:     '#F4F4F5',     // zinc-100 subtle
+          bright:  '#FFFFFF',
         },
         ink: {
           DEFAULT: '#0F1524',    // deep near-navy (matches hero heading)
@@ -77,7 +77,7 @@ const config: Config = {
           DEFAULT: '#6B7794',
           variant: '#C7CDD8',
         },
-        bg: '#FFF1E6',            // 🔑 cream canvas — matches hero
+        bg: '#FFFFFF',            // 🔑 classic white page canvas
         danger:  '#DC2626',
         warning: '#D97706',
         success: '#16A34A',

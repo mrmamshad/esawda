@@ -100,13 +100,9 @@ export default async function HomePage() {
           )}
         </section>
 
-        {/* ── Sponsored products — warm cream-tinted block with soft brand wash ── */}
+        {/* ── Sponsored products — classic white block (was brand-tinted) ── */}
         {featured.data.length > 0 && (
-          <section className="reveal relative overflow-hidden py-24">
-            {/* Soft brand-tinted background — cream base with a warm orange wash */}
-            <div aria-hidden className="absolute inset-0 bg-gradient-to-br from-brand-50 via-bg to-brand-100/60" />
-            <div aria-hidden className="pointer-events-none absolute -left-32 top-16 h-96 w-96 rounded-full bg-brand-200/40 blur-3xl" />
-            <div aria-hidden className="pointer-events-none absolute -right-32 bottom-16 h-96 w-96 rounded-full bg-brand-300/30 blur-3xl" />
+          <section className="reveal relative overflow-hidden bg-white py-24">
 
             <div className="container-page relative">
               <div className="flex flex-wrap items-end justify-between gap-4">
@@ -160,9 +156,9 @@ export default async function HomePage() {
           )}
         </section>
 
-        {/* ── Brand New arrivals — soft tertiary tint ── */}
+        {/* ── Brand New arrivals — classic white section ── */}
         {brandNew.data.length > 0 && (
-          <section className="reveal bg-tertiary py-24">
+          <section className="reveal bg-white py-24">
             <div className="container-page">
               <SectionHeader
                 eyebrow="Brand new"
@@ -195,9 +191,9 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* ── Membership plans — tertiary tint, bold pricing cards ── */}
+        {/* ── Membership plans — classic white section, bold pricing cards ── */}
         {activePlans.length > 0 && (
-          <section className="reveal bg-tertiary py-24">
+          <section className="reveal bg-white py-24">
             <div className="container-page">
               <SectionHeader
                 eyebrow="Level up"
@@ -238,9 +234,9 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* ── Blog preview — cream, three horizontal cards ── */}
+        {/* ── Blog preview — classic white, three horizontal cards ── */}
         {blogs.data.length > 0 && (
-          <section className="reveal bg-tertiary py-24">
+          <section className="reveal bg-white py-24">
             <div className="container-page">
               <SectionHeader
                 eyebrow="From the journal"
