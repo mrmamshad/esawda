@@ -16,14 +16,20 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
+          timeout: 60s
+          command_timeout: 15m
           script: |
+            set -euo pipefail
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            eval "$(ssh-agent -s)"
-            ssh-add ~/.ssh/github_actions_deploy
             cd /home/esawda-demo/htdocs/demo.esawda.com
-            git pull origin main
+            echo "==> before pull:"; git log --oneline -1
+            git fetch origin main
+            git reset --hard origin/main
+            echo "==> after pull:"; git log --oneline -1
             npm ci
+            rm -rf .next
             npm run build
             pm2 restart esawda-frontend --update-env
             pm2 save
+            echo "==> deploy complete on $(git rev-parse --short HEAD)"
