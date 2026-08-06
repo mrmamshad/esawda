@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { Calendar, Tag, Car } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
+import { ScrollToTopOnMount } from '@/components/layout/ScrollToTopOnMount';
 import { AdGallery } from '@/components/listing/AdGallery';
 import { ListingCard } from '@/components/listing/ListingCard';
 import { SellerCard } from '@/components/seller/SellerCard';
@@ -79,6 +80,7 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Header variant="default" />
       <HeaderSpacer />
+      <ScrollToTopOnMount />
 
       <div className="container-page py-8 md:py-10">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
