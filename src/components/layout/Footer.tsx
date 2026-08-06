@@ -39,9 +39,9 @@ export function Footer({ siteName = 'eSawda' }: { siteName?: string }) {
     {
       title: 'Legal',
       links: [
-        { label: 'Terms', href: '/terms' as Route },
-        { label: 'Privacy', href: '/privacy' as Route },
-        { label: 'Safety tips', href: '/safety' as Route },
+        { label: 'Terms & Conditions', href: '/terms' as Route },
+        { label: 'Privacy policy', href: '/privacy' as Route },
+        { label: 'Safety tips', href: '/safety-tips' as Route },
       ],
     },
   ];
@@ -97,7 +97,7 @@ export function Footer({ siteName = 'eSawda' }: { siteName?: string }) {
           </p>
           <div className="flex items-center gap-5 text-xs text-white/50">
             <Link href={'/privacy' as Route} className="hover:text-white/80">Privacy policy</Link>
-            <Link href={'/terms' as Route} className="hover:text-white/80">Terms</Link>
+            <Link href={'/terms' as Route} className="hover:text-white/80">Terms and conditions</Link>
             <Link href={'/contact' as Route} className="hover:text-white/80">Support</Link>
           </div>
         </div>
