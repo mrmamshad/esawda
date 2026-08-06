@@ -7,10 +7,21 @@ import type { Category } from '@/types/api';
 /**
  * Category tile — Stitch homepage style. Aspect-square image with a
  * primary overlay that fades on hover; caption sits below in centred
- * headline-md typography.
+ * headline-md typography. Optional count line shows live ad totals.
  */
-export function CategoryCard({ category, className }: { category: Category; className?: string }) {
+export function CategoryCard({
+  category,
+  className,
+  adCount,
+  countTone = 'used',
+}: {
+  category: Category;
+  className?: string;
+  adCount?: number;
+  countTone?: 'used' | 'new';
+}) {
   const href = (category.slug ? `/category/${category.slug}` : `/ads?filter[category]=${category.id}`) as Route;
+  const condLabel = countTone === 'new' ? 'new' : 'used';
   return (
     <Link href={href} className={cn('group block', className)}>
       <div className="relative mb-4 aspect-square overflow-hidden rounded-2xl bg-brand-50">
@@ -32,6 +43,11 @@ export function CategoryCard({ category, className }: { category: Category; clas
       <h3 className="text-center text-body-md font-semibold text-ink transition-colors group-hover:text-secondary">
         {category.name}
       </h3>
+      {adCount !== undefined && (
+        <p className="mt-1 text-center text-body-sm text-ink-muted">
+          <span className="font-semibold text-ink">{adCount.toLocaleString()}</span> {condLabel} ads
+        </p>
+      )}
     </Link>
   );
 }

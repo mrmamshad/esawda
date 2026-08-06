@@ -7,7 +7,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { HomeHero } from '@/components/home/HomeHero';
 import { SectionHeader } from '@/components/home/SectionHeader';
-import { CategoryCard } from '@/components/home/CategoryCard';
+import { CategoryConditionGrid } from '@/components/home/CategoryConditionGrid';
 import { ListingCard } from '@/components/listing/ListingCard';
 import { BlogCard } from '@/components/blog/BlogCard';
 import { TestimonialCard } from '@/components/ui/TestimonialCard';
@@ -76,12 +76,6 @@ export default async function HomePage() {
       <HomeHero siteName={siteName} bgImageUrl={heroBgUrl} />
 
       <main className="bg-bg">
-        {/* ═══ AD SLOT #1 — large (970×250), hero-under ═══
-            Highest reach on the page. Bigger canvas = higher CTR for brand ads. */}
-        <div className="container-page pt-8">
-          <AdSlot placement="home.hero_under" size="large" />
-        </div>
-
         {/* ═══ SECTION HEADER PATTERN ═══
             All sections share the same rhythm now — a small orange "eyebrow"
             label above a chunky navy heading, muted body, and (optionally)
@@ -99,14 +93,20 @@ export default async function HomePage() {
           {cats.data.length === 0 ? (
             <EmptyState title="No categories yet" description="Categories will appear once seeded." />
           ) : (
-            <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-              {(cats.data as Category[])
+            <CategoryConditionGrid
+              categories={(cats.data as Category[])
                 .filter((c) => !/playwright|test/i.test(c.name))
-                .slice(0, 12)
-                .map((c) => <CategoryCard key={c.id} category={c} />)}
-            </div>
+                .slice(0, 12)}
+            />
           )}
         </section>
+
+        {/* ═══ AD SLOT #1 — large (970×250), after categories ═══
+            Sits between the categories grid and the Sponsored section.
+            User has expressed browse intent — higher CPM than hero-under. */}
+        <div className="container-page pb-8">
+          <AdSlot placement="home.after_categories" size="large" />
+        </div>
 
         {/* ── Sponsored products — classic white block (was brand-tinted) ── */}
         {featured.data.length > 0 && (
