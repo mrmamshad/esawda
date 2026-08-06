@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { ListChecks } from 'lucide-react';
-import { Header } from '@/components/layout/Header';
+import { Header, HeaderSpacer } from '@/components/layout/Header';
 import { ListingCard } from '@/components/listing/ListingCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Pagination } from '@/components/ui/Pagination';
@@ -38,10 +38,9 @@ export function ListingGrid({
 }) {
   return (
     <>
-      <div className="border-b border-line bg-white">
-        <div className="container-page"><Header user={user ?? undefined} /></div>
-      </div>
-      <main className="container-page py-10">
+      <Header user={user ?? undefined} />
+      <HeaderSpacer />
+      <main className="container-page pt-10 pb-12 md:pt-14 md:pb-16">
         <header className="mb-8">
           {overline && <p className="text-xs font-semibold uppercase tracking-wide text-brand-500">{overline}</p>}
           <h1 className="mt-1 text-3xl font-bold text-ink">{title}</h1>
