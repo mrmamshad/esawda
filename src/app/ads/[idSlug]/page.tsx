@@ -12,6 +12,7 @@ import { PriceTag } from '@/components/ui/PriceTag';
 import { AdActions } from '@/components/interactive/AdActions';
 import { ReviewsSection } from '@/components/interactive/ReviewsSection';
 import { ToastProvider } from '@/components/ui/Toast';
+import { AdSlot } from '@/components/ads/AdSlot';
 import { env } from '@/lib/env';
 import type { Ad, AdDetail } from '@/types/api';
 
@@ -115,6 +116,10 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
 
             <ReviewsSection adId={ad.id} />
 
+            {/* AD SLOT — inline wide, post-reviews, pre-related. Re-engages
+                the buyer once they've digested the listing. */}
+            <AdSlot placement={`ad.${ad.id}.post_description`} size="wide" />
+
             {similar.data.length > 0 && (
               <section className="space-y-4 pt-2">
                 <SectionHeading title="Related ads" />
@@ -128,6 +133,10 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
           {/* Sidebar — sticky top so it stays aligned with the gallery */}
           <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
             {ad.seller && <SellerCard seller={ad.seller} />}
+
+            {/* AD SLOT — sidebar MPU (300×250), high-CPM inventory. */}
+            <AdSlot placement={`ad.${ad.id}.sidebar_mpu`} size="mpu" />
+
             {similar.data.length > 0 && (
               <section className="surface-card p-5">
                 <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-muted">More from this seller</h3>
@@ -138,6 +147,9 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
                 </div>
               </section>
             )}
+
+            {/* AD SLOT — sidebar bottom MPU, catches tail intent. */}
+            <AdSlot placement={`ad.${ad.id}.sidebar_bottom`} size="mpu" />
           </aside>
         </div>
       </div>

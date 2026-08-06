@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Fragment } from 'react';
 import type { Route } from 'next';
 import { ArrowUpRight } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
@@ -13,6 +14,7 @@ import { TestimonialCard } from '@/components/ui/TestimonialCard';
 import { PlanCard } from '@/components/membership/PlanCard';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { AdSlot } from '@/components/ads/AdSlot';
 import { apiFromServer, ApiError } from '@/lib/api';
 import { getSiteSettings } from '@/lib/settings';
 import { getSessionUser } from '@/lib/session';
@@ -74,6 +76,12 @@ export default async function HomePage() {
       <HomeHero siteName={siteName} bgImageUrl={heroBgUrl} />
 
       <main className="bg-bg">
+        {/* ═══ AD SLOT #1 — large (970×250), hero-under ═══
+            Highest reach on the page. Bigger canvas = higher CTR for brand ads. */}
+        <div className="container-page pt-8">
+          <AdSlot placement="home.hero_under" size="large" />
+        </div>
+
         {/* ═══ SECTION HEADER PATTERN ═══
             All sections share the same rhythm now — a small orange "eyebrow"
             label above a chunky navy heading, muted body, and (optionally)
@@ -128,7 +136,15 @@ export default async function HomePage() {
                 </Link>
               </div>
               <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {stripTestAds(featured.data as Ad[]).slice(0, 6).map((ad) => <ListingCard key={ad.id} ad={ad} variant="featured" />)}
+                {stripTestAds(featured.data as Ad[]).slice(0, 6).map((ad, i) => (
+                  <Fragment key={ad.id}>
+                    <ListingCard ad={ad} variant="featured" />
+                    {/* ═══ AD SLOT #2 — in-feed native, after 3rd sponsored card ═══
+                        Native blend, highest CTR, mid CPM. Slot only renders if we
+                        actually have ≥3 featured cards so the grid doesn't break. */}
+                    {i === 2 && <AdSlot placement="home.sponsored_infeed" size="infeed" />}
+                  </Fragment>
+                ))}
               </div>
             </div>
           </section>
@@ -191,6 +207,12 @@ export default async function HomePage() {
           </section>
         )}
 
+        {/* ═══ AD SLOT — wide banner, after Pre-owned section ═══
+            Sits between the editorial pre-owned grid and the membership upsell. */}
+        <div className="container-page py-8">
+          <AdSlot placement="home.after_preowned" size="wide" />
+        </div>
+
         {/* ── Membership plans — classic white section, bold pricing cards ── */}
         {activePlans.length > 0 && (
           <section className="reveal bg-white py-24">
@@ -251,6 +273,12 @@ export default async function HomePage() {
             </div>
           </section>
         )}
+
+        {/* ═══ AD SLOT #3 — wide, before final CTA ═══
+            Catches the tail of the scroll, no competition with editorial. */}
+        <div className="container-page pb-4 pt-8">
+          <AdSlot placement="home.pre_cta" size="wide" />
+        </div>
 
         {/* ── Final CTA — orange bloom on navy ── */}
         <section className="reveal relative overflow-hidden bg-ink py-20">

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Fragment } from 'react';
 import { Search } from 'lucide-react';
 import { api } from '@/lib/api';
 import { toQueryString } from '@/lib/queryString';
@@ -10,6 +11,7 @@ import { PriceRangeFilter } from '@/components/filter/PriceRangeFilter';
 import { ListingCard } from '@/components/listing/ListingCard';
 import { IconButton } from '@/components/ui/IconButton';
 import { Button } from '@/components/ui/Button';
+import { AdSlot } from '@/components/ads/AdSlot';
 import type { Ad, Category } from '@/types/api';
 
 /**
@@ -142,6 +144,10 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
             })}
           </div>
 
+          {/* AD SLOT — large (970×250), filter-under. Highest CPM inventory
+              on the browse page — users with active intent. */}
+          <AdSlot placement="search.filter_under" size="large" />
+
           {/* Grid */}
           {ads.data.length === 0 ? (
             <div className="rounded-card border border-dashed border-line p-12 text-center text-ink-muted">
@@ -149,8 +155,19 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {ads.data.map((ad) => <ListingCard key={ad.id} ad={ad} variant="featured" />)}
+              {ads.data.map((ad, i) => (
+                <Fragment key={ad.id}>
+                  <ListingCard ad={ad} variant="featured" />
+                  {/* AD SLOT — in-feed native after 9th card (every ~10 results). */}
+                  {i === 8 && <AdSlot placement="search.mid_infeed" size="infeed" />}
+                </Fragment>
+              ))}
             </div>
+          )}
+
+          {/* AD SLOT — wide, results-bottom (pre-pagination). */}
+          {ads.data.length > 0 && (
+            <AdSlot placement="search.results_bottom" size="wide" />
           )}
         </main>
       </div>

@@ -44,6 +44,10 @@ export default async function CityPage({ params, searchParams }: { params: Param
       currentPage={meta.current_page}
       lastPage={meta.last_page}
       basePath={`/city/${city}`}
+      topSlot={{ placement: `city.${city}.header_under`, size: 'wide' }}
+      midSlot={{ placement: `city.${city}.mid_infeed`,    size: 'infeed' }}
+      bottomSlot={{ placement: `city.${city}.footer_above`, size: 'large' }}
+      midAfter={7}
     />
   );
 }

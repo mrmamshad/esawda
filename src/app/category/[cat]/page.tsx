@@ -48,6 +48,10 @@ export default async function CategoryPage({ params, searchParams }: { params: P
       currentPage={meta.current_page}
       lastPage={meta.last_page}
       basePath={`/category/${cat}`}
+      topSlot={{ placement: `category.${cat}.filter_under`, size: 'large' }}
+      midSlot={{ placement: `category.${cat}.mid_infeed`,    size: 'infeed' }}
+      bottomSlot={{ placement: `category.${cat}.pre_pagination`, size: 'wide' }}
+      midAfter={5}
     />
   );
 }

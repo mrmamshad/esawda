@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>eSawda — Ad Banner Plan</title>
+<style>
+  @page {
+    size: A4;
+    margin: 22mm 18mm 22mm 18mm;
+    @bottom-center {
+      content: "eSawda · Ad Banner Plan · " counter(page) " / " counter(pages);
+      font-family: 'Helvetica', sans-serif;
+      font-size: 9pt;
+      color: #6b7280;
+    }
+  }
+  @page :first { @bottom-center { content: ""; } }
+  html { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 11pt; line-height: 1.55; color: #111827; }
+  body { margin: 0; }
+
+  /* Cover */
+  .cover {
+    height: 240mm;
+    display: flex; flex-direction: column; justify-content: space-between;
+    page-break-after: always;
+    border-top: 6px solid #f16a2b;
+  }
+  .cover .eyebrow {
+    text-transform: uppercase; letter-spacing: 0.22em; font-size: 9pt;
+    color: #f16a2b; font-weight: 700;
+  }
+  .cover h1 {
+    font-size: 38pt; line-height: 1.08; margin: 14pt 0 10pt 0;
+    color: #0f172a; letter-spacing: -0.01em;
+  }
+  .cover .sub {
+    font-size: 14pt; font-weight: 400; color: #475569;
+    margin: 0; line-height: 1.45; max-width: 150mm;
+  }
+  .cover .meta {
+    font-size: 11pt; color: #374151; line-height: 1.9;
+  }
+  .cover .meta .row { display: block; margin-bottom: 2pt; }
+  .cover .meta b { color: #0f172a; }
+  .cover .footer-block {
+    border-top: 1px solid #e5e7eb; padding-top: 14pt;
+    font-size: 9.5pt; color: #6b7280; line-height: 1.6;
+  }
+
+  /* Section headings */
+  h1 {
+    font-size: 22pt; line-height: 1.2; margin: 0 0 8pt 0;
+    border-bottom: 3px solid #f16a2b; padding-bottom: 6pt;
+    color: #0f172a;
+    page-break-after: avoid;
+  }
+  h2 {
+    font-size: 16pt; margin: 24pt 0 6pt 0;
+    color: #f16a2b; letter-spacing: -0.005em;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 13pt; margin: 14pt 0 4pt 0;
+    color: #0f172a;
+    page-break-after: avoid;
+  }
+  p { margin: 0 0 8pt 0; }
+
+  /* Page block — one per page */
+  .page-block { page-break-inside: avoid; margin-bottom: 18pt; }
+
+  /* Page header strip */
+  .page-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    border-bottom: 1px solid #e5e7eb; padding-bottom: 4pt; margin-bottom: 8pt;
+  }
+  .page-name { font-size: 14pt; font-weight: 700; color: #0f172a; }
+  .page-url  { font-size: 9.5pt; color: #6b7280; font-family: 'Courier New', monospace; }
+  .page-count {
+    font-size: 9pt; color: #475569;
+    background: #fff7ed; border: 1px solid #fed7aa;
+    padding: 2pt 8pt; border-radius: 10pt; font-weight: 600;
+  }
+
+  /* Banner cards */
+  .banner {
+    border: 1px solid #e5e7eb; border-radius: 6pt;
+    padding: 10pt 12pt; margin-bottom: 8pt; background: #fafafa;
+  }
+  .banner-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12pt;
+  }
+  .banner-num {
+    display: inline-block; min-width: 22pt; height: 22pt; line-height: 22pt;
+    text-align: center; border-radius: 50%;
+    background: #f16a2b; color: #fff; font-weight: 700; font-size: 10pt;
+  }
+  .banner-ratio {
+    font-size: 10pt; font-weight: 700; color: #0f172a;
+    background: #0f172a; color: #fff; padding: 3pt 8pt; border-radius: 4pt;
+    letter-spacing: 0.04em;
+  }
+  .banner-type {
+    font-size: 9pt; color: #6b7280; text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .banner-where {
+    margin-top: 6pt; font-size: 10.5pt; color: #374151; line-height: 1.5;
+  }
+  .banner-where b { color: #0f172a; }
+
+  /* Summary table */
+  table {
+    width: 100%; border-collapse: collapse; margin: 10pt 0 14pt 0;
+    font-size: 10pt; page-break-inside: avoid;
+  }
+  thead { display: table-header-group; }
+  th, td {
+    text-align: left; padding: 7pt 9pt;
+    border-bottom: 1px solid #e5e7eb; vertical-align: middle;
+  }
+  th {
+    background: #0f172a; color: #fff; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    font-size: 9pt; border-bottom: 2px solid #f16a2b;
+  }
+  tbody tr:nth-child(even) td { background: #f9fafb; }
+  td.num { text-align: center; font-weight: 700; color: #f16a2b; }
+
+  hr { border: 0; border-top: 1px solid #e5e7eb; margin: 16pt 0; }
+  blockquote {
+    margin: 8pt 0; padding: 8pt 12pt;
+    border-left: 3px solid #f16a2b; background: #fff7ed;
+    color: #7c2d12; font-size: 10pt;
+  }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div>
+    <div class="eyebrow">eSawda · Ad Banner Plan</div>
+    <h1>Ad Banner<br>Plan</h1>
+    <p class="sub">A clear summary of every ad banner reserved on the eSawda website — how many, where they appear, and the size of each.</p>
+  </div>
+  <div class="meta">
+    <span class="row"><b>Prepared for</b> &nbsp; Clients &amp; Marketing Team</span>
+    <span class="row"><b>Date</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 6 August 2026</span>
+    <span class="row"><b>Status</b> &nbsp;&nbsp;&nbsp;&nbsp; Live</span>
+    <span class="row"><b>Total banners</b> &nbsp; 20 across 7 page types</span>
+  </div>
+  <div class="footer-block">
+    A "ratio" means the width × height of a banner in pixels. For example,
+    <b>970 × 90</b> is a wide thin banner that sits across the page, while
+    <b>300 × 250</b> is a small square that fits in a side column.
+  </div>
+</div>
+
+<h1>Overview — sizes we use</h1>
+<p>Five banner sizes are used across the site. They follow the standard sizes recognised by the global ad industry.</p>
+<table>
+  <thead>
+    <tr><th>Size</th><th>Ratio (pixels)</th><th>Where it fits</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Wide banner</td>      <td>970 × 90</td>  <td>Spans the full width of the page, thin strip</td></tr>
+    <tr><td>Large banner</td>     <td>970 × 250</td> <td>Spans the full width, tall — high impact</td></tr>
+    <tr><td>Sidebar square</td>   <td>300 × 250</td> <td>Small square that fits in the right-side column</td></tr>
+    <tr><td>Native (in-grid)</td> <td>—</td>          <td>Mixed into the listing grid, looks like a regular card</td></tr>
+    <tr><td>Compact</td>          <td>728 × 90</td>  <td>Compact horizontal strip (legacy, rarely used)</td></tr>
+  </tbody>
+</table>
+
+<h1>Where the banners sit</h1>
+
+<!-- ───────── HOME ───────── -->
+<div class="page-block">
+  <div class="page-header">
+    <span class="page-name">Home Page</span>
+    <span class="page-url">/</span>
+    <span class="page-count">4 banners</span>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">1</span> &nbsp; <span class="banner-type">Hero-under</span></span>
+      <span class="banner-ratio">970 × 250</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> directly below the big hero image at the top of the home page.</div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">2</span> &nbsp; <span class="banner-type">In sponsored grid</span></span>
+      <span class="banner-ratio">Native</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> appears as the 4th card inside the "Sponsored" listings row.</div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">3</span> &nbsp; <span class="banner-type">After pre-owned</span></span>
+      <span class="banner-ratio">970 × 90</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> below the "Great condition, great value" pre-owned listings grid.</div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">4</span> &nbsp; <span class="banner-type">Pre-CTA</span></span>
+      <span class="banner-ratio">970 × 90</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> above the orange "Post your ad" call-to-action block at the bottom.</div>
+  </div>
+</div>
+
+<!-- ───────── BROWSE / SEARCH ───────── -->
+<div class="page-block">
+  <div class="page-header">
+    <span class="page-name">Browse / Search Results</span>
+    <span class="page-url">/ads</span>
+    <span class="page-count">3 banners</span>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">1</span> &nbsp; <span class="banner-type">Below filters</span></span>
+      <span class="banner-ratio">970 × 250</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> just below the "All / New / Used" filter row at the top of the results.</div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">2</span> &nbsp; <span class="banner-type">Inside results</span></span>
+      <span class="banner-ratio">Native</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> appears after every 9th listing card, blended into the results grid.</div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">3</span> &nbsp; <span class="banner-type">Results bottom</span></span>
+      <span class="banner-ratio">970 × 90</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> below the last row of results, just above the "Next page" link.</div>
+  </div>
+</div>
+
+<!-- ───────── CATEGORY ───────── -->
+<div class="page-block">
+  <div class="page-header">
+    <span class="page-name">Category Page</span>
+    <span class="page-url">/category/[cat]</span>
+    <span class="page-count">3 banners</span>
+  </div>
+  <p style="font-size:10pt; color:#6b7280; margin: 0 0 8pt 0;">The banner placement id carries the category name. Example for <b>Vehicles</b>: <i>vehicles.filter_under</i>.</p>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">1</span> &nbsp; <span class="banner-type">Below page title</span></span>
+      <span class="banner-ratio">970 × 250</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> directly under the category name and total-ads count.</div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">2</span> &nbsp; <span class="banner-type">Inside grid</span></span>
+      <span class="banner-ratio">Native</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> appears as the 7th card in the listings grid.</div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">3</span> &nbsp; <span class="banner-type">Above pagination</span></span>
+      <span class="banner-ratio">970 × 90</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> below the grid, above the page-2 / page-3 links.</div>
+  </div>
+</div>
+
+<!-- ───────── AD DETAIL ───────── -->
+<div class="page-block">
+  <div class="page-header">
+    <span class="page-name">Ad Detail Page</span>
+    <span class="page-url">/ads/[slug]</span>
+    <span class="page-count">3 banners</span>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">1</span> &nbsp; <span class="banner-type">Sidebar top</span></span>
+      <span class="banner-ratio">300 × 250</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> in the right-hand column, just below the seller's contact card.</div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">2</span> &nbsp; <span class="banner-type">Post-description</span></span>
+      <span class="banner-ratio">970 × 90</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> full-width strip below the reviews and above the "Related ads" section.</div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">3</span> &nbsp; <span class="banner-type">Sidebar bottom</span></span>
+      <span class="banner-ratio">300 × 250</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> at the bottom of the right-hand column.</div>
+  </div>
+</div>
+
+<!-- ───────── CITY ───────── -->
+<div class="page-block">
+  <div class="page-header">
+    <span class="page-name">City Page</span>
+    <span class="page-url">/city/[city]</span>
+    <span class="page-count">3 banners</span>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">1</span> &nbsp; <span class="banner-type">Below page title</span></span>
+      <span class="banner-ratio">970 × 90</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> directly under the "Ads in [city]" header.</div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">2</span> &nbsp; <span class="banner-type">Inside grid</span></span>
+      <span class="banner-ratio">Native</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> appears after the 8th listing card.</div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">3</span> &nbsp; <span class="banner-type">Above pagination</span></span>
+      <span class="banner-ratio">970 × 250</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> tall full-width banner below the grid, above pagination.</div>
+  </div>
+</div>
+
+<!-- ───────── BLOG INDEX ───────── -->
+<div class="page-block">
+  <div class="page-header">
+    <span class="page-name">Blog Index</span>
+    <span class="page-url">/blog</span>
+    <span class="page-count">2 banners</span>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">1</span> &nbsp; <span class="banner-type">Below page title</span></span>
+      <span class="banner-ratio">970 × 90</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> directly under the "Blog" header and search bar.</div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">2</span> &nbsp; <span class="banner-type">In post grid</span></span>
+      <span class="banner-ratio">Native</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> appears as the 4th card in the post grid.</div>
+  </div>
+</div>
+
+<!-- ───────── BLOG POST ───────── -->
+<div class="page-block">
+  <div class="page-header">
+    <span class="page-name">Blog Post</span>
+    <span class="page-url">/blog/[slug]</span>
+    <span class="page-count">2 banners</span>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">1</span> &nbsp; <span class="banner-type">Below article</span></span>
+      <span class="banner-ratio">970 × 90</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> full-width strip right after the article body, before the share row.</div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-head">
+      <span><span class="banner-num">2</span> &nbsp; <span class="banner-type">Pre-related</span></span>
+      <span class="banner-ratio">970 × 250</span>
+    </div>
+    <div class="banner-where"><b>Position:</b> tall full-width banner right above the "Related posts" section.</div>
+  </div>
+</div>
+
+<h1>Total at a glance</h1>
+<table>
+  <thead>
+    <tr><th>Page</th><th>How many banners</th><th>Sizes used</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Home</td>            <td class="num">4</td><td>Large × 1, Wide × 2, Native × 1</td></tr>
+    <tr><td>Browse / Search</td> <td class="num">3</td><td>Large × 1, Wide × 1, Native × 1</td></tr>
+    <tr><td>Category</td>        <td class="num">3</td><td>Large × 1, Wide × 1, Native × 1</td></tr>
+    <tr><td>Ad Detail</td>       <td class="num">3</td><td>Sidebar square × 2, Wide × 1</td></tr>
+    <tr><td>City</td>            <td class="num">3</td><td>Wide × 1, Large × 1, Native × 1</td></tr>
+    <tr><td>Blog Index</td>      <td class="num">2</td><td>Wide × 1, Native × 1</td></tr>
+    <tr><td>Blog Post</td>       <td class="num">2</td><td>Wide × 1, Large × 1</td></tr>
+    <tr><td><b>Total</b></td>    <td class="num"><b>20</b></td><td>—</td></tr>
+  </tbody>
+</table>
+
+<blockquote>
+<strong>What "ratio" means:</strong> the size of a banner in pixels, width × height.
+For example, <b>970 × 90</b> is a long thin strip across the page; <b>300 × 250</b>
+is a small square that fits in the side column.
+</blockquote>
+
+</body>
+</html>

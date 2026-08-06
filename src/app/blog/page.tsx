@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Fragment } from 'react';
 import { FileText } from 'lucide-react';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
 import { BlogHero } from '@/components/blog/BlogHero';
@@ -6,6 +7,7 @@ import { BlogCard } from '@/components/blog/BlogCard';
 import { CategoryChip } from '@/components/blog/CategoryChip';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Pagination } from '@/components/ui/Pagination';
+import { AdSlot } from '@/components/ads/AdSlot';
 import { apiFromServer, ApiError } from '@/lib/api';
 import { getSessionUser } from '@/lib/session';
 import { toQueryString } from '@/lib/queryString';
@@ -62,6 +64,9 @@ export default async function BlogIndex({ searchParams }: { searchParams: Search
           </form>
         </header>
 
+        {/* AD SLOT — wide banner, header-under. */}
+        <AdSlot placement="blog.header_under" size="wide" />
+
         {error ? (
           <EmptyState title="Couldn't load posts" description={error} />
         ) : posts.length === 0 ? (
@@ -71,7 +76,13 @@ export default async function BlogIndex({ searchParams }: { searchParams: Search
             <div className="space-y-8">
               {featured && page === 1 && !q && <BlogHero blog={featured} />}
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {(page === 1 && !q ? rest : posts).map((b) => <BlogCard key={b.id} blog={b} />)}
+                {(page === 1 && !q ? rest : posts).map((b, i) => (
+                  <Fragment key={b.id}>
+                    <BlogCard blog={b} />
+                    {/* AD SLOT — in-feed native after 3rd card. */}
+                    {i === 2 && <AdSlot placement="blog.post_mid" size="infeed" />}
+                  </Fragment>
+                ))}
               </div>
               <Pagination current={meta.current_page} last={meta.last_page} basePath="/blog" params={{ q: q || undefined }} />
             </div>

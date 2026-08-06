@@ -11,6 +11,7 @@ import { BlogCard } from '@/components/blog/BlogCard';
 import { SocialRow } from '@/components/ui/SocialRow';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
+import { AdSlot } from '@/components/ads/AdSlot';
 import { apiFromServer, ApiError } from '@/lib/api';
 import { getSessionUser } from '@/lib/session';
 import type { Blog } from '@/types/api';
@@ -79,6 +80,10 @@ export default async function BlogSingle({ params }: { params: Params }) {
             dangerouslySetInnerHTML={{ __html: blog.description }}
           />
 
+          {/* AD SLOT — wide inline, post-content. Catches the engaged reader
+              between the article and the share/author/related blocks. */}
+          <AdSlot placement={`blog.${blog.id}.content_inline`} size="wide" />
+
           <div className="mt-10 border-t border-line pt-6">
             <p className="mb-3 text-sm font-medium text-ink">Share this post</p>
             <SocialRow socials={{
@@ -104,12 +109,19 @@ export default async function BlogSingle({ params }: { params: Params }) {
         </article>
 
         {related.length > 0 && (
-          <section className="mx-auto mt-16 max-w-6xl">
-            <h2 className="mb-6 text-2xl font-bold text-ink">Related posts</h2>
-            <div className="grid gap-6 md:grid-cols-3">
-              {related.map((r) => <BlogCard key={r.id} blog={r} />)}
+          <>
+            {/* AD SLOT — large (970×250), pre-related. Catches the bounce
+                before the reader leaves the article. */}
+            <div className="mx-auto mt-16 max-w-6xl">
+              <AdSlot placement={`blog.${blog.id}.related_before`} size="large" />
             </div>
-          </section>
+            <section className="mx-auto mt-16 max-w-6xl">
+              <h2 className="mb-6 text-2xl font-bold text-ink">Related posts</h2>
+              <div className="grid gap-6 md:grid-cols-3">
+                {related.map((r) => <BlogCard key={r.id} blog={r} />)}
+              </div>
+            </section>
+          </>
         )}
       </main>
     </>
