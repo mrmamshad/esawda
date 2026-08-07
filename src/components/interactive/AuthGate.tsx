@@ -1,9 +1,14 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { LoginPopup } from './LoginPopup';
-import { GoogleOneTapCard } from './GoogleOneTapCard';
+import dynamic from 'next/dynamic';
 import { api } from '@/lib/api';
+
+// Lazy-load the popup + Google one-tap card — they're only needed on the rare
+// action that actually triggers login, not on every route paint. Keeping them
+// out of the AuthGate chunk trims JS from all 35 routes that host the gate.
+const LoginPopup = dynamic(() => import('./LoginPopup').then((m) => m.LoginPopup), { ssr: false });
+const GoogleOneTapCard = dynamic(() => import('./GoogleOneTapCard').then((m) => m.GoogleOneTapCard), { ssr: false });
 import type { User } from '@/types/api';
 
 /**
