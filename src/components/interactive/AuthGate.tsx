@@ -1,12 +1,13 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { LoginPopup } from './LoginPopup';
 import { GoogleOneTapCard } from './GoogleOneTapCard';
+import { api } from '@/lib/api';
 import type { User } from '@/types/api';
 
 /**
- * App-wide auth gate. Wrap the tree in <AuthGate initialUser={...}> and any
+ * App-wide auth gate. Wrap the tree in <AuthGate> and any
  * client component can call `useAuthGate()` to:
  *
  *   - open the Bikroy-style login popup (`requireLogin(reason)`)
@@ -15,6 +16,9 @@ import type { User } from '@/types/api';
  *
  * The popup shows if the user is not signed in when `requireLogin` is called.
  * If they *are* signed in, the wrapped action fires immediately.
+ *
+ * Auth state is resolved lazily, client-side, on mount — never blocking
+ * first paint with a server `/auth/me` round-trip.
  */
 type Ctx = {
   user:         User | null;
@@ -30,11 +34,19 @@ export function useAuthGate(): Ctx {
   return ctx;
 }
 
-export function AuthGate({
-  children, initialUser = null,
-}: { children: ReactNode; initialUser?: User | null }) {
-  const [user,   setUser]   = useState<User | null>(initialUser);
+export function AuthGate({ children }: { children: ReactNode }) {
+  const [user,   setUser]   = useState<User | null>(null);
   const [popup,  setPopup]  = useState<{ open: boolean; reason?: string; after?: () => void }>({ open: false });
+
+  // Non-blocking: resolve the session after first paint. The HttpOnly token
+  // cookie authenticates the request; a 401 simply means "guest".
+  useEffect(() => {
+    let alive = true;
+    api<{ user: User | null }>('/auth/me')
+      .then((res) => { if (alive && res.data?.user) setUser(res.data.user); })
+      .catch(() => { /* guest — leave user null */ });
+    return () => { alive = false; };
+  }, []);
 
   const requireLogin = useCallback((reason?: string, onAuthed?: () => void) => {
     if (user) { onAuthed?.(); return; }

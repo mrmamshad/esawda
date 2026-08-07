@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { env } from '@/lib/env';
-import { getSessionUser } from '@/lib/session';
 import { AuthGate } from '@/components/interactive/AuthGate';
 import { SmoothScroll } from '@/components/interactive/SmoothScroll';
 import { ThemeProvider } from '@/components/interactive/ThemeProvider';
@@ -47,16 +46,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // attributes such as `cz-shortcut-listen="true"` on those elements before
   // React hydrates. We still get real hydration warnings from descendants.
   //
-  // Preload the user server-side so the Bikroy-style login popup (and the
-  // Google "Continue as …" card) know whether a session already exists on
-  // first paint — avoids a flash of the popup for signed-in users.
-  const user = await getSessionUser();
+  // Auth state is intentionally NOT preloaded server-side: reading the token
+  // cookie here forced every route dynamic and blocked first paint on an
+  // uncached `/auth/me` round-trip. AuthGate resolves the session itself,
+  // client-side + lazily.
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body className="min-h-screen antialiased" suppressHydrationWarning>
         <ThemeProvider>
           <SmoothScroll />
-          <AuthGate initialUser={user}>{children}</AuthGate>
+          <AuthGate>{children}</AuthGate>
           <Toaster
             richColors
             position="bottom-right"

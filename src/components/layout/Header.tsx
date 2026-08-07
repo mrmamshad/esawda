@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useAuthGate } from '@/components/interactive/AuthGate';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { Plus } from 'lucide-react';
@@ -40,12 +41,18 @@ const NAV: NavItem[] = [
 
 export function Header({
   variant = 'default',
-  user,
+  user: userProp,
   showSearch = false,
   className,
 }: { variant?: 'default' | 'onDark' | 'compact'; user?: User | null; showSearch?: boolean; className?: string }) {
   const onDark = variant === 'onDark';
   const compact = variant === 'compact';
+
+  // Server pages may pass `user` explicitly (their own auth fetch). When they
+  // don't, fall back to the client-side AuthGate session, so public pages
+  // (e.g. the homepage) no longer need a blocking server /auth/me call.
+  const { user: gateUser } = useAuthGate();
+  const user = userProp ?? gateUser;
 
   // Small scroll cue: after user scrolls a touch we drop a soft shadow on
   // the header background so it lifts off the page when content flows

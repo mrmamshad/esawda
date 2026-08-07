@@ -11,9 +11,7 @@ import { BlogCard } from '@/components/blog/BlogCard';
 import { TestimonialCard } from '@/components/ui/TestimonialCard';
 import { PlanCard } from '@/components/membership/PlanCard';
 import { AdSlot } from '@/components/ads/AdSlot';
-import { apiFromServer, ApiError } from '@/lib/api';
-import { getSiteSettings } from '@/lib/settings';
-import { getSessionUser } from '@/lib/session';
+import { api, ApiError } from '@/lib/api';
 import type { Ad, Blog, Category, Plan, Testimonial } from '@/types/api';
 
 export const metadata: Metadata = {
@@ -29,29 +27,34 @@ async function safe<T>(p: Promise<T>, fb: T): Promise<T> {
 }
 
 export default async function HomePage() {
-  const user     = await getSessionUser();
-  const settings = await getSiteSettings();
+  // All homepage data is public, so we fetch via the cookie-free `api()`
+  // helper (NOT `apiFromServer`, which reads cookies() and forces this route
+  // dynamic, defeating ISR). Auth state resolves client-side in AuthGate and
+  // Header falls back to it. Settings join the parallel fan-out so nothing
+  // is awaited serially before first HTML.
+  const [settings, cats, featured, latest, brandNew, used, plans, testimonials, blogs] = await Promise.all([
+    api<{ settings: Record<string, string> }>('/settings', { revalidate: 300, tags: ['settings'] }),
+    safe(api<Category[]>('/categories?with_counts=true', { revalidate: 300 }),                                  { data: [] as Category[] }),
+    safe(api<Ad[]>('/ads/featured?per_page=6', { revalidate: 120 }),                                            { data: [] as Ad[] }),
+    safe(api<Ad[]>('/ads?per_page=8&sort=-created_at', { revalidate: 120 }),                                    { data: [] as Ad[] }),
+    safe(api<Ad[]>('/ads?per_page=8&sort=-created_at&filter[condition]=new', { revalidate: 120 }),              { data: [] as Ad[] }),
+    safe(api<Ad[]>('/ads?per_page=8&sort=-created_at&filter[condition]=used', { revalidate: 120 }),             { data: [] as Ad[] }),
+    safe(api<Plan[]>('/plans', { revalidate: 300 }),                                                            { data: [] as Plan[] }),
+    safe(api<Testimonial[]>('/testimonials?limit=3', { revalidate: 600 }),                                      { data: [] as Testimonial[] }),
+    safe(api<Blog[]>('/blogs?per_page=3', { revalidate: 300 }),                                                 { data: [] as Blog[] }),
+  ]);
+
   // Prefer the human "site_name" (short brand) over the SEO "site_title".
-  const siteName    = (settings.site_name as string) || 'eSawda';
+  const siteName   = ((settings.data?.settings ?? {}) as Record<string, string>).site_name || 'eSawda';
   // `home_banner` from backend may be either a bare filename (legacy) or a
   // full URL if the admin uploaded via the new pipeline. Resolve both.
-  const rawBanner   = settings.home_banner as string | undefined;
-  const heroBgUrl   = rawBanner
-    ? (/^https?:\/\//i.test(rawBanner)
-        ? rawBanner
+  const rawBanner  = (settings.data?.settings ?? {}) as Record<string, string> | undefined;
+  const bannerVal  = rawBanner?.home_banner as string | undefined;
+  const heroBgUrl  = bannerVal
+    ? (/^https?:\/\//i.test(bannerVal)
+        ? bannerVal
         : `${process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/v1\/?$/, '')}/uploads/hero/hero-bg.jpg`)
     : undefined;
-
-  const [cats, featured, latest, brandNew, used, plans, testimonials, blogs] = await Promise.all([
-    safe(apiFromServer<Category[]>('/categories?with_counts=true'),                              { data: [] as Category[] }),
-    safe(apiFromServer<Ad[]>       ('/ads/featured?per_page=6'),                                 { data: [] as Ad[] }),
-    safe(apiFromServer<Ad[]>       ('/ads?per_page=8&sort=-created_at'),                         { data: [] as Ad[] }),
-    safe(apiFromServer<Ad[]>       ('/ads?per_page=8&sort=-created_at&filter[condition]=new'),   { data: [] as Ad[] }),
-    safe(apiFromServer<Ad[]>       ('/ads?per_page=8&sort=-created_at&filter[condition]=used'),  { data: [] as Ad[] }),
-    safe(apiFromServer<Plan[]>     ('/plans'),                                                    { data: [] as Plan[] }),
-    safe(apiFromServer<Testimonial[]>('/testimonials?limit=3'),                                   { data: [] as Testimonial[] }),
-    safe(apiFromServer<Blog[]>     ('/blogs?per_page=3'),                                         { data: [] as Blog[] }),
-  ]);
 
   const activePlans = ((plans.data ?? []) as Plan[]).filter((p) => p.active !== false).slice(0, 3);
 
@@ -63,7 +66,7 @@ export default async function HomePage() {
         gracefully.
       */}
       {/* Header is always light glass on the cream Eris hero — no scroll swap needed. */}
-      <Header variant="default" user={user ?? undefined} />
+      <Header variant="default" />
       <HomeHero siteName={siteName} bgImageUrl={heroBgUrl} />
 
       <main className="bg-bg">
