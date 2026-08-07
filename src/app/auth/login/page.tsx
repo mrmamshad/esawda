@@ -1,12 +1,13 @@
 import { Suspense } from 'react';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
 import { PageSurface } from '@/components/layout/PageSurface';
-import { LoginFormClient } from './LoginFormClient';
+import { RoleLoginForm } from '@/components/auth/RoleLoginForm';
 
 /**
- * Sign-in screen. The interactive form lives in a client component because it
- * reads `useSearchParams()` for ?redirect=. Keeping this page as a server
- * wrapper lets Next prerender it safely with a Suspense boundary.
+ * Sign-in screen. Uses the shared RoleLoginForm (buyer variant) — the same
+ * component that powers /shop/login and /admin/login — so there is a single
+ * login implementation. Wrapped in Suspense because RoleLoginForm reads
+ * useSearchParams() for ?redirect=.
  */
 export default function LoginPage() {
   return (
@@ -15,7 +16,7 @@ export default function LoginPage() {
       <HeaderSpacer />
       <div className="grid place-items-center px-6 py-16">
         <Suspense fallback={null}>
-          <LoginFormClient />
+          <RoleLoginForm role="buyer" />
         </Suspense>
       </div>
     </PageSurface>
