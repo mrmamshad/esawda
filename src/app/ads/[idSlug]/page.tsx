@@ -28,6 +28,19 @@ import type { Ad, AdDetail } from '@/types/api';
  */
 export const revalidate = 60;
 
+/** Serialize JSON-LD safely — a `</script>` or `<!--` inside user-controlled
+ *  title/description would otherwise break out of the <script> block. */
+function safeJsonLd(data: unknown): string {
+  // A literal `</script>` or `<!--` inside user-controlled title/description
+  // would otherwise break out of the <script> block early.
+  return JSON.stringify(data)
+    .split('<').join('\\u003c')
+    .split('>').join('\\u003e')
+    .split('&').join('\\u0026')
+    .split(' ').join('\\u2028')
+    .split(' ').join('\\u2029');
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ idSlug: string }> }): Promise<Metadata> {
   const { idSlug } = await params;
   try {
@@ -79,7 +92,7 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
   return (
     <ToastProvider>
       <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <Header variant="default" />
       <HeaderSpacer />
       <ScrollToTopOnMount />
