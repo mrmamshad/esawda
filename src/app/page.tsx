@@ -1,19 +1,15 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Fragment } from 'react';
 import type { Route } from 'next';
 import { ArrowUpRight } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { HomeHero } from '@/components/home/HomeHero';
+import { HomeSections } from '@/components/home/HomeSections';
 import { SectionHeader } from '@/components/home/SectionHeader';
-import { CategoryConditionGrid } from '@/components/home/CategoryConditionGrid';
-import { ListingCard } from '@/components/listing/ListingCard';
 import { BlogCard } from '@/components/blog/BlogCard';
 import { TestimonialCard } from '@/components/ui/TestimonialCard';
 import { PlanCard } from '@/components/membership/PlanCard';
-import { Button } from '@/components/ui/Button';
-import { EmptyState } from '@/components/ui/EmptyState';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { apiFromServer, ApiError } from '@/lib/api';
 import { getSiteSettings } from '@/lib/settings';
@@ -30,11 +26,6 @@ export const revalidate = 120;
 
 async function safe<T>(p: Promise<T>, fb: T): Promise<T> {
   return p.catch((e) => { if (e instanceof ApiError) return fb; throw e; });
-}
-
-/** Strip demo/test seed ads (Playwright, "Test Ad", etc.) from public grids. */
-function stripTestAds<T extends { title?: string | null }>(ads: T[]): T[] {
-  return ads.filter((a) => !/playwright|test\s*ad/i.test(a.title ?? ''));
 }
 
 export default async function HomePage() {
@@ -81,131 +72,22 @@ export default async function HomePage() {
             label above a chunky navy heading, muted body, and (optionally)
             a ghost "See all" pill on the right. This is the Eris cadence. */}
 
-        {/* ── Popular categories — cream canvas, tilted card grid ── */}
-        <section className="reveal container-page py-24">
-          <SectionHeader
-            eyebrow="Browse by category"
-            title={<>Find exactly what you need, <span className="text-brand-700">faster.</span></>}
-            description="Twelve most-loved categories, ranked by weekly buyer activity."
-            actionLabel="View all"
-            actionHref={'/ads' as Route}
-          />
-          {cats.data.length === 0 ? (
-            <EmptyState title="No categories yet" description="Categories will appear once seeded." />
-          ) : (
-            <CategoryConditionGrid
-              categories={(cats.data as Category[])
-                .filter((c) => !/playwright|test/i.test(c.name))
-                .slice(0, 12)}
-            />
-          )}
-        </section>
-
-        {/* ═══ AD SLOT #1 — large (970×250), after categories ═══
-            Sits between the categories grid and the Sponsored section.
-            User has expressed browse intent — higher CPM than hero-under. */}
-        <div className="container-page pb-8">
+        {/* ═══ AD SLOT #1 — large (970×250), directly under hero ═══
+            First slot on the page, sits between hero and the toggle. */}
+        <div className="container-page pb-8 pt-10">
           <AdSlot placement="home.after_categories" size="large" />
         </div>
 
-        {/* ── Sponsored products — classic white block (was brand-tinted) ── */}
-        {featured.data.length > 0 && (
-          <section className="reveal relative overflow-hidden bg-white py-24">
-
-            <div className="container-page relative">
-              <div className="flex flex-wrap items-end justify-between gap-4">
-                <div>
-                  <p className="inline-flex items-center gap-2 text-body-sm font-semibold uppercase tracking-[0.2em] text-brand-700">
-                    <span className="inline-block h-1.5 w-6 rounded-full bg-brand-700" />
-                    Sponsored
-                  </p>
-                  <h2 className="mt-3 max-w-xl text-[40px] leading-[1.05] font-bold tracking-[-0.02em] text-ink md:text-[48px]">
-                    Sponsored <span className="text-brand-700">products.</span>
-                  </h2>
-                  <p className="mt-3 max-w-lg text-body-md text-ink-muted">
-                    Verified sellers, best-in-class prices, and buyer-safe messaging on every listing.
-                  </p>
-                </div>
-                <Link href={'/ads' as Route} className="contents">
-                  <button className="group inline-flex items-center gap-2 rounded-pill bg-ink pl-5 pr-2 py-2 text-body-md font-semibold text-white transition hover:bg-ink/90">
-                    See all sponsored
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-500 text-white transition-transform group-hover:rotate-45">
-                      <ArrowUpRight size={14} />
-                    </span>
-                  </button>
-                </Link>
-              </div>
-              <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {stripTestAds(featured.data as Ad[]).slice(0, 6).map((ad, i) => (
-                  <Fragment key={ad.id}>
-                    <ListingCard ad={ad} variant="featured" />
-                    {/* ═══ AD SLOT #2 — in-feed native, after 3rd sponsored card ═══
-                        Native blend, highest CTR, mid CPM. Slot only renders if we
-                        actually have ≥3 featured cards so the grid doesn't break. */}
-                    {i === 2 && <AdSlot placement="home.sponsored_infeed" size="infeed" />}
-                  </Fragment>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ── Latest ads — cream canvas ── */}
-        <section className="reveal container-page py-24">
-          <SectionHeader
-            eyebrow="Just posted"
-            title={<>Fresh from sellers, <span className="text-brand-700">in the last 24h.</span></>}
-            description="Newly listed items across every category — updated every few minutes."
-            actionLabel="Browse all"
-            actionHref={'/ads' as Route}
-          />
-          {latest.data.length === 0 ? (
-            <div className="mt-12">
-              <EmptyState title="No ads yet" description="Be the first to post an ad." action={
-                <Link href={'/shop/ads/new' as Route} className="contents"><Button variant="filled">Post an ad</Button></Link>
-              } />
-            </div>
-          ) : (
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {stripTestAds(latest.data as Ad[]).slice(0, 8).map((ad) => <ListingCard key={ad.id} ad={ad} variant="featured" />)}
-            </div>
-          )}
-        </section>
-
-        {/* ── Brand New arrivals — classic white section ── */}
-        {brandNew.data.length > 0 && (
-          <section className="reveal bg-white py-24">
-            <div className="container-page">
-              <SectionHeader
-                eyebrow="Brand new"
-                title={<>Never used, still <span className="text-brand-700">in the box.</span></>}
-                description="Factory-fresh listings from verified retailers and everyday sellers."
-                actionLabel="See all new"
-                actionHref={'/ads?condition=new' as Route}
-              />
-              <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                {stripTestAds(brandNew.data as Ad[]).slice(0, 8).map((ad) => <ListingCard key={ad.id} ad={ad} variant="featured" />)}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ── Used items — cream, green pill accent ── */}
-        {used.data.length > 0 && (
-          <section className="reveal container-page py-24">
-            <SectionHeader
-              eyebrow="Pre-owned"
-              title={<>Great condition, <span className="text-brand-700">great value.</span></>}
-              description="Verified second-hand deals — save an average of 42% versus buying new."
-              actionLabel="See all used"
-              actionHref={'/ads?condition=used' as Route}
-              statPill={{ label: '42% avg savings', tone: 'success' }}
-            />
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {stripTestAds(used.data as Ad[]).slice(0, 8).map((ad) => <ListingCard key={ad.id} ad={ad} variant="featured" />)}
-            </div>
-          </section>
-        )}
+        {/* ── Condition-toggleable sections (categories → sponsored →
+            latest → brand-new/pre-owned) live in a client component so one
+            Used/New pill drives them all. ── */}
+        <HomeSections
+          cats={cats.data as Category[]}
+          featured={featured.data as Ad[]}
+          latest={latest.data as Ad[]}
+          brandNew={brandNew.data as Ad[]}
+          used={used.data as Ad[]}
+        />
 
         {/* ═══ AD SLOT — wide banner, after Pre-owned section ═══
             Sits between the editorial pre-owned grid and the membership upsell. */}

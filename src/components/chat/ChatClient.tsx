@@ -19,31 +19,47 @@ export function ChatClient({ userId }: { userId: number }) {
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
+  const loadCtrl = useRef<AbortController | null>(null);
 
   const load = useCallback(async () => {
+    // Abort the previous in-flight poll so a slow response can't race or
+    // mutate state after a newer one (or after unmount).
+    loadCtrl.current?.abort();
+    const ctrl = new AbortController();
+    loadCtrl.current = ctrl;
     try {
       const res = await api<Message[]>(`/me/threads/${userId}`, { token: readToken(), cache: 'no-store' });
-      setMessages((res.data ?? []) as Message[]);
-      setError(null);
+      if (!ctrl.signal.aborted) {
+        setMessages((res.data ?? []) as Message[]);
+        setError(null);
+      }
     } catch (e) {
+      if (ctrl.signal.aborted) return;
       setError(e instanceof ApiError ? e.message : 'Could not load messages.');
     } finally {
-      setLoading(false);
+      if (!ctrl.signal.aborted) setLoading(false);
     }
   }, [userId]);
 
   useEffect(() => {
     setLoading(true);
     void load();
-    const t = setInterval(load, 8000);
-    return () => clearInterval(t);
+    // Pause polling while the tab is hidden; resume on visibility change.
+    const t = setInterval(() => { if (document.visibilityState === 'visible') void load(); }, 8000);
+    const onVisible = () => { if (document.visibilityState === 'visible') void load(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      clearInterval(t);
+      document.removeEventListener('visibilitychange', onVisible);
+      loadCtrl.current?.abort();
+    };
   }, [load]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages.length]);
 
-  const onSend = async (body: string) => {
+  const onSend = useCallback(async (body: string) => {
     try {
       // Backend `SendMessageRequest` expects `to` (recipient user id) — not `to_id`.
       await api('/messages', { method: 'POST', body: { to: userId, body }, token: readToken() });
@@ -51,7 +67,7 @@ export function ChatClient({ userId }: { userId: number }) {
     } catch (e) {
       setError(e instanceof ApiError ? e.message : 'Failed to send.');
     }
-  };
+  }, [userId, load]);
 
   return (
     <>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { api, ApiError } from '@/lib/api';
+import { saveToken } from '@/lib/auth';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
 import { PageSurface } from '@/components/layout/PageSurface';
 import { Button } from '@/components/ui/Button';
@@ -31,7 +32,7 @@ export default function SignupPage() {
           password: form.password, password_confirmation: form.confirm,
         },
       });
-      document.cookie = `eshauda_token=${data.token}; path=/; max-age=2592000; samesite=lax`;
+      saveToken(data.token);
       router.push('/' as Route);
       router.refresh();
     } catch (err) {

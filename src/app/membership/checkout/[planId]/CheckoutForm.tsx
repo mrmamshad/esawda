@@ -30,7 +30,23 @@ export function CheckoutForm({ planId, cadence }: { planId: number; cadence: str
         setBusy(false);
         return;
       }
-      window.location.href = data.gateway_url;
+      // Open redirect guard: only allow same-origin relative URLs or known
+      // payment-gateway hosts. A backend that returns a hostile location
+      // must not be able to bounce the buyer to an attacker site.
+      const url = data.gateway_url;
+      const allowed = (u: string) => {
+        if (u.startsWith('/')) return true;
+        try {
+          const h = new URL(u).hostname;
+          return /(^|\.)(sslcommerz\.com|esawda\.com|eshauda\.com)$/i.test(h);
+        } catch { return false; }
+      };
+      if (!allowed(url)) {
+        notify('danger', 'Payment gateway returned an unsafe redirect URL.');
+        setBusy(false);
+        return;
+      }
+      window.location.href = url;
     } catch (e) {
       notify('danger', e instanceof ApiError ? e.message : 'Payment failed to start.');
       setBusy(false);

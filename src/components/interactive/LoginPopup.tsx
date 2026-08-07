@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { X } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
+import { saveToken } from '@/lib/auth';
 import type { User } from '@/types/api';
 
 /**
@@ -70,7 +71,7 @@ export function LoginPopup({ open, onClose, onSuccess, reason }: LoginPopupProps
   const t = STRINGS[lang];
 
   const handleSuccess = (user: User, token: string) => {
-    document.cookie = `eshauda_token=${token}; path=/; max-age=2592000; samesite=lax`;
+    saveToken(token);
     onSuccess?.(user, token);
     onClose();
   };

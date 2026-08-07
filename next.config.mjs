@@ -21,5 +21,44 @@ const nextConfig = {
   },
   poweredByHeader: false,
   compress: true,
+
+  async headers() {
+    const securityHeaders = [
+      // Clickjacking / framing protection.
+      { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+      // MIME-sniffing off — browsers honour the declared content type.
+      { key: 'X-Content-Type-Options', value: 'nosniff' },
+      // Referrer stays same-origin, downgrades to origin cross-origin.
+      { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+      // No camera/mic/geolocation for the whole site.
+      { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+      // Mitigates stored XSS (see src/lib/sanitize.ts). Next inlines its own
+      // bootstrap scripts, so script-src keeps 'unsafe-inline'/'unsafe-eval'
+      // for the app shell; Google OAuth hosts are allow-listed for social login.
+      {
+        key: 'Content-Security-Policy',
+        value: [
+          "default-src 'self'",
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://apis.google.com",
+          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+          "img-src 'self' data: blob: https: http://127.0.0.1:8100 http://localhost:8100",
+          "font-src 'self' data: https://fonts.gstatic.com",
+          "connect-src 'self' https: http://127.0.0.1:8100 http://localhost:8100 https://api.esawda.com https://*.eshauda.com",
+          "frame-src 'self' https://accounts.google.com https://apis.google.com",
+          "object-src 'none'",
+          "base-uri 'self'",
+          "form-action 'self'",
+        ].join('; '),
+      },
+    ];
+
+    // HSTS only when served over HTTPS (production). On plain-HTTP dev this
+    // would force browsers into an upgrade loop for localhost.
+    if (process.env.NODE_ENV === 'production') {
+      securityHeaders.push({ key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' });
+    }
+
+    return [{ source: '/:path*', headers: securityHeaders }];
+  },
 };
 export default nextConfig;

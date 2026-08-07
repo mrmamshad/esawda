@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
 import { apiFromServer, ApiError } from '@/lib/api';
+import { sanitizeHtml } from '@/lib/sanitize';
 import { getSessionUser } from '@/lib/session';
 import type { Page } from '@/types/api';
 
@@ -43,7 +44,7 @@ export default async function CmsPage({ params }: { params: Params }) {
                        prose-a:text-brand-700 prose-a:no-underline hover:prose-a:underline
                        prose-blockquote:border-l-4 prose-blockquote:border-brand-500 prose-blockquote:pl-4 prose-blockquote:italic
                        prose-img:rounded-card"
-            dangerouslySetInnerHTML={{ __html: page.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(page.content ?? '') }}
           />
         </article>
       </main>

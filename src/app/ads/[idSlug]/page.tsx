@@ -14,6 +14,7 @@ import { ReviewsSection } from '@/components/interactive/ReviewsSection';
 import { ToastProvider } from '@/components/ui/Toast';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { env } from '@/lib/env';
+import { sanitizeHtml } from '@/lib/sanitize';
 import type { Ad, AdDetail } from '@/types/api';
 
 /**
@@ -26,6 +27,19 @@ import type { Ad, AdDetail } from '@/types/api';
  *   - ISR 60s so price/availability changes propagate quickly
  */
 export const revalidate = 60;
+
+/** Serialize JSON-LD safely — a `</script>` or `<!--` inside user-controlled
+ *  title/description would otherwise break out of the <script> block. */
+function safeJsonLd(data: unknown): string {
+  // A literal `</script>` or `<!--` inside user-controlled title/description
+  // would otherwise break out of the <script> block early.
+  return JSON.stringify(data)
+    .split('<').join('\\u003c')
+    .split('>').join('\\u003e')
+    .split('&').join('\\u0026')
+    .split(' ').join('\\u2028')
+    .split(' ').join('\\u2029');
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ idSlug: string }> }): Promise<Metadata> {
   const { idSlug } = await params;
@@ -78,7 +92,7 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
   return (
     <ToastProvider>
       <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <Header variant="default" />
       <HeaderSpacer />
       <ScrollToTopOnMount />
@@ -110,7 +124,7 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
               <section className="surface-card p-6">
                 <h2 className="mb-3 text-base font-semibold text-ink">Description</h2>
                 <div className="prose prose-sm max-w-none prose-headings:text-ink prose-a:text-brand-700"
-                     dangerouslySetInnerHTML={{ __html: ad.description }} />
+                     dangerouslySetInnerHTML={{ __html: sanitizeHtml(ad.description ?? '') }} />
               </section>
             )}
 
