@@ -125,10 +125,10 @@ export function HomeHero({ siteName = 'eSawda' }: HomeHeroProps = {}) {
           style={{ height: 400 }}
         >
           <Image
-            src="/postar-01.png"
+            src="/postar-01.webp"
             alt="eSawda mobile app preview"
-            width={1100}
-            height={1100}
+            width={1600}
+            height={1600}
             priority
             sizes="(max-width: 1024px) 100vw, 780px"
             className="pointer-events-none absolute z-0 object-contain"
