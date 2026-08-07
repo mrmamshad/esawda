@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { CategoryCard } from './CategoryCard';
 import type { Category } from '@/types/api';
 
-type Condition = 'used' | 'new';
+export type Condition = 'used' | 'new';
 
 /**
  * Demo counts — deterministic per category id so SSR and CSR agree and
@@ -18,29 +17,13 @@ function demoCounts(id: number): { used: number; new: number } {
 }
 
 /**
- * Categories grid with a Used/New pill toggle. Default = Used.
- * Toggle state lives here so every card flips in sync.
+ * Categories grid showing per-category counts for one condition.
+ * The Used/New toggle lives on the page (HomeSections) so every
+ * section flips in sync; this component is purely presentational.
  */
-export function CategoryConditionGrid({ categories }: { categories: Category[] }) {
-  const [condition, setCondition] = useState<Condition>('used');
-
+export function CategoryConditionGrid({ categories, condition }: { categories: Category[]; condition: Condition }) {
   return (
     <div>
-      <div className="mt-2 mb-6 flex justify-end">
-        <div
-          role="tablist"
-          aria-label="Filter categories by condition"
-          className="inline-flex items-center rounded-full border border-line bg-white p-1 shadow-sm"
-        >
-          <ToggleBtn active={condition === 'used'} onClick={() => setCondition('used')}>
-            Used
-          </ToggleBtn>
-          <ToggleBtn active={condition === 'new'} onClick={() => setCondition('new')}>
-            New
-          </ToggleBtn>
-        </div>
-      </div>
-
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         {categories.map((c) => {
           const counts = demoCounts(c.id);
@@ -56,26 +39,5 @@ export function CategoryConditionGrid({ categories }: { categories: Category[] }
         })}
       </div>
     </div>
-  );
-}
-
-function ToggleBtn({
-  active, onClick, children,
-}: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={active}
-      onClick={onClick}
-      className={
-        'rounded-full px-4 py-1.5 text-sm font-semibold transition ' +
-        (active
-          ? 'bg-brand-700 text-white shadow-sm'
-          : 'text-ink-muted hover:text-ink')
-      }
-    >
-      {children}
-    </button>
   );
 }

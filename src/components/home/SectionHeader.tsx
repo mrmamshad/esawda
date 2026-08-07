@@ -38,7 +38,7 @@ export function SectionHeader({
     return (
       <div className="mx-auto max-w-2xl text-center">
         <Eyebrow>{eyebrow}</Eyebrow>
-        <h2 className="mt-3 text-[40px] leading-[1.05] font-bold tracking-[-0.02em] text-ink md:text-[48px]">{title}</h2>
+        <h2 className="mt-3 whitespace-nowrap text-[40px] leading-[1.05] font-bold tracking-[-0.02em] text-ink md:text-[48px]">{title}</h2>
         {description && <p className="mt-4 text-body-md text-ink-muted">{description}</p>}
       </div>
     );
@@ -46,7 +46,7 @@ export function SectionHeader({
 
   return (
     <div className="flex flex-wrap items-end justify-between gap-6">
-      <div className="max-w-xl">
+      <div className="min-w-0">
         <div className="flex items-center gap-3">
           <Eyebrow>{eyebrow}</Eyebrow>
           {statPill && (
@@ -62,7 +62,7 @@ export function SectionHeader({
             </span>
           )}
         </div>
-        <h2 className="mt-3 text-[40px] leading-[1.05] font-bold tracking-[-0.02em] text-ink md:text-[48px]">
+        <h2 className="mt-3 whitespace-nowrap text-[40px] leading-[1.05] font-bold tracking-[-0.02em] text-ink md:text-[48px]">
           {title}
         </h2>
         {description && (
