@@ -3,6 +3,7 @@ import { HelpCircle, ChevronDown } from 'lucide-react';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { getSessionUser } from '@/lib/session';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 export const metadata: Metadata = {
   title: 'FAQ',
@@ -123,7 +124,7 @@ export default async function FaqPage() {
                   <div className="px-5 pb-5 text-[15px] leading-[1.6] text-ink-muted">
                     <div
                       className="prose prose-sm max-w-none prose-a:text-brand-700"
-                      dangerouslySetInnerHTML={{ __html: f.a }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(f.a) }}
                     />
                   </div>
                 </details>

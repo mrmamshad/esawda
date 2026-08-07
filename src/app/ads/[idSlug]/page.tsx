@@ -14,6 +14,7 @@ import { ReviewsSection } from '@/components/interactive/ReviewsSection';
 import { ToastProvider } from '@/components/ui/Toast';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { env } from '@/lib/env';
+import { sanitizeHtml } from '@/lib/sanitize';
 import type { Ad, AdDetail } from '@/types/api';
 
 /**
@@ -110,7 +111,7 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
               <section className="surface-card p-6">
                 <h2 className="mb-3 text-base font-semibold text-ink">Description</h2>
                 <div className="prose prose-sm max-w-none prose-headings:text-ink prose-a:text-brand-700"
-                     dangerouslySetInnerHTML={{ __html: ad.description }} />
+                     dangerouslySetInnerHTML={{ __html: sanitizeHtml(ad.description ?? '') }} />
               </section>
             )}
 

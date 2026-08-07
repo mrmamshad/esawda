@@ -13,6 +13,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { apiFromServer, ApiError } from '@/lib/api';
+import { sanitizeHtml } from '@/lib/sanitize';
 import { getSessionUser } from '@/lib/session';
 import type { Blog } from '@/types/api';
 
@@ -77,7 +78,7 @@ export default async function BlogSingle({ params }: { params: Params }) {
                        prose-blockquote:border-l-4 prose-blockquote:border-brand-500 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-ink-muted
                        prose-code:rounded prose-code:bg-surface-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm
                        prose-img:rounded-card"
-            dangerouslySetInnerHTML={{ __html: blog.description }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(blog.description ?? '') }}
           />
 
           {/* AD SLOT — wide inline, post-content. Catches the engaged reader
