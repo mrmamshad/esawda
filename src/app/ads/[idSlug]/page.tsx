@@ -15,7 +15,7 @@ import { ToastProvider } from '@/components/ui/Toast';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { env } from '@/lib/env';
 import { sanitizeHtml } from '@/lib/sanitize';
-import type { Ad, AdDetail } from '@/types/api';
+import type { Ad, AdDetail, Review } from '@/types/api';
 
 /**
  * Ad Detail — reference frame #2.
@@ -63,9 +63,10 @@ export async function generateMetadata({ params }: { params: Promise<{ idSlug: s
 
 export default async function AdDetailPage({ params }: { params: Promise<{ idSlug: string }> }) {
   const { idSlug } = await params;
-  const [detail, similar] = await Promise.all([
+  const [detail, similar, reviews] = await Promise.all([
     api<AdDetail>(`/ads/${idSlug}`,           { revalidate: 60 }).catch(() => null),
     api<Ad[]>   (`/ads/${idSlug.split('-')[0]}/similar?limit=3`, { revalidate: 300 }).catch(() => ({ data: [] as Ad[] })),
+    api<Review[]>   (`/ads/${idSlug.split('-')[0]}/reviews`, { revalidate: 120 }).catch(() => ({ data: [] as Review[] })),
   ]);
   if (!detail) notFound();
   const ad = detail.data;
@@ -128,7 +129,7 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
               </section>
             )}
 
-            <ReviewsSection adId={ad.id} />
+            <ReviewsSection adId={ad.id} initialItems={reviews?.data ?? []} />
 
             {/* AD SLOT — inline wide, post-reviews, pre-related. Re-engages
                 the buyer once they've digested the listing. */}

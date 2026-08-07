@@ -10,12 +10,13 @@ import { api } from '@/lib/api';
 import { readToken } from '@/lib/auth';
 import type { Review } from '@/types/api';
 
-export function ReviewsSection({ adId }: { adId: number }) {
-  const [items, setItems]   = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
+export function ReviewsSection({ adId, initialItems = [] }: { adId: number; initialItems?: Review[] }) {
+  const [items, setItems]   = useState<Review[]>(initialItems);
+  const [loading, setLoading] = useState(false);
   const [authed, setAuthed] = useState(false);
 
   const load = async () => {
+    setLoading(true);
     try {
       const res = await api<Review[]>(`/ads/${adId}/reviews`, { cache: 'no-store' });
       setItems((res.data ?? []) as Review[]);
@@ -23,7 +24,9 @@ export function ReviewsSection({ adId }: { adId: number }) {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { setAuthed(!!readToken()); void load(); }, [adId]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Reviews are fetched server-side and passed in as `initialItems`; the only
+  // client re-fetch happens after a new review is submitted (onSubmitted).
+  useEffect(() => { setAuthed(!!readToken()); }, [adId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <section className="space-y-4">
