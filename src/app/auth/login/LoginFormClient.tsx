@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { api, ApiError } from '@/lib/api';
+import { saveToken } from '@/lib/auth';
 import { Button } from '@/components/ui/Button';
 import type { User } from '@/types/api';
 
@@ -36,7 +37,7 @@ export function LoginFormClient() {
         body: { identifier, password },
       });
 
-      document.cookie = `eshauda_token=${data.token}; path=/; max-age=2592000; samesite=lax`;
+      saveToken(data.token);
 
       // Honour ?redirect=... first (same-origin only), then fall back to
       // the role-specific home. This means a shop owner / admin who

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { LogIn, ShieldCheck, Store } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
+import { saveToken } from '@/lib/auth';
 import { Button } from '@/components/ui/Button';
 import type { User } from '@/types/api';
 
@@ -87,7 +88,7 @@ export function RoleLoginForm({ role }: RoleLoginFormProps) {
         return;
       }
 
-      document.cookie = `eshauda_token=${data.token}; path=/; max-age=2592000; samesite=lax`;
+      saveToken(data.token);
 
       // Honour explicit ?redirect=... first, otherwise land the user on
       // the panel that matches their actual role. This means a

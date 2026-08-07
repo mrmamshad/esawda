@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import type { Route } from 'next';
 import { api, ApiError } from '@/lib/api';
+import { readToken } from '@/lib/auth';
 import { Button } from '@/components/ui/Button';
 import type { Ad, Category } from '@/types/api';
 
@@ -108,7 +109,7 @@ export default function PostAdPage() {
       setBusy(false); return;
     }
 
-    const token = document.cookie.match(/eshauda_token=([^;]+)/)?.[1];
+    const token = readToken();
     if (!token) { router.push('/shop/login?redirect=/shop/ads/new' as Route); return; }
 
     // Multipart body — images travel with the record so the whole listing
