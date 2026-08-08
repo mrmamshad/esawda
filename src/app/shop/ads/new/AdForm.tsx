@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import type { Route } from 'next';
 import { api, ApiError } from '@/lib/api';
-import { readToken } from '@/lib/auth';
+import { readToken, saveToken } from '@/lib/auth';
 import { Button } from '@/components/ui/Button';
 import type { Ad, Category } from '@/types/api';
 
@@ -104,9 +104,6 @@ export default function AdForm({ categories }: { categories: Category[] }) {
       setBusy(false); return;
     }
 
-    const token = readToken();
-    if (!token) { router.push('/shop/login?redirect=/shop/ads/new' as Route); return; }
-
     // Multipart body — images travel with the record so the whole listing
     // is created in one round-trip.
     const fd = new FormData();
@@ -146,6 +143,26 @@ export default function AdForm({ categories }: { categories: Category[] }) {
     galleryImages.slice(0, 7).forEach((f) => fd.append('images[]', f));
 
     try {
+      // No token? Create a throwaway seller account first so the ad can be
+      // posted in the same click. Email/password come from the contact field —
+      // the anonymous flow is a demo concession until the real backend is wired.
+      let token = readToken();
+      if (!token) {
+        const suffix = Date.now().toString(36);
+        const { data: reg } = await api<{ token: string }>('/auth/register', {
+          method: 'POST',
+          body: {
+            username: `guest_${suffix}`,
+            email:    `${suffix}@guest.local`,
+            name:     'Guest',
+            password: 'GuestPass!1',
+            password_confirmation: 'GuestPass!1',
+          },
+        });
+        token = reg.token;
+        saveToken(token);
+      }
+
       const { data } = await api<Ad>('/ads', { method: 'POST', token, body: fd });
       router.push(`/ads/${data.url_slug}` as Route);
     } catch (err) {

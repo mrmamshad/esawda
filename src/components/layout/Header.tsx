@@ -115,7 +115,7 @@ export function Header({
               </Link>
             </>
           ) : (
-            <Link href={'/auth/login' as Route} className="hidden sm:inline-flex">
+            <Link href={'/shop/ads/new' as Route} className="hidden sm:inline-flex">
               <button
                 type="button"
                 className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-[14px] font-semibold text-white transition active:translate-y-[1px] hover:brightness-95"
@@ -124,7 +124,7 @@ export function Header({
                   boxShadow: '0 10px 22px -10px rgba(255,0,63,0.55)',
                 }}
               >
-                Get Started
+                Post an Ad
               </button>
             </Link>
           )}
