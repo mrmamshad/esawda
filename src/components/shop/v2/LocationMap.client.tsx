@@ -24,7 +24,7 @@ export default function LocationMapClient({
 
   return (
     <div
-      className="overflow-hidden rounded-lg border"
+      className="relative z-0 overflow-hidden rounded-lg border"
       style={{ borderColor: 'var(--shp-border)', height }}
     >
       <MapContainer
