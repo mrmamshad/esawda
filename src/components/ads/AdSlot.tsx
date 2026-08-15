@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import type { ReactNode } from 'react';
 
 export type AdSlotSize = 'leaderboard' | 'large' | 'mpu' | 'infeed' | 'wide';
@@ -24,13 +25,20 @@ const SIZE_SPEC: Record<AdSlotSize, { h: string; label: string; tone: 'leaderboa
   wide:        { h: 'h-[160px] md:h-[140px]', label: '970 × 90',     tone: 'wide' },
 };
 
+const SIZE_IMG: Partial<Record<AdSlotSize, { src: string; alt: string }>> = {
+  large:       { src: '/ad-large-970x250.jpg', alt: 'Advertisement banner' },
+  wide:        { src: '/ad-wide-970x90.jpg',    alt: 'Advertisement banner' },
+  mpu:         { src: '/ad-mpu-300x250.jpg',    alt: 'Advertisement banner' },
+  infeed:      { src: '/ad-mpu-300x250.jpg',    alt: 'Advertisement banner' },
+};
+
 export function AdSlot({
   placement,
   size = 'leaderboard',
   className = '',
-  children,
 }: AdSlotProps) {
   const spec = SIZE_SPEC[size];
+  const img = SIZE_IMG[size];
 
   return (
     <aside
@@ -38,26 +46,19 @@ export function AdSlot({
       data-ad-size={size}
       aria-label="Advertisement"
       className={[
-        // dotted dashed border + crosshatched bg to scream "ad goes here"
-        'relative isolate flex w-full items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-ink/20 bg-[repeating-linear-gradient(135deg,rgba(0,0,0,0.025)_0_12px,transparent_12px_24px)]',
+        'relative isolate flex w-full items-center justify-center overflow-hidden rounded-2xl',
         spec.h,
         className,
       ].join(' ')}
     >
-      {/* corner ribbons — top-left + bottom-right so it reads as a reserved box even at a glance */}
-      <span aria-hidden className="pointer-events-none absolute left-0 top-0 h-3 w-3 border-l-2 border-t-2 border-ink/30" />
-      <span aria-hidden className="pointer-events-none absolute right-0 bottom-0 h-3 w-3 border-r-2 border-b-2 border-ink/30" />
-
-      {/* ratio badge — top-left, pinned. Only the size label is shown. */}
-      <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-ink/85 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white">
-        <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand-500" />
-        Ad · {spec.label}
-      </span>
-
-      {children ?? (
-        <p className="px-6 text-center text-body-md font-semibold text-ink/60">
-          Ad will be here
-        </p>
+      {img ? (
+        <Image src={img.src} alt={img.alt} fill sizes="100vw" priority={false} className="object-cover" />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center border-2 border-dashed border-ink/20 bg-[repeating-linear-gradient(135deg,rgba(0,0,0,0.025)_0_12px,transparent_12px_24px)]">
+          <span className="px-6 text-center text-body-md font-semibold text-ink/60">
+            Ad will be here
+          </span>
+        </div>
       )}
     </aside>
   );
