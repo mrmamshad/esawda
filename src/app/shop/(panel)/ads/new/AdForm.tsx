@@ -93,6 +93,7 @@ export default function AdForm({
 }) {
   const router = useRouter();
   const canUseSubscription = hasActivePlan && adsRemaining > 0;
+  const gateLocked = mode === 'shop' && !canUseSubscription;
   // Guests get a free listing quota when their account is created, so start
   // them on the subscription path even though the pre-auth server render
   // reports hasActivePlan=false.
@@ -288,9 +289,23 @@ export default function AdForm({
         the shop panel.
       */}
       <div>
+        {gateLocked && (
+          <div className="mb-6">
+            <SubscriptionGate
+              hasActivePlan={hasActivePlan}
+              adsRemaining={adsRemaining}
+              planName={planName}
+              planExpiresAt={planExpiresAt}
+              subscribeHref={mode === 'shop' ? '/shop/plan' : '/membership'}
+            />
+          </div>
+        )}
         <form
-          onSubmit={submit}
-          className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]"
+          onSubmit={gateLocked ? (e) => e.preventDefault() : submit}
+          className={[
+            'grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]',
+            gateLocked ? 'pointer-events-none select-none opacity-40 blur-[1px]' : '',
+          ].join(' ')}
         >
           {/* ── main column ─────────────────────────────────────────── */}
           <div className="space-y-6">
@@ -627,11 +642,14 @@ function SubscriptionGate({
   adsRemaining,
   planName,
   planExpiresAt,
+  subscribeHref = '/membership',
 }: {
   hasActivePlan: boolean;
   adsRemaining: number;
   planName: string;
   planExpiresAt: string | null;
+  /** Where "Subscribe now" sends the seller (shop panel → /shop/plan) */
+  subscribeHref?: string;
 }) {
   const quotaExhausted = hasActivePlan && adsRemaining <= 0;
   const expiryLabel = planExpiresAt
@@ -688,7 +706,7 @@ function SubscriptionGate({
 
         <div className="flex min-w-[210px] flex-col gap-2 md:items-stretch">
           <Link
-            href={'/membership' as Route}
+            href={subscribeHref as Route}
             className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand-700 px-6 text-sm font-bold text-white shadow-lg shadow-brand-700/20 transition hover:-translate-y-0.5 hover:bg-brand-600"
           >
             <Sparkles size={16} />

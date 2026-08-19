@@ -41,7 +41,8 @@ export default async function SellerPlanPage() {
   const allowance = Math.max(remaining, Number(settings.ads_limit ?? 0));
   const usagePercent = allowance > 0 ? Math.min(100, Math.round((remaining / allowance) * 100)) : 0;
   const active = Boolean(user.plan_active);
-  const currentName = currentPlan?.name || (user.group_id ? String(user.group_id) : 'Starter');
+  const trial = active && !currentPlan;
+  const currentName = currentPlan?.name || (trial ? 'Free Trial' : (user.group_id ? String(user.group_id) : 'Starter'));
 
   return (
     <>
