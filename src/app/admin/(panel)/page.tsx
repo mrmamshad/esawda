@@ -209,8 +209,6 @@ function LatestTransactionsTable({ rows }: { rows: AdminRecentTx[] }) {
   const cols: ColumnV2<AdminRecentTx>[] = [
     { key: 'id',     header: '#',       render: (r) => <span className="font-mono text-[11px]" style={{ color: 'var(--adm-fg-faint)' }}>TX-{r.id}</span> },
     { key: 'name',   header: 'Purpose', render: (r) => <span className="font-medium">{r.product_name || 'Unnamed'}</span> },
-    { key: 'buyer',  header: 'Buyer',   render: (r) => <UserChip user={r.buyer} fallback={`#${r.seller_id}`} /> },
-    { key: 'seller', header: 'Seller',  render: (r) => <UserChip user={r.seller_info} fallback={r.seller_info ? undefined : '—'} /> },
     { key: 'gw',     header: 'Gateway', render: (r) => <span className="capitalize">{r.transaction_gatway}</span> },
     { key: 'amt',    header: 'Amount',  align: 'right', render: (r) => <span className="tabular-nums font-semibold">৳{new Intl.NumberFormat('en-IN').format(r.amount)}</span> },
     { key: 'status', header: 'Status',  align: 'right', render: (r) => <StatusBadge value={r.status} /> },
@@ -225,24 +223,6 @@ function LatestTransactionsTable({ rows }: { rows: AdminRecentTx[] }) {
       emptyTitle="No transactions yet"
       emptyDescription="Successful and pending payments will show up here."
     />
-  );
-}
-
-function UserChip({ user, fallback }: { user?: { id: number; username: string; email: string | null } | null; fallback?: string }) {
-  if (!user) return <span style={{ color: 'var(--adm-fg-faint)' }}>{fallback ?? '—'}</span>;
-  return (
-    <div className="flex items-center gap-2.5">
-      <span
-        className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-[10px] font-semibold text-white"
-        style={{ background: 'linear-gradient(135deg, #FF003F 0%, #4F46E5 100%)' }}
-      >
-        {(user.username || user.email || '?').slice(0, 2).toUpperCase()}
-      </span>
-      <div className="min-w-0">
-        <p className="truncate font-medium">{user.username || 'No username'}</p>
-        {user.email && <p className="truncate text-[11px]" style={{ color: 'var(--adm-fg-faint)' }}>{user.email}</p>}
-      </div>
-    </div>
   );
 }
 
