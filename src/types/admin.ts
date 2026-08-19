@@ -50,6 +50,8 @@ export type AdminRecentTx = {
   transaction_gatway: string;
   product_name: string | null;
   created_at?: string | null;
+  buyer?: { id: number; username: string; email: string | null } | null;
+  seller_info?: { id: number; username: string; email: string | null } | null;
 };
 
 export type DateRangeValue = 'today' | 'week' | 'month' | 'custom';
