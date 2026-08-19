@@ -96,7 +96,6 @@ export function ShopApplyForm({
 
       await api('/me/shop/apply', { method: 'POST', body: fd });
       setDone(true);
-      router.refresh();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not open the shop. Please try again.');
     } finally {
