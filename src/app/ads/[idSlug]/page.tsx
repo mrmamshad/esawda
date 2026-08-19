@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import type { Route } from 'next';
 import { notFound } from 'next/navigation';
 import { Calendar, Tag, Car } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -7,8 +9,10 @@ import { ScrollToTopOnMount } from '@/components/layout/ScrollToTopOnMount';
 import { AdGallery } from '@/components/listing/AdGallery';
 import { ListingCard } from '@/components/listing/ListingCard';
 import { SellerCard } from '@/components/seller/SellerCard';
+import { BuyNowCard } from '@/components/checkout/BuyNowCard';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { PriceTag } from '@/components/ui/PriceTag';
+import { Badge } from '@/components/ui/Badge';
 import { AdActions } from '@/components/interactive/AdActions';
 import { ReviewsSection } from '@/components/interactive/ReviewsSection';
 import { ToastProvider } from '@/components/ui/Toast';
@@ -58,7 +62,7 @@ export async function generateMetadata({ params }: { params: Promise<{ idSlug: s
       },
       twitter: { card: 'summary_large_image', title: ad.title, description: desc, images: img ? [img] : [] },
     };
-  } catch { return { title: 'Ad not found' }; }
+  } catch { return { title: 'Product not found' }; }
 }
 
 export default async function AdDetailPage({ params }: { params: Promise<{ idSlug: string }> }) {
@@ -104,6 +108,14 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
             {/* Title + Price — tighter internal gap on 8pt grid */}
             <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
               <h1 className="max-w-2xl text-2xl md:text-3xl font-bold leading-tight text-ink">{ad.title}</h1>
+              {(ad.paid || ad.featured || ad.urgent) && (
+                <div className="flex flex-wrap gap-2">
+                  {ad.paid && <Badge tone="paid">Paid listing</Badge>}
+                  {ad.featured && <Badge tone="featured">Featured</Badge>}
+                  {ad.urgent && <Badge tone="urgent">Urgent</Badge>}
+                  {ad.highlight && <Badge tone="featured">Highlighted</Badge>}
+                </div>
+              )}
               <PriceTag amount={ad.price} label="Price" size="lg" />
             </div>
 
@@ -117,7 +129,30 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
               </div>
             </div>
 
-            <AdGallery images={ad.images} title={ad.title} />
+            <AdGallery images={ad.images} title={ad.title} className="mx-auto max-w-xl" />
+
+            {ad.bundle_items && ad.bundle_items.length > 0 && (
+              <section className="surface-card p-6">
+                <h2 className="mb-3 text-base font-semibold text-ink">This bundle includes</h2>
+                <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {ad.bundle_items.map((item) => (
+                    <li key={item.id} className="flex items-center gap-3 rounded-card border border-line p-3">
+                      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-md bg-surface-muted">
+                        {item.thumbnail
+                          ? <img src={item.thumbnail} alt="" className="h-full w-full object-cover" />
+                          : <div className="flex h-full w-full items-center justify-center text-xs text-ink-faint">img</div>}
+                      </div>
+                      <div className="min-w-0">
+                        <Link href={`/ads/${item.id}-${ad.slug}` as Route} className="block truncate text-sm font-semibold text-ink hover:text-brand-600">
+                          {item.title}
+                        </Link>
+                        <span className="text-xs text-ink-muted">৳{Number(item.price).toLocaleString('en-US')}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
 
             <AdActions adId={ad.id} url={`/ads/${ad.url_slug}`} title={ad.title} />
 
@@ -137,7 +172,7 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
 
             {similar.data.length > 0 && (
               <section className="space-y-4 pt-2">
-                <SectionHeading title="Related ads" />
+                <SectionHeading title="Related products" />
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {similar.data.map((s) => <ListingCard key={s.id} ad={s} variant="featured" />)}
                 </div>
@@ -147,7 +182,17 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
 
           {/* Sidebar — sticky top so it stays aligned with the gallery */}
           <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
-            {ad.seller && <SellerCard seller={ad.seller} />}
+            {ad.seller && <SellerCard seller={ad.seller} productId={ad.id} productTitle={ad.title} adWhatsapp={ad.whatsapp} />}
+            <BuyNowCard
+              productId={ad.id}
+              productTitle={ad.title}
+              price={ad.price}
+              sellerId={ad.seller?.id ?? 0}
+              sellerName={ad.seller?.name ?? 'the seller'}
+              sellerUsername={ad.seller?.username}
+              sellerAvatar={ad.seller?.avatar_url}
+              sellerOnline={ad.seller?.online}
+            />
 
             {/* AD SLOT — sidebar MPU (300×250), high-CPM inventory. */}
             <AdSlot placement={`ad.${ad.id}.sidebar_mpu`} size="mpu" />

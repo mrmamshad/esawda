@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
 import {
-  Package, DollarSign, MessageSquare, Heart, PlusSquare, ArrowRight,
+  Package, DollarSign, MessageSquare, Heart, PlusSquare,
   CircleCheckBig, Clock, DollarSign as DollarIcon, Trash2, FileEdit,
 } from 'lucide-react';
 import { requireUser } from '@/lib/session';
@@ -11,6 +11,8 @@ import { PageHeader } from '@/components/shop/v2/PageHeader';
 import { StoreHero } from '@/components/shop/v2/StoreHero';
 import { StatCard } from '@/components/shop/v2/StatCard';
 import { SalesPanel } from '@/components/shop/v2/SalesPanel';
+import { MessagesWidget } from '@/components/shop/v2/MessagesWidget';
+import { MarketingCard } from '@/components/shop/v2/MarketingCard';
 
 export const metadata: Metadata = { title: 'Shop Dashboard' };
 export const dynamic = 'force-dynamic';
@@ -68,29 +70,34 @@ export default async function ShopDashboardPage() {
 
       {/* ── Row 1: KPI cards ── */}
       <section className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total ads"          value={stats.ads.total}         icon={<Package size={17} />}       tone="brand" sparkline={spark} />
+        <StatCard label="Total products"    value={stats.ads.total}         icon={<Package size={17} />}       tone="brand" sparkline={spark} />
         <StatCard label="Sales this month"   value={stats.sales_this_month}  icon={<DollarSign size={17} />}    tone="accent" currency sparkline={spark} />
         <StatCard label="Wishlisted by users"value={stats.wishlist_count}    icon={<Heart size={17} />}         tone="success" />
-        <StatCard label="Buyer messages"     value={stats.store.total_orders} icon={<MessageSquare size={17} />} tone="info" />
+        <StatCard label="Orders received"    value={stats.store.total_orders} icon={<MessageSquare size={17} />} tone="info" />
       </section>
 
-      {/* ── Row 2: sales chart + shortcuts ── */}
+      {/* ── Row 2: sales chart + buyer messages ── */}
       <section className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-5">
         <div className="lg:col-span-3">
           <SalesPanel series={stats.sales_series} />
         </div>
         <div className="lg:col-span-2">
-          <QuickActionsCard />
+          <MessagesWidget />
         </div>
       </section>
 
-      {/* ── Row 3: ad-status navigation grid ── */}
+      {/* ── Row 3: marketing / plan upsell ── */}
+      <section className="mt-5">
+        <MarketingCard hasActivePlan={Boolean(user.group_id)} />
+      </section>
+
+      {/* ── Row 4: ad-status navigation grid ── */}
       <section className="mt-5">
         <h3 className="mb-3 text-[10.5px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--shp-fg-faint)' }}>
           Your listings by status
         </h3>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-          <StatusCard href="/shop/ads"          label="All Ads"    value={stats.ads.total}    icon={<Package size={15} />}        tone="brand" />
+          <StatusCard href="/shop/ads"          label="All Products" value={stats.ads.total}    icon={<Package size={15} />}        tone="brand" />
           <StatusCard href="/shop/ads/active"   label="Active"     value={stats.ads.active}   icon={<CircleCheckBig size={15} />} tone="success" />
           <StatusCard href="/shop/ads/pending"  label="Pending"    value={stats.ads.pending}  icon={<Clock size={15} />}          tone="warning" />
           <StatusCard href="/shop/ads/sold-out" label="Sold Out"   value={stats.ads.sold_out} icon={<DollarIcon size={15} />}     tone="danger" />
@@ -99,48 +106,6 @@ export default async function ShopDashboardPage() {
         </div>
       </section>
     </>
-  );
-}
-
-function QuickActionsCard() {
-  const actions = [
-    { href: '/shop/ads/new',   label: 'Post a new ad',       icon: <PlusSquare size={15} /> },
-    { href: '/shop/messages',  label: 'Reply to buyers',      icon: <MessageSquare size={15} /> },
-    { href: '/shop/wishlisted',label: 'See who wishlisted',   icon: <Heart size={15} /> },
-    { href: '/shop/plan',      label: 'Upgrade your plan',    icon: <DollarSign size={15} /> },
-  ];
-  return (
-    <section
-      className="rounded-xl border p-5"
-      style={{ background: 'var(--shp-surface)', borderColor: 'var(--shp-border)', boxShadow: 'var(--shp-shadow-sm)' }}
-    >
-      <header className="mb-4">
-        <h2 className="text-[15px] font-semibold" style={{ color: 'var(--shp-fg)' }}>Quick actions</h2>
-        <p className="mt-0.5 text-xs" style={{ color: 'var(--shp-fg-muted)' }}>Common tasks to keep your store fresh</p>
-      </header>
-      <ul className="space-y-2">
-        {actions.map((a) => (
-          <li key={a.href}>
-            <Link
-              href={a.href as Route}
-              className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5 text-[13px] font-medium transition hover:border-[color:var(--shp-brand)]"
-              style={{ borderColor: 'var(--shp-border)', color: 'var(--shp-fg)' }}
-            >
-              <span className="flex items-center gap-2.5">
-                <span
-                  className="grid h-7 w-7 place-items-center rounded-md"
-                  style={{ background: 'var(--shp-brand-soft)', color: 'var(--shp-brand)' }}
-                >
-                  {a.icon}
-                </span>
-                {a.label}
-              </span>
-              <ArrowRight size={13} style={{ color: 'var(--shp-fg-faint)' }} />
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </section>
   );
 }
 

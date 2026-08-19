@@ -31,7 +31,7 @@ export function AdActions({ adId, url, title }: { adId: number; url: string; tit
   return (
     <div className="flex flex-wrap items-center gap-2">
       <FavouriteButton adId={adId} variant="inline" />
-      <Button variant="outline" size="md" leftIcon={<Flag size={16} />} onClick={() => requireLogin('report this ad', () => setReportOpen(true))}>
+      <Button variant="outline" size="md" leftIcon={<Flag size={16} />} onClick={() => requireLogin('report this product', () => setReportOpen(true))}>
         Report
       </Button>
       <Button variant="ghost" size="md" leftIcon={copied ? <Check size={16} /> : <Share2 size={16} />} onClick={share}>

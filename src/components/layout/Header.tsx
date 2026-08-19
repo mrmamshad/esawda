@@ -112,17 +112,17 @@ export function Header({
           </nav>
         )}
 
-        {/* Right cluster — user chip / Get Started + optional Post Ad */}
+        {/* Right cluster — user chip / Get Started + optional Post Product */}
         <div className="ml-auto flex items-center gap-2 md:gap-3">
           {user ? (
             <>
               <UserMenu user={user} onDark={onDark} />
-              <Link href={'/shop/ads/new' as Route} className="hidden sm:inline-flex">
-                <Button variant="filled" size="sm" leftIcon={<Plus size={16} />}>Post Ad</Button>
+              <Link href={(user.is_shop || user.user_type === 'seller' ? '/shop/ads/new' : '/post/product') as Route} className="hidden sm:inline-flex">
+                <Button variant="filled" size="sm" leftIcon={<Plus size={16} />}>Post Product</Button>
               </Link>
             </>
           ) : (
-            <Link href={'/shop/ads/new' as Route} className="hidden sm:inline-flex">
+            <Link href={'/post/product' as Route} className="hidden sm:inline-flex">
               <button
                 type="button"
                 className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-[14px] font-semibold text-white transition active:translate-y-[1px] hover:brightness-95"
@@ -131,7 +131,7 @@ export function Header({
                   boxShadow: '0 10px 22px -10px rgba(255,0,63,0.55)',
                 }}
               >
-                Post an Ad
+                Post a Product
               </button>
             </Link>
           )}

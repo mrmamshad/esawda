@@ -8,11 +8,13 @@ import type { Thread } from '@/types/api';
 export function ThreadListItem({
   thread,
   active,
+  hrefPrefix = '/messages',
 }: {
   thread: Thread;
   active?: boolean;
+  hrefPrefix?: string;
 }) {
-  const href = `/messages/${thread.counterpart.id}` as Route;
+  const href = `${hrefPrefix}/${thread.counterpart.id}` as Route;
   return (
     <Link
       href={href}
@@ -34,11 +36,6 @@ export function ThreadListItem({
           {thread.last_message.body}
         </p>
       </div>
-      {thread.unread_count > 0 && (
-        <span className="ml-1 inline-flex min-w-5 items-center justify-center rounded-pill bg-brand-700 px-1.5 text-xs font-semibold text-white">
-          {thread.unread_count}
-        </span>
-      )}
     </Link>
   );
 }

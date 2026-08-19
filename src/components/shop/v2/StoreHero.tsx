@@ -41,11 +41,13 @@ export function StoreHero({
       <div className="relative flex flex-wrap items-center gap-6">
         <div className="flex items-center gap-4 flex-1 min-w-[240px]">
           <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full ring-2" style={{ boxShadow: '0 0 0 4px var(--shp-brand-soft)' }}>
-            <Image
-              src={user.avatar_url || '/avatar-fallback.png'}
-              alt={shopName}
-              fill sizes="64px" className="object-cover"
-            />
+            {user.avatar_set ? (
+              <Image src={user.avatar_url} alt={shopName} fill sizes="64px" className="object-cover" />
+            ) : (
+              <div className="grid h-full w-full place-items-center text-lg font-bold" style={{ background: 'var(--shp-brand-soft)', color: 'var(--shp-brand)' }}>
+                {shopName.trim().charAt(0).toUpperCase() || 'S'}
+              </div>
+            )}
           </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">

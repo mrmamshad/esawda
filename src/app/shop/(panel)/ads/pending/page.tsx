@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { requireUser } from '@/lib/session';
 import { AdsListView } from '../AdsListView';
 
-export const metadata: Metadata = { title: 'Pending Ads' };
+export const metadata: Metadata = { title: 'Pending Products' };
 export const dynamic = 'force-dynamic';
 
 export default async function PendingAdsPage({ searchParams }: { searchParams: Promise<{ page?: string; q?: string; condition?: string }> }) {
@@ -12,7 +12,7 @@ export default async function PendingAdsPage({ searchParams }: { searchParams: P
     <AdsListView
       user={user}
       statusFilter="pending"
-      title="Pending Ads"
+      title="Pending Products"
       description="Awaiting moderator approval."
       basePath="/shop/ads/pending"
       page={Math.max(1, parseInt(sp.page ?? '1', 10) || 1)}

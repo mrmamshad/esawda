@@ -52,6 +52,17 @@ export type AdminRecentTx = {
   created_at?: string | null;
 };
 
+export type DateRangeValue = 'today' | 'week' | 'month' | 'custom';
+
+export type AdminWindow = {
+  range:        DateRangeValue;
+  from:         string;
+  to:           string;
+  revenue:      TrendPoint[];
+  users:        TrendPoint[];
+  transactions: TrendPoint[];
+};
+
 export type AdminDashboardData = {
   counts: AdminCounts;
   trend?: AdminTrend;
@@ -69,4 +80,5 @@ export type AdminDashboardData = {
   category_breakdown?: { name: string; value: number }[];
   top_categories?:     { name: string; count: number }[];
   user_growth?:        TrendPoint[];
+  window?:             AdminWindow;
 };

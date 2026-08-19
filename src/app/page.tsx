@@ -15,8 +15,8 @@ import { api, ApiError } from '@/lib/api';
 import type { Ad, Blog, Category, Plan, Testimonial } from '@/types/api';
 
 export const metadata: Metadata = {
-  title: 'eSawda — Buy, Sell, Browse Ads',
-  description: 'Browse thousands of classified ads across vehicles, mobiles, electronics, houses and more.',
+  title: 'eSawda — Buy, Sell, Browse Products',
+  description: 'Browse thousands of classified products across vehicles, mobiles, electronics, houses and more.',
   alternates: { canonical: '/' },
 };
 
@@ -32,12 +32,13 @@ export default async function HomePage() {
   // dynamic, defeating ISR). Auth state resolves client-side in AuthGate and
   // Header falls back to it. Settings join the parallel fan-out so nothing
   // is awaited serially before first HTML.
-  const [settings, cats, featured, latest, brandNew, used, plans, testimonials, blogs] = await Promise.all([
+  const [settings, cats, featured, urgent, last24h, highlights, used, plans, testimonials, blogs] = await Promise.all([
     api<{ settings: Record<string, string> }>('/settings', { revalidate: 300, tags: ['settings'] }),
     safe(api<Category[]>('/categories?with_counts=true', { revalidate: 300 }),                                  { data: [] as Category[] }),
     safe(api<Ad[]>('/ads/featured?per_page=6', { revalidate: 120 }),                                            { data: [] as Ad[] }),
-    safe(api<Ad[]>('/ads?per_page=8&sort=-created_at', { revalidate: 120 }),                                    { data: [] as Ad[] }),
-    safe(api<Ad[]>('/ads?per_page=8&sort=-created_at&filter[condition]=new', { revalidate: 120 }),              { data: [] as Ad[] }),
+    safe(api<Ad[]>('/ads?per_page=8&filter[urgent]=1&sort=-created_at', { revalidate: 120 }),                   { data: [] as Ad[] }),
+    safe(api<Ad[]>('/ads?per_page=8&since_hours=24&sort=-created_at', { revalidate: 120 }),                     { data: [] as Ad[] }),
+    safe(api<Ad[]>('/ads?per_page=8&filter[highlight]=1&sort=-created_at', { revalidate: 120 }),                { data: [] as Ad[] }),
     safe(api<Ad[]>('/ads?per_page=8&sort=-created_at&filter[condition]=used', { revalidate: 120 }),             { data: [] as Ad[] }),
     safe(api<Plan[]>('/plans', { revalidate: 300 }),                                                            { data: [] as Plan[] }),
     safe(api<Testimonial[]>('/testimonials?limit=3', { revalidate: 600 }),                                      { data: [] as Testimonial[] }),
@@ -81,14 +82,13 @@ export default async function HomePage() {
           <AdSlot placement="home.after_categories" size="large" />
         </div>
 
-        {/* ── Condition-toggleable sections (categories → sponsored →
-            latest → brand-new/pre-owned) live in a client component so one
-            Used/New pill drives them all. ── */}
+        {/* ── Five fixed sections: Featured → Urgent → Last 24h → Highlights →
+            Pre-owned (used). ── */}
         <HomeSections
-          cats={cats.data as Category[]}
           featured={featured.data as Ad[]}
-          latest={latest.data as Ad[]}
-          brandNew={brandNew.data as Ad[]}
+          urgent={urgent.data as Ad[]}
+          last24h={last24h.data as Ad[]}
+          highlights={highlights.data as Ad[]}
           used={used.data as Ad[]}
         />
 
@@ -186,9 +186,9 @@ export default async function HomePage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <Link href={'/shop/ads/new' as Route} className="contents">
+              <Link href={'/post/product' as Route} className="contents">
                 <button className="group inline-flex items-center gap-2 rounded-pill bg-brand-700 pl-6 pr-2 py-2 text-body-md font-semibold text-white shadow-[0_10px_24px_-8px_rgba(241,106,43,0.55)] transition hover:bg-brand-600">
-                  Post your ad
+                  Post your product
                   <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/20 transition-transform group-hover:rotate-45">
                     <ArrowUpRight size={16} />
                   </span>

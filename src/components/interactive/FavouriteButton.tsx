@@ -39,7 +39,7 @@ export function FavouriteButton({
     } catch (err) {
       setFav(!next); // rollback
       if (err instanceof ApiError && err.status === 401) {
-        requireLogin('save this ad');
+        requireLogin('save this product');
       }
     } finally { setBusy(false); }
   };
@@ -49,7 +49,7 @@ export function FavouriteButton({
     e.stopPropagation();
     // Popup gate — signed-out users see the Bikroy-style modal, then the
     // favourite action runs automatically once they authenticate.
-    requireLogin('save this ad', doToggle);
+    requireLogin('save this product', doToggle);
   };
 
   if (variant === 'inline') {

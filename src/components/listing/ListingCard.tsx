@@ -51,7 +51,7 @@ export function ListingCard({
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-xs text-ink-muted">{ad.category?.name ?? 'Ad'}</p>
+            <p className="text-xs text-ink-muted">{ad.category?.name ?? 'Product'}</p>
             <p className="truncate text-sm font-semibold text-ink">{ad.title}</p>
             {subtitle && <p className="mt-0.5 text-xs text-ink-muted">{subtitle}</p>}
             {ad.location.city && (
@@ -78,7 +78,7 @@ export function ListingCard({
         ) : <ThumbFallback />}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-xs text-ink-muted">{ad.category?.name ?? 'Ad'}</p>
+        <p className="text-xs text-ink-muted">{ad.category?.name ?? 'Product'}</p>
         <p className="truncate text-sm font-semibold text-ink">{ad.title}</p>
         <p className="text-xs text-ink-muted">Price <span className="ml-1 font-bold text-ink">$ {ad.price.toLocaleString('en-US')}</span></p>
       </div>
@@ -100,8 +100,20 @@ export function ListingCard({
           />
         ) : <ThumbFallback />}
         <div className="absolute left-3 top-3 flex flex-col gap-1">
+          {ad.paid && (
+            <Badge tone="paid" className="rounded-md px-2 py-0.5">Paid</Badge>
+          )}
           {ad.featured && (
             <Badge tone="featured" className="rounded-md px-2 py-0.5">Featured</Badge>
+          )}
+          {ad.urgent && (
+            <Badge tone="urgent" className="rounded-md px-2 py-0.5">Urgent</Badge>
+          )}
+          {ad.highlight && (
+            <Badge className="rounded-md px-2 py-0.5" tone="highlight">Highlight</Badge>
+          )}
+          {ad.bundle_items && ad.bundle_items.length > 1 && (
+            <Badge className="rounded-md px-2 py-0.5" tone="highlight">Bundle · {ad.bundle_items.length} items</Badge>
           )}
           {ad.condition && (
             <span className={cn(
@@ -118,7 +130,7 @@ export function ListingCard({
       </Link>
 
       <div className="flex-1 p-4">
-        <p className="text-xs text-ink-muted">{ad.category?.name ?? 'Ad'}</p>
+        <p className="text-xs text-ink-muted">{ad.category?.name ?? 'Product'}</p>
         <Link href={url} className="mt-1 block truncate text-lg font-bold text-ink hover:text-brand-700">
           {ad.title}
         </Link>

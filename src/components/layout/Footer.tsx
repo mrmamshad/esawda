@@ -23,7 +23,8 @@ export function Footer({ siteName = 'eSawda' }: { siteName?: string }) {
       links: [
         { label: 'Browse ads', href: '/ads' as Route },
         { label: 'Categories', href: '/ads' as Route },
-        { label: 'Post an ad', href: '/shop/ads/new' as Route },
+        { label: 'Post a Product', href: '/post/product' as Route },
+        { label: 'Create a shop account', href: '/shop/apply' as Route },
         { label: 'Membership', href: '/membership' as Route },
       ],
     },
@@ -64,6 +65,12 @@ export function Footer({ siteName = 'eSawda' }: { siteName?: string }) {
               Design better trades. {siteName} connects verified buyers and
               sellers across Bangladesh — safely, quickly, transparently.
             </p>
+            <Link
+              href={'/shop/apply' as Route}
+              className="mt-6 inline-flex items-center rounded-full bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-950/30 transition hover:-translate-y-0.5 hover:bg-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+            >
+              Create a shop account
+            </Link>
           </div>
 
           {/* ── Link columns ── */}

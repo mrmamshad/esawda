@@ -30,7 +30,7 @@ export default async function CityPage({ params, searchParams }: { params: Param
     items = (res.data ?? []) as Ad[];
     meta  = { ...meta, ...(res.meta as Partial<typeof meta>) };
   } catch (e) {
-    error = e instanceof ApiError ? e.message : 'Could not load ads.';
+    error = e instanceof ApiError ? e.message : 'Could not load products.';
   }
 
   return (

@@ -1,5 +1,8 @@
+'use client';
+
 import { forwardRef, type InputHTMLAttributes, type TextareaHTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/lib/cn';
+import { PasswordInput } from './PasswordInput';
 
 const controlBase =
   'w-full rounded-field border border-line bg-white px-3.5 h-11 text-sm text-ink placeholder:text-ink-faint ' +
@@ -33,7 +36,15 @@ export const FormField = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLIn
     return (
       <div className={cn('flex flex-col', className)}>
         {label && <FormLabel htmlFor={fid} required={required}>{label}</FormLabel>}
-        <input ref={ref} id={fid} required={required} className={cn(controlBase, error && errorRing)} {...rest} />
+        {rest.type === 'password' ? (
+          <PasswordInput
+            ref={ref} id={fid} required={required}
+            className={cn(controlBase, error && errorRing)}
+            {...rest}
+          />
+        ) : (
+          <input ref={ref} id={fid} required={required} className={cn(controlBase, error && errorRing)} {...rest} />
+        )}
         {error ? <FormError>{error}</FormError> : hint ? <FormHint>{hint}</FormHint> : null}
       </div>
     );

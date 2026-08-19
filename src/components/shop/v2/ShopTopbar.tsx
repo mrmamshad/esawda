@@ -5,7 +5,7 @@ import type { Route } from 'next';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import {
-  Search, Bell, PlusSquare, ChevronRight, LogOut, User as UserIcon, ExternalLink,
+  Search, PlusSquare, ChevronRight, LogOut, User as UserIcon, ExternalLink,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useClickOutside } from '@/components/admin/v2/useClickOutside';
@@ -68,7 +68,7 @@ export function ShopTopbar({ user }: { user: User }) {
           <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--shp-fg-faint)' }} />
           <input
             type="search"
-            placeholder="Search your ads, messages…"
+            placeholder="Search your products, messages…"
             className="h-9 w-full rounded-lg border pl-9 pr-3 text-[13px] outline-none transition focus:ring-2"
             style={{ background: 'var(--shp-bg)', borderColor: 'var(--shp-border)', color: 'var(--shp-fg)' }}
           />
@@ -81,18 +81,8 @@ export function ShopTopbar({ user }: { user: User }) {
           className="hidden items-center gap-1.5 rounded-lg px-3 py-2 text-[12.5px] font-semibold text-white transition sm:inline-flex active:translate-y-[1px]"
           style={{ background: 'var(--shp-brand)' }}
         >
-          <PlusSquare size={14} /> Post ad
+          <PlusSquare size={14} /> Post product
         </Link>
-
-        <button
-          type="button"
-          aria-label="Notifications"
-          className="relative grid h-9 w-9 place-items-center rounded-lg transition hover:bg-[color:var(--shp-bg)]"
-          style={{ color: 'var(--shp-fg-muted)' }}
-        >
-          <Bell size={16} />
-          <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full" style={{ background: 'var(--shp-brand)' }} />
-        </button>
 
         <div className="relative" ref={avatarRef}>
           <button

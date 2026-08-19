@@ -1,4 +1,5 @@
 import { env } from './env';
+import { readToken } from './auth';
 
 /**
  * Thin fetch wrapper around the Laravel /api/v1 backend.
@@ -47,10 +48,13 @@ type FetchOpts = {
 export async function api<T>(path: string, opts: FetchOpts = {}): Promise<ApiEnvelope<T>> {
   const url = path.startsWith('http') ? path : env.api.base + (path.startsWith('/') ? path : `/${path}`);
 
+  // Auto-read token from memory/cookie if not explicitly provided
+  const token = opts.token ?? readToken();
+
   const headers: Record<string, string> = {
     Accept: 'application/json',
     ...(opts.body && !(opts.body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}),
-    ...(opts.token ? { Authorization: `Bearer ${opts.token}` } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...opts.headers,
   };
 

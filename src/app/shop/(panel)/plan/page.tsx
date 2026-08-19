@@ -1,99 +1,134 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { Crown, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { CalendarDays, CheckCircle2, Crown, Layers3, ReceiptText, ShieldCheck, Sparkles } from 'lucide-react';
+import { PageHeader } from '@/components/shop/v2/PageHeader';
 import { requireUser } from '@/lib/session';
 import { apiFromServer, ApiError } from '@/lib/api';
 import type { Plan } from '@/types/api';
+import { ShopPlansClient } from './ShopPlansClient';
 
-export const metadata: Metadata = { title: 'Membership Plan' };
+export const metadata: Metadata = { title: 'Membership & Billing' };
 export const dynamic = 'force-dynamic';
 
 async function safe<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
-  try { return await fn(); } catch (e) { if (e instanceof ApiError) return fallback; throw e; }
+  try { return await fn(); } catch (error) { if (error instanceof ApiError) return fallback; throw error; }
 }
 
-/**
- * Seller membership overview: current plan snapshot + shortcut to the
- * full plan compare / checkout flow.
- */
+type PlanSettings = { ads_limit?: number; featured_ads?: number; duration_days?: number };
+
+function settingsOf(plan?: Plan): PlanSettings {
+  return plan?.settings && typeof plan.settings === 'object' && !Array.isArray(plan.settings)
+    ? plan.settings as PlanSettings
+    : {};
+}
+
+function readableDate(value?: string | null): string {
+  if (!value) return 'No renewal scheduled';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? 'No renewal scheduled'
+    : new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
+}
+
 export default async function SellerPlanPage() {
   const user = await requireUser('/shop/plan');
-
-  const plansRes = await safe(
-    () => apiFromServer<Plan[]>('/plans', { revalidate: 300 }),
-    { data: [] as Plan[] },
-  );
-  const plans = plansRes.data ?? [];
+  const plansRes = await safe(() => apiFromServer<Plan[]>('/plans', { revalidate: 300 }), { data: [] as Plan[] });
+  const plans = (plansRes.data ?? []).filter(plan => plan.active !== false);
+  const currentPlan = plans.find(plan => String(plan.id) === String(user.plan_id));
+  const settings = settingsOf(currentPlan);
+  const remaining = Math.max(0, Number(user.ads_remaining ?? 0));
+  const allowance = Math.max(remaining, Number(settings.ads_limit ?? 0));
+  const usagePercent = allowance > 0 ? Math.min(100, Math.round((remaining / allowance) * 100)) : 0;
+  const active = Boolean(user.plan_active);
+  const currentName = currentPlan?.name || (user.group_id ? String(user.group_id) : 'Starter');
 
   return (
     <>
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-ink">Membership Plan</h1>
-        <p className="text-sm text-ink-muted">
-          Upgrade your seller tier to unlock featured badges, priority placement and more listings.
-        </p>
-      </header>
+      <PageHeader
+        title="Membership & Billing"
+        description="Manage your shop tier, listing allowance and billing cycle from one workspace."
+        actions={
+          <Link
+            href={'/shop/transactions' as Route}
+            className="inline-flex min-h-10 items-center gap-2 rounded-lg border px-3 text-xs font-bold transition hover:bg-[color:var(--shp-bg)]"
+            style={{ borderColor: 'var(--shp-border)', color: 'var(--shp-fg-muted)' }}
+          >
+            <ReceiptText size={15} /> Billing history
+          </Link>
+        }
+      />
 
-      <section className="surface-card p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
-              <Crown size={22} />
-            </span>
-            <div>
-              <p className="text-xs uppercase tracking-widest text-slate-500">Current tier</p>
-              <p className="text-lg font-semibold text-ink capitalize">
-                {user.group_id ?? 'Free'}
-              </p>
-              <p className="text-sm text-slate-500">
-                {plans.length > 0
-                  ? `${plans.length} paid plans available`
-                  : 'No paid plans configured yet.'}
-              </p>
+      <section
+        className="relative overflow-hidden rounded-2xl p-6 text-white shadow-xl sm:p-8"
+        style={{
+          background: 'linear-gradient(135deg, #FF003F 0%, #E4254F 45%, #C41F42 100%)',
+        }}
+      >
+        <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-white/15 opacity-60 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 right-1/3 h-28 w-28 rotate-45 border border-white/15" />
+
+        <div className="relative grid gap-8 xl:grid-cols-[1.2fr_1fr] xl:items-end">
+          <div>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white/15 text-white ring-1 ring-white/20"><Crown size={23} /></span>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/70">Current membership</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <h2 className="text-2xl font-black capitalize tracking-tight">{currentName}</h2>
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${active ? 'bg-white/20 text-white' : 'bg-white/15 text-amber-200'}`}>
+                    {active ? <CheckCircle2 size={12} /> : <Sparkles size={12} />}{active ? 'Active' : 'Starter access'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <p className="mt-5 max-w-xl text-sm leading-6 text-white/80">
+              {active
+                ? 'Your seller benefits are active. Upgrade whenever you need more inventory capacity or product visibility.'
+                : 'Choose a paid tier to unlock more listings, featured placement and stronger buyer reach.'}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="rounded-xl bg-white/10 p-4 ring-1 ring-white/15">
+              <Layers3 size={17} className="text-white" />
+              <p className="mt-3 text-2xl font-black">{remaining}</p>
+              <p className="text-[11px] text-white/70">Listings remaining</p>
+            </div>
+            <div className="rounded-xl bg-white/10 p-4 ring-1 ring-white/15">
+              <Sparkles size={17} className="text-white" />
+              <p className="mt-3 text-2xl font-black">{settings.featured_ads ?? 0}</p>
+              <p className="text-[11px] text-white/70">Featured boosts</p>
+            </div>
+            <div className="col-span-2 rounded-xl bg-white/10 p-4 ring-1 ring-white/15 sm:col-span-1">
+              <CalendarDays size={17} className="text-white" />
+              <p className="mt-3 text-sm font-bold">{readableDate(user.plan_expires_at)}</p>
+              <p className="text-[11px] text-white/70">Renewal date</p>
             </div>
           </div>
-          <Link href={'/membership' as Route}>
-            <Button variant="filled">Compare all plans →</Button>
-          </Link>
         </div>
+
+        {allowance > 0 && (
+          <div className="relative mt-7 border-t border-white/15 pt-5">
+            <div className="mb-2 flex items-center justify-between text-[11px] text-white/75">
+              <span>Available listing allowance</span><span>{remaining} of {allowance} available</span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-white/20"><div className="h-full rounded-full bg-gradient-to-r from-white/90 to-white/60" style={{ width: `${usagePercent}%` }} /></div>
+          </div>
+        )}
       </section>
 
-      {plans.length > 0 && (
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {plans.map((plan) => (
-            <div
-              key={plan.id}
-              className={`surface-card flex flex-col p-6 ${plan.recommended ? 'ring-2 ring-brand-500' : ''}`}
-            >
-              <div className="mb-2 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-ink">{plan.name}</h3>
-                {plan.recommended && (
-                  <span className="inline-flex items-center gap-1 rounded-pill bg-brand-100 px-2 py-0.5 text-xs font-semibold text-brand-800">
-                    <Sparkles size={12} /> Recommended
-                  </span>
-                )}
-              </div>
-              <p className="mb-1 text-3xl font-bold text-ink">
-                ৳{Number(plan.monthly_price).toLocaleString('en-IN')}
-                <span className="ml-1 text-sm font-normal text-slate-500">/ mo</span>
-              </p>
-              {plan.annual_price > 0 && (
-                <p className="mb-4 text-sm text-slate-500">
-                  or ৳{Number(plan.annual_price).toLocaleString('en-IN')}/year
-                </p>
-              )}
-              {plan.badge && (
-                <p className="mb-4 text-xs uppercase tracking-widest text-slate-500">{plan.badge}</p>
-              )}
-              <Link href={`/membership/checkout/${plan.id}` as Route} className="mt-auto">
-                <Button variant="filled" className="w-full">Choose plan</Button>
-              </Link>
-            </div>
-          ))}
-        </section>
-      )}
+      <div className="mt-8">
+        {plans.length > 0 ? (
+          <ShopPlansClient plans={plans} currentPlanId={active ? user.plan_id ?? null : null} />
+        ) : (
+          <section className="rounded-2xl border border-dashed p-10 text-center" style={{ borderColor: 'var(--shp-border)' }}>
+            <span className="mx-auto grid h-12 w-12 place-items-center rounded-xl bg-[color:var(--shp-accent-soft)] text-[color:var(--shp-accent)]"><ShieldCheck size={22} /></span>
+            <h2 className="mt-4 text-lg font-bold text-[color:var(--shp-fg)]">Plans are being prepared</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm text-[color:var(--shp-fg-muted)]">Your current shop access is unchanged. New membership options will appear here when available.</p>
+          </section>
+        )}
+      </div>
     </>
   );
 }

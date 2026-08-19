@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
                 It expires in 30 minutes.
               </p>
               <div className="mt-6 flex flex-col gap-2 sm:flex-row">
-                <Link href={'/auth/login' as Route} className="contents">
+                <Link href={'/login' as Route} className="contents">
                   <Button variant="filled" fullWidth>Back to login</Button>
                 </Link>
                 <Button variant="outline" fullWidth onClick={() => { setDone(false); setEmail(''); }}>Try another email</Button>
@@ -63,7 +63,7 @@ export default function ForgotPasswordPage() {
               />
               <Button type="submit" fullWidth disabled={busy || !email}>{busy ? 'Sending…' : 'Send reset link'}</Button>
               <div className="text-center text-sm">
-                <Link href={'/auth/login' as Route} className="text-brand-700 hover:underline">Back to login</Link>
+                <Link href={'/login' as Route} className="text-brand-700 hover:underline">Back to login</Link>
               </div>
             </form>
           )}

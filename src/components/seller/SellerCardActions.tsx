@@ -1,35 +1,29 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import type { Route } from 'next';
+import { useState } from 'react';
 import { MessageCircle, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { useAuthGate } from '@/components/interactive/AuthGate';
+import { MessageSellerModal } from './MessageSellerModal';
 
 /**
- * Client-only action row for the seller sidebar. "Message" is gated behind
- * the login popup — signed-out users see the Bikroy-style modal instead of
- * being bounced to /auth/login, matching the reference UX.
+ * Client-only action row for the seller sidebar. "Message" opens an inline
+ * modal so signed-out buyers can message with just a name + mobile (guest
+ * login) instead of bouncing to a full registration form.
  */
 export function SellerCardActions({
-  sellerId, sellerName, waHref,
+  sellerId, sellerName, waHref, productId, productTitle,
 }: {
   sellerId:   number;
   sellerName: string;
   waHref:     string | null;
+  productId?: number;
+  productTitle?: string;
 }) {
-  const router = useRouter();
-  const { requireLogin } = useAuthGate();
-
-  const startChat = () => {
-    requireLogin(`chat with ${sellerName}`, () => {
-      router.push(`/messages/${sellerId}` as Route);
-    });
-  };
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="mt-6 grid grid-cols-2 gap-3">
-      <Button variant="filled" leftIcon={<MessageCircle size={16} />} onClick={startChat}>
+      <Button variant="filled" leftIcon={<MessageCircle size={16} />} onClick={() => setOpen(true)}>
         Message
       </Button>
       {waHref ? (
@@ -41,6 +35,14 @@ export function SellerCardActions({
           WhatsApp
         </Button>
       )}
+      <MessageSellerModal
+        open={open}
+        onClose={() => setOpen(false)}
+        sellerId={sellerId}
+        sellerName={sellerName}
+        productId={productId}
+        productTitle={productTitle}
+      />
     </div>
   );
 }

@@ -12,7 +12,7 @@ type Suggestion = { id: number; title: string; url_slug: string };
  * Debounced search box that hits /ads/search-suggest and shows a popover of
  * matches. Enter submits to /ads?q=. Kept minimal so it fits any header.
  */
-export function SearchAutocomplete({ placeholder = 'Search ads…', className }: { placeholder?: string; className?: string }) {
+export function SearchAutocomplete({ placeholder = 'Search products…', className }: { placeholder?: string; className?: string }) {
   const [q, setQ] = useState('');
   const [items, setItems] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);

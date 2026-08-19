@@ -53,6 +53,13 @@ export function TableRow({
 
       <div className="flex items-center gap-4 md:w-40 md:justify-end">
         <span className="text-sm font-bold text-ink">{formatMoney(ad.price)}</span>
+        {(ad.paid || ad.featured || ad.urgent) && (
+          <div className="flex flex-col gap-1">
+            {ad.paid && <Badge tone="paid">Paid</Badge>}
+            {ad.featured && <Badge tone="featured">Featured</Badge>}
+            {ad.urgent && <Badge tone="urgent">Urgent</Badge>}
+          </div>
+        )}
       </div>
 
       {status && (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { Route } from 'next';
@@ -23,7 +23,10 @@ export type AdminBlogRow = {
 
 export function BlogTableClient({ initialRows }: { initialRows: AdminBlogRow[] }) {
   const router = useRouter();
-  const [rows] = useState<AdminBlogRow[]>(initialRows);
+  const [rows, setRows] = useState<AdminBlogRow[]>(initialRows);
+
+  // router.refresh() hands back fresh rows after an action — keep in sync.
+  useEffect(() => { setRows(initialRows); }, [initialRows]);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [pending, start] = useTransition();
 

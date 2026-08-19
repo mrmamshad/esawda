@@ -32,7 +32,7 @@ export default async function WishlistedPage() {
     <>
       <header>
         <h1 className="text-2xl font-bold text-ink">Wishlisted by Users</h1>
-        <p className="text-sm text-ink-muted">Buyers who saved your ads to their favourites.</p>
+        <p className="text-sm text-ink-muted">Buyers who saved your products to their favourites.</p>
       </header>
 
       {rows.length === 0 ? (
@@ -40,7 +40,7 @@ export default async function WishlistedPage() {
           <EmptyState
             icon={<Heart size={20} />}
             title="No wishlists yet"
-            description="Your ads haven't been added to a buyer's favourites list yet."
+            description="Your products haven't been added to a buyer's favourites list yet."
           />
         </section>
       ) : (
@@ -64,7 +64,7 @@ export default async function WishlistedPage() {
                     <Link href={`/ads/${row.post.id}-${row.post.slug ?? 'ad'}` as Route} className="text-brand-700 hover:underline">
                       {row.post.product_name}
                     </Link>
-                  ) : 'an ad'}
+                  ) : 'a product'}
                 </p>
               </div>
               {row.post && (

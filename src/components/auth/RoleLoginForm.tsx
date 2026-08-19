@@ -8,6 +8,7 @@ import { LogIn, ShieldCheck, Store } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
 import { saveToken } from '@/lib/auth';
 import { Button } from '@/components/ui/Button';
+import { PasswordInput } from '@/components/forms/PasswordInput';
 import type { User } from '@/types/api';
 
 /**
@@ -36,7 +37,7 @@ const ROLE_META: Record<LoginRole, {
     subtitle: 'Sign in to post ads, message sellers, and manage your listings.',
     icon:     <LogIn size={22} />,
     accent:   'bg-brand-50 text-brand-700',
-    home:     '/' as Route,
+    home:     '/dashboard' as Route,
     ctaLabel: 'Sign in',
   },
   seller: {
@@ -131,21 +132,21 @@ export function RoleLoginForm({ role }: RoleLoginFormProps) {
 
         <form onSubmit={submit} className="space-y-4" noValidate>
           <label className="block">
-            <span className="text-sm font-medium text-slate-700">Email or username</span>
+            <span className="text-sm font-medium text-slate-700">Email or phone</span>
             <input
               type="text"
               autoComplete="username"
               required
               value={identifier}
               onChange={(e) => setId(e.target.value)}
+              placeholder="you@example.com or phone"
               className="mt-1 block w-full rounded-lg border-0 bg-brand-50/60 px-4 py-3 text-slate-900 outline-none ring-1 ring-transparent focus:ring-2 focus:ring-brand-500"
             />
           </label>
 
           <label className="block">
             <span className="text-sm font-medium text-slate-700">Password</span>
-            <input
-              type="password"
+            <PasswordInput
               autoComplete="current-password"
               required
               value={password}
@@ -165,7 +166,16 @@ export function RoleLoginForm({ role }: RoleLoginFormProps) {
           <div className="flex items-center justify-between pt-2 text-sm">
             <Link href={'/auth/forgot' as Route} className="text-brand-700 hover:underline">Forgot password?</Link>
             {role !== 'admin' && (
-              <Link href={'/auth/signup' as Route} className="text-brand-700 hover:underline">Create account</Link>
+              <Link
+                href={(
+                  role === 'seller'
+                    ? `/auth/signup?redirect=${encodeURIComponent(params.get('redirect') || '/shop/apply')}`
+                    : '/auth/signup'
+                ) as Route}
+                className="text-brand-700 hover:underline"
+              >
+                Create account
+              </Link>
             )}
           </div>
         </form>

@@ -1,134 +1,248 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
-import type { Route } from 'next';
 import { redirect } from 'next/navigation';
-import { Heart, MessageSquare, Receipt, Settings, Crown, PlusSquare, ShoppingBag } from 'lucide-react';
+import type { Route } from 'next';
+import { ShoppingBag, MessageSquare, Heart, User as UserIcon, ArrowRight, PackageOpen, ClipboardList, Clock3 } from 'lucide-react';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
 import { requireUser } from '@/lib/session';
 import { apiFromServer, ApiError } from '@/lib/api';
+import type { Thread } from '@/types/api';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { PriceTag } from '@/components/ui/PriceTag';
+import { Badge } from '@/components/ui/Badge';
 
 export const metadata: Metadata = { title: 'My Dashboard' };
 export const dynamic = 'force-dynamic';
 
-/**
- * Buyer dashboard — for users who haven't posted any ads yet.
- *
- * Layout matches Figma screen 2: a profile card (avatar + name +
- * membership) followed by two quick-count cards (Favourites, My Listings)
- * and a "This Month Views" area chart placeholder.
- *
- * The moment a buyer posts their first ad the backend flips `is_shop=true`
- * on /auth/me and we redirect them to the full /shop dashboard instead.
- */
+type Purchase = {
+  id: number;
+  product?: { product_name: string; slug: string; price: number; screen_shot?: string | null };
+  product_image?: string | null;
+  seller?: { id: number; username: string; name: string };
+  transaction?: { status: string; amount: number; created_at: string };
+  shipping_status: string;
+  amount: number;
+  created_at: string;
+};
+
+type Favourite = { id: number; product?: { id: number; product_name: string; slug: string; price: number; screen_shot?: string | null } };
+
+type MyAd = {
+  id: number;
+  title: string;
+  url_slug: string;
+  status: string;
+  price: number;
+  thumbnail?: string | null;
+};
+
+const FALLBACK_PURCHASES: Purchase[] = [];
+const FALLBACK_FAVOURITES: Favourite[] = [];
+const FALLBACK_ADS: MyAd[] = [];
+
+async function safe<T>(fn: () => Promise<T>, fb: T): Promise<T> {
+  try { return await fn(); } catch (e) { if (e instanceof ApiError) return fb; throw e; }
+}
+
 export default async function BuyerDashboardPage() {
   const user = await requireUser('/dashboard');
-  if (user.is_shop) redirect('/shop');
 
-  const [favs, threads, txs] = await Promise.all([
-    safe(() => apiFromServer<unknown[]>('/me/favourites?per_page=1', { cache: 'no-store' })),
-    safe(() => apiFromServer<{ unread: number } | unknown[]>('/me/threads?per_page=1', { cache: 'no-store' })),
-    safe(() => apiFromServer<unknown[]>('/me/transactions?per_page=1', { cache: 'no-store' })),
+  // Role-aware: admins → admin panel, sellers → shop panel. This page is the
+  // lightweight personal dashboard for regular buyers.
+  if (user.is_admin || user.user_type === 'admin') redirect('/admin');
+  if (user.is_shop || user.user_type === 'seller') redirect('/shop');
+
+  const [purchases, favourites, threads, pendingAds, activeAds] = await Promise.all([
+    safe(() => apiFromServer<Purchase[]>('/me/purchases?per_page=5', { cache: 'no-store' }).then(r => r.data), FALLBACK_PURCHASES),
+    safe(() => apiFromServer<Favourite[]>('/me/favourites?per_page=5', { cache: 'no-store' }).then(r => r.data), FALLBACK_FAVOURITES),
+    safe(() => apiFromServer<Thread[]>('/me/threads?limit=5', { cache: 'no-store' }).then(r => r.data), []),
+    safe(() => apiFromServer<MyAd[]>('/me/ads?status=pending&per_page=5', { cache: 'no-store' }).then(r => r.data), FALLBACK_ADS),
+    safe(() => apiFromServer<MyAd[]>('/me/ads?status=active&per_page=5', { cache: 'no-store' }).then(r => r.data), FALLBACK_ADS),
   ]);
 
-  const favCount    = (favs?.meta as { total?: number } | undefined)?.total ?? 0;
-  const threadCount = (threads?.meta as { total?: number } | undefined)?.total ?? 0;
-  const txCount     = (txs?.meta as { total?: number } | undefined)?.total ?? 0;
+  const unread = threads.reduce((n, t) => n + (t.unread_count ?? 0), 0);
+
+  // My listings = active (approved, live on public pages) + pending (awaiting
+  // admin review). Sorted newest first.
+  const listings = [...activeAds, ...pendingAds];
+
+  const statusLabel = (s: string) => ({
+    pending: 'Pending', processing: 'Processing', shipped: 'Shipped',
+    delivered: 'Delivered', cancelled: 'Cancelled',
+  }[s] ?? s);
 
   return (
     <>
       <Header variant="default" user={user} />
       <HeaderSpacer />
-      <main className="container-page py-8">
-        <div className="grid gap-6 md:grid-cols-[260px_1fr]">
-          {/* Simple buyer sidebar */}
-          <aside className="md:sticky md:top-6 md:self-start">
-            <nav className="surface-card flex flex-col gap-1 p-3">
-              <SideLink href="/dashboard"          icon={<Heart size={16} />}       label="Overview" />
-              <SideLink href="/shop/favourites"    icon={<Heart size={16} />}       label="Favourites" count={favCount} />
-              <SideLink href="/shop/messages"      icon={<MessageSquare size={16} />} label="Messages"   count={threadCount} />
-              <SideLink href="/shop/transactions"  icon={<Receipt size={16} />}     label="Orders"     count={txCount} />
-              <SideLink href="/shop/plan"          icon={<Crown size={16} />}       label="Membership" />
-              <SideLink href="/shop/settings"      icon={<Settings size={16} />}    label="Settings" />
-            </nav>
-            <div className="mt-4 rounded-lg border border-brand-100 bg-brand-50 p-4 text-center">
-              <p className="text-sm font-semibold text-brand-800">Have something to sell?</p>
-              <p className="mt-1 text-xs text-brand-700">Post your first ad and unlock the full Shop Dashboard.</p>
-              <Link href={'/shop/ads/new' as Route} className="mt-3 inline-flex items-center gap-2 rounded-pill bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800">
-                <PlusSquare size={14} /> Post an ad
+      <main className="container-page py-10">
+        {/* Greeting */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-ink">Hi, {user.name} 👋</h1>
+            <p className="mt-1 text-sm text-ink-muted">Here is your purchase activity, messages and saved items.</p>
+          </div>
+          <Link href={`/store/${user.username}` as Route} className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:text-brand-700">
+            <UserIcon size={16} /> View my profile
+          </Link>
+        </div>
+
+        <div className="mt-8 grid gap-6 lg:grid-cols-3">
+          {/* Quick stats */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:col-span-3 lg:grid-cols-4">
+            {[
+              { icon: <PackageOpen size={18} />, label: 'Listings', value: pendingAds.length + activeAds.length },
+              { icon: <Clock3 size={18} />, label: 'Pending review', value: pendingAds.length, tone: 'text-amber-600' as const },
+              { icon: <Heart size={18} />, label: 'Saved', value: favourites.length },
+              { icon: <ClipboardList size={18} />, label: 'Unread messages', value: unread },
+            ].map((s) => (
+              <div key={s.label} className="surface-card flex items-center gap-3 p-4">
+                <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-50 ${s.tone ?? 'text-brand-700'}`}>
+                  {s.icon}
+                </span>
+                <div>
+                  <p className="text-2xl font-bold leading-none text-ink">{s.value}</p>
+                  <p className="mt-1 text-xs text-ink-muted">{s.label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* My listings (active + under review) */}
+          <section className="surface-card p-6 lg:col-span-2">
+            <div className="flex items-center justify-between">
+              <h2 className="flex items-center gap-2 text-base font-semibold text-ink">
+                <PackageOpen size={18} className="text-brand-600" /> My listings
+              </h2>
+            </div>
+            {listings.length === 0 ? (
+              <EmptyState
+                className="mt-4"
+                icon={<PackageOpen size={24} />}
+                title="No listings yet"
+                description="Products you post will appear here."
+                action={<Link href={'/post/product' as Route}><button className="inline-flex items-center gap-1 rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">Post a product</button></Link>}
+              />
+            ) : (
+              <ul className="mt-4 divide-y divide-line">
+                {listings.map(a => (
+                  <li key={a.id} className="flex items-center gap-4 py-4">
+                    <div className="h-14 w-14 shrink-0 overflow-hidden rounded-md bg-surface-muted">
+                      {a.thumbnail ? (
+                        <img src={a.thumbnail} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-ink-faint text-xs">img</div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      {a.status === 'active' ? (
+                        <Link href={`/ads/${a.url_slug}` as Route} target="_blank" rel="noopener noreferrer"
+                              className="block truncate text-sm font-semibold text-ink hover:text-brand-600">
+                          {a.title}
+                        </Link>
+                      ) : (
+                        <span className="block truncate text-sm font-semibold text-ink">{a.title}</span>
+                      )}
+                      <div className="mt-0.5 text-xs text-ink-muted">
+                        <PriceTag amount={a.price} />
+                        {a.status === 'active' ? ' · Live on marketplace' : ' · awaiting admin review'}
+                      </div>
+                    </div>
+                    {a.status === 'active' ? (
+                      <Badge tone="success">Approved</Badge>
+                    ) : (
+                      <Badge tone="urgent">Pending review</Badge>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          {/* Right column — Messages + Saved, fills space beside My listings */}
+          <div className="flex flex-col gap-6">
+            {/* Messages */}
+            <section className="surface-card p-6">
+              <div className="flex items-center justify-between">
+                <h2 className="flex items-center gap-2 text-base font-semibold text-ink">
+                  <MessageSquare size={18} className="text-brand-600" /> Messages
+                </h2>
+                {unread > 0 && <Badge tone="urgent">{unread} new</Badge>}
+              </div>
+              <Link href={'/messages' as Route} className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:text-brand-700">
+                Open inbox <ArrowRight size={14} />
               </Link>
-            </div>
-          </aside>
+            </section>
 
-          <section className="min-w-0 space-y-6">
-            {/* Profile banner */}
-            <div className="surface-card flex items-center gap-4 p-6">
-              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full ring-2 ring-brand-100">
-                <Image src={user.avatar_url || '/avatar-fallback.png'} alt={user.username} fill sizes="64px" className="object-cover" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <h1 className="text-xl font-bold text-ink">{user.name || user.username}</h1>
-                <p className="text-sm text-ink-muted">
-                  <span className="rounded-pill bg-brand-100 px-2 py-0.5 text-xs font-semibold text-brand-800">Free Plan</span>
-                  <span className="ml-2 font-mono text-xs">@{user.username}</span>
-                </p>
-              </div>
-              <Link href={'/shop/plan' as Route} className="contents">
-                <button className="rounded-pill bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800">
-                  Upgrade
-                </button>
-              </Link>
-            </div>
+            {/* Favourites */}
+            <section className="surface-card p-6">
+              <h2 className="flex items-center gap-2 text-base font-semibold text-ink">
+                <Heart size={18} className="text-brand-600" /> Saved items
+              </h2>
+              {favourites.length === 0 ? (
+                <p className="mt-3 text-sm text-ink-muted">Nothing saved yet.</p>
+              ) : (
+                <ul className="mt-3 space-y-3">
+                  {favourites.map(f => (
+                    <li key={f.id}>
+                      {f.product && (
+                        <Link href={`/ads/${f.product.slug}` as Route} className="block truncate text-sm font-medium text-ink hover:text-brand-600">
+                          {f.product.product_name}
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </div>
 
-            {/* Two KPI cards */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <KpiCard icon={<Heart size={20} />}       label="Favourite Listings" value={favCount}    href="/shop/favourites" />
-              <KpiCard icon={<ShoppingBag size={20} />} label="Order History"      value={txCount}     href="/shop/transactions" />
+          {/* Purchases — full row below My listings + Messages */}
+          <section className="surface-card p-6 lg:col-span-3">
+            <div className="flex items-center justify-between">
+              <h2 className="flex items-center gap-2 text-base font-semibold text-ink">
+                <ShoppingBag size={18} className="text-brand-600" /> My purchases
+              </h2>
             </div>
-
-            {/* Views placeholder card */}
-            <div className="surface-card p-6">
-              <h3 className="text-sm font-semibold text-ink">📈 Recent activity</h3>
-              <p className="mt-1 text-xs text-ink-muted">Your saves, messages, and orders will show up here.</p>
-              <div className="mt-6 flex h-40 items-center justify-center rounded-lg bg-brand-50 text-sm text-ink-muted">
-                Nothing to show yet — start browsing to see activity!
-              </div>
-            </div>
+            {purchases.length === 0 ? (
+              <EmptyState
+                className="mt-4"
+                icon={<ShoppingBag size={24} />}
+                title="No purchases yet"
+                description="Items you buy will show up here with their delivery status."
+                action={<Link href={'/' as Route}><button className="inline-flex items-center gap-1 rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">Browse products</button></Link>}
+              />
+            ) : (
+              <ul className="mt-4 divide-y divide-line">
+                {purchases.map(p => (
+                  <li key={p.id} className="flex items-center gap-4 py-4">
+                    <div className="h-14 w-14 shrink-0 overflow-hidden rounded-md bg-surface-muted">
+                      {p.product_image ? (
+                        <img src={p.product_image} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-ink-faint text-xs">img</div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      {p.product ? (
+                        <Link href={`/ads/${p.product.slug}` as Route} className="block truncate text-sm font-semibold text-ink hover:text-brand-600">
+                          {p.product.product_name}
+                        </Link>
+                      ) : (
+                        <p className="text-sm font-semibold text-ink">Order #{p.id}</p>
+                      )}
+                      <div className="mt-0.5 text-xs text-ink-muted">
+                        from {p.seller?.name ?? 'seller'} · <PriceTag amount={p.transaction?.amount ?? p.amount} />
+                      </div>
+                    </div>
+                    <Badge tone="muted">{statusLabel(p.shipping_status)}</Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
           </section>
         </div>
       </main>
     </>
-  );
-}
-
-async function safe<T>(fn: () => Promise<{ data: T; meta?: unknown }>) {
-  try { return await fn(); } catch (e) { if (e instanceof ApiError) return null; throw e; }
-}
-
-function SideLink({ href, icon, label, count }: { href: string; icon: React.ReactNode; label: string; count?: number }) {
-  return (
-    <Link href={href as Route} className="flex items-center gap-3 rounded-pill px-3 h-10 text-sm font-medium text-ink hover:bg-brand-50">
-      <span className="text-brand-500">{icon}</span>
-      <span className="flex-1">{label}</span>
-      {typeof count === 'number' && count > 0 && (
-        <span className="inline-flex min-w-5 items-center justify-center rounded-pill bg-brand-100 px-2 text-xs font-semibold text-brand-800">{count}</span>
-      )}
-    </Link>
-  );
-}
-
-function KpiCard({ icon, label, value, href }: { icon: React.ReactNode; label: string; value: number; href: string }) {
-  return (
-    <Link href={href as Route} className="surface-card group block p-5 transition hover:shadow-sm">
-      <div className="flex items-center gap-3">
-        <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-700 group-hover:bg-brand-100">
-          {icon}
-        </span>
-        <div>
-          <p className="text-xs uppercase tracking-widest text-ink-muted">{label}</p>
-          <p className="mt-0.5 text-2xl font-bold text-ink">{value}</p>
-        </div>
-      </div>
-    </Link>
   );
 }

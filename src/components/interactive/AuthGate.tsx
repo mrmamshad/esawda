@@ -44,13 +44,21 @@ export function AuthGate({ children }: { children: ReactNode }) {
   const [popup,  setPopup]  = useState<{ open: boolean; reason?: string; after?: () => void }>({ open: false });
 
   // Non-blocking: resolve the session after first paint. The HttpOnly token
-  // cookie authenticates the request; a 401 simply means "guest".
+  // cookie authenticates the request; a 401 simply means "guest". Also
+  // re-resolves when login/logout happens anywhere (auth lib emits
+  // `eshauda:authchange`) so the header chip appears without a reload.
   useEffect(() => {
     let alive = true;
-    api<{ user: User | null }>('/auth/me')
-      .then((res) => { if (alive && res.data?.user) setUser(res.data.user); })
-      .catch(() => { /* guest — leave user null */ });
-    return () => { alive = false; };
+    const resolve = () => {
+      api<{ user: User | null }>('/auth/me')
+        .then((res) => { if (alive && res.data?.user) setUser(res.data.user); })
+        // 401 → guest: also dust the stale user so a logout on another tab
+        // clears the header chip.
+        .catch(() => { if (alive) setUser(null); });
+    };
+    resolve();
+    window.addEventListener('eshauda:authchange', resolve);
+    return () => { alive = false; window.removeEventListener('eshauda:authchange', resolve); };
   }, []);
 
   const requireLogin = useCallback((reason?: string, onAuthed?: () => void) => {

@@ -3,7 +3,7 @@ import { apiFromServer, ApiError } from '@/lib/api';
 import { PageHeader } from '@/components/admin/v2/PageHeader';
 import { AdsTableClient, type AdminAdRow } from './AdsTableClient';
 
-export const metadata: Metadata = { title: 'Ads' };
+export const metadata: Metadata = { title: 'Products' };
 export const dynamic = 'force-dynamic';
 
 const STATUS_TABS = [
@@ -55,13 +55,13 @@ export default async function AdminAdsPage({
   return (
     <>
       <PageHeader
-        title="Ads moderation"
+        title="Products moderation"
         description="Approve, reject, feature, or delete listings across the marketplace."
       />
 
       {/* Filter row — clean pill tabs so the table below stays uncluttered */}
       <div className="mb-4 space-y-3">
-        <nav aria-label="Ad status" className="flex flex-wrap items-center gap-1.5">
+        <nav aria-label="Product status" className="flex flex-wrap items-center gap-1.5">
           <span className="mr-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--adm-fg-faint)' }}>Status</span>
           {STATUS_TABS.map((t) => {
             const active = (status || '') === t.key;

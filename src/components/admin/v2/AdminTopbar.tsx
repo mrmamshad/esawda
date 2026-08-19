@@ -5,10 +5,9 @@ import type { Route } from 'next';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import {
-  Search, Bell, Plus, ChevronRight, LogOut,
+  Search, Plus, ChevronRight, LogOut,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/cn';
 import { useClickOutside } from './useClickOutside';
 import type { User } from '@/types/api';
 
@@ -71,7 +70,7 @@ export function AdminTopbar({ user }: { user: User }) {
           <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--adm-fg-faint)' }} />
           <input
             type="search"
-            placeholder="Search users, ads, transactions…"
+            placeholder="Search users, products, transactions…"
             className="h-9 w-full rounded-lg border pl-9 pr-14 text-[13px] outline-none transition focus:ring-2"
             style={{
               background: 'var(--adm-bg)',
@@ -118,7 +117,7 @@ export function AdminTopbar({ user }: { user: User }) {
                 {[
                   // Admin quick-new stays inside the admin panel so operators
                   // never bounce out to the public/shop chrome mid-workflow.
-                  { href: '/admin/ads/new',  label: 'New ad' },
+                  { href: '/admin/ads/new',  label: 'New product' },
                   { href: '/admin/users',    label: 'New user' },
                   { href: '/admin/blog/new', label: 'New blog post' },
                 ].map((it) => (
@@ -136,11 +135,6 @@ export function AdminTopbar({ user }: { user: User }) {
             )}
           </AnimatePresence>
         </div>
-
-        <IconBtn label="Notifications">
-          <Bell size={16} />
-          <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full" style={{ background: 'var(--adm-brand)' }} />
-        </IconBtn>
 
         {/* Avatar with click-open dropdown */}
         <div className="relative" ref={avatarRef}>
@@ -200,24 +194,6 @@ function MenuLink({
   );
 }
 
-function IconBtn({
-  children, onClick, label,
-}: { children: React.ReactNode; onClick?: () => void; label: string }) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      onClick={onClick}
-      className={cn(
-        'relative grid h-9 w-9 place-items-center rounded-lg transition',
-        'hover:bg-[color:var(--adm-bg)]',
-      )}
-      style={{ color: 'var(--adm-fg-muted)' }}
-    >
-      {children}
-    </button>
-  );
-}
 
 function deriveCrumbs(pathname: string | null): { label: string; href: string }[] {
   if (!pathname) return [{ label: 'Dashboard', href: '/admin' }];

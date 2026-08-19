@@ -49,15 +49,19 @@ export type Ad = {
   featured: boolean;
   urgent: boolean;
   highlight: boolean;
+  paid?: boolean;
   location: { city: string | null; state: string | null; country: string | null };
   category?:    { id: number; name: string; slug: string | null } | null;
   sub_category?:{ id: number; name: string; slug: string | null } | null;
   created_at: string | null;
+  expires_at?: string | null;
+  bundle_items?: { id: number; title: string; price: number; thumbnail: string | null }[] | null;
 };
 
 export type AdDetail = Ad & {
   description: string;
   phone: string | null;
+  whatsapp: string | null;
   tags: string[];
   view_count: number;
   images: { url: string; thumb: string }[];
@@ -75,6 +79,7 @@ export type SellerMini = {
   username: string;
   name: string;
   avatar_url: string;
+  cover_url?: string | null;
   online: boolean;
   member_since: string | null;
   phone: string | null;
@@ -89,6 +94,7 @@ export type Seller = {
   tagline: string | null;
   description: string | null;
   avatar_url: string;
+  cover_url?: string | null;
   online: boolean;
   phone: string | null;
   whatsapp: string | null;
@@ -121,6 +127,7 @@ export type Review = {
   id: number;
   rating: number | null;
   comment: string;
+  image?: string | null;
   date: string;
   author: { id: number; username: string; name: string; avatar_url: string; tagline: string | null } | null;
   product_id: number;
@@ -134,15 +141,23 @@ export type User = {
   phone: string | null;
   user_type: string;
   group_id?: string | number | null;
+  plan_id?: number | null;
   is_admin?: boolean;
   is_shop?: boolean;
+  plan_active?: boolean;
+  plan_expires_at?: string | null;
+  ads_remaining?: number;
+  shop_name?: string | null;
+  shop_address?: string | null;
   avatar_url: string;
+  avatar_set?: boolean;
+  cover_url?: string | null;
   online: boolean;
 };
 
 export type Thread = {
   id: string;
-  counterpart: { id: number; username: string; name: string; avatar_url: string; online: boolean };
+  counterpart: { id: number; username: string; name: string; phone: string | null; avatar_url: string; online: boolean };
   last_message: { body: string; type: string; mine: boolean; sent_at: string | null };
   unread_count: number;
   post_id: number | null;
@@ -157,6 +172,7 @@ export type Message = {
   to_name: string;
   body: string;
   type: string;
+  image_url?: string | null;
   post_id: number | null;
   seen: boolean;
   mine: boolean;
@@ -180,6 +196,25 @@ export type Transaction = {
   reference: string | null;
   invoice_url: string | null;
   created_at: string | null;
+};
+
+export type Order = {
+  id: number;
+  product_id: number;
+  buyer_id: number;
+  seller_id: number;
+  transaction_id: number | null;
+  amount: number;
+  shipping_status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | string;
+  courier_name: string | null;
+  tracking_no: string | null;
+  seller_paid: boolean;
+  product_image: string | null;
+  created_at: string | null;
+  product?: { id: number; product_name: string; slug?: string; price: number; screen_shot?: string | null } | null;
+  buyer?:  { id: number; username: string; name: string | null; email?: string | null } | null;
+  seller?: { id: number; username: string; name: string | null } | null;
+  transaction?: { id: number; status: string; amount: number; created_at: string | null } | null;
 };
 
 export type Blog = {

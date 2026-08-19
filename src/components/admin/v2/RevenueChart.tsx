@@ -15,17 +15,19 @@ export type RevenuePoint = { date: string; total: number };
  */
 export function RevenueChart({
   series,
+  window,
   title = 'Revenue',
   subtitle = 'SSLCommerz confirmed transactions',
   currency = '৳',
 }: {
   series: Record<'7D' | '30D' | '90D' | '1Y', RevenuePoint[]>;
+  window?: { label: string; points: RevenuePoint[] };
   title?: string;
   subtitle?: string;
   currency?: string;
 }) {
   const [range, setRange] = useState<'7D' | '30D' | '90D' | '1Y'>('30D');
-  const data = series[range] ?? [];
+  const data = window ? window.points : (series[range] ?? []);
   const total = data.reduce((s, p) => s + p.total, 0);
 
   return (
@@ -41,33 +43,35 @@ export function RevenueChart({
         <div className="flex items-center gap-3">
           <div className="text-right">
             <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--adm-fg-faint)' }}>
-              {range}
+              {window ? window.label : range}
             </p>
             <p className="text-lg font-bold tabular-nums" style={{ color: 'var(--adm-fg)' }}>
               {currency}{new Intl.NumberFormat('en-IN').format(Math.round(total))}
             </p>
           </div>
-          <div
-            className="inline-flex items-center rounded-lg border p-0.5"
-            style={{ background: 'var(--adm-bg)', borderColor: 'var(--adm-border)' }}
-          >
-            {(['7D', '30D', '90D', '1Y'] as const).map((r) => (
-              <button
-                key={r}
-                onClick={() => setRange(r)}
-                className={cn(
-                  'rounded-md px-2.5 py-1 text-[11px] font-semibold transition',
-                )}
-                style={{
-                  background: range === r ? 'var(--adm-surface)' : 'transparent',
-                  color: range === r ? 'var(--adm-fg)' : 'var(--adm-fg-muted)',
-                  boxShadow: range === r ? 'var(--adm-shadow-sm)' : 'none',
-                }}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
+          {!window && (
+            <div
+              className="inline-flex items-center rounded-lg border p-0.5"
+              style={{ background: 'var(--adm-bg)', borderColor: 'var(--adm-border)' }}
+            >
+              {(['7D', '30D', '90D', '1Y'] as const).map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setRange(r)}
+                  className={cn(
+                    'rounded-md px-2.5 py-1 text-[11px] font-semibold transition',
+                  )}
+                  style={{
+                    background: range === r ? 'var(--adm-surface)' : 'transparent',
+                    color: range === r ? 'var(--adm-fg)' : 'var(--adm-fg-muted)',
+                    boxShadow: range === r ? 'var(--adm-shadow-sm)' : 'none',
+                  }}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </header>
 

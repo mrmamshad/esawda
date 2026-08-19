@@ -39,7 +39,7 @@ export function ReportModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={`Report ad #${adId}`}
+      title={`Report product #${adId}`}
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>Cancel</Button>

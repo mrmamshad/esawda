@@ -40,8 +40,8 @@ const FAQS: FaqItem[] = [
     a: 'Returns are handled directly between buyer and seller based on whatever return policy the seller has published on the listing. If a seller refuses to resolve a clear misrepresentation, open a dispute from <strong>Messages → Report</strong> and our moderation team will step in.',
   },
   {
-    q: 'How do I post my first ad?',
-    a: 'From your dashboard, click <strong>Post Ad</strong>. Add up to 8 photos, a clear title, a description with key details (condition, model, year, etc.), a price, and a category. Listings with at least 3 photos and a complete description get 4× more enquiries.',
+    q: 'How do I post my first product?',
+    a: 'From your dashboard, click <strong>Post Product</strong>. Add up to 8 photos, a clear title, a description with key details (condition, model, year, etc.), a price, and a category. Listings with at least 3 photos and a complete description get 4× more enquiries.',
   },
   {
     q: 'How long does a listing stay active?',
@@ -53,7 +53,7 @@ const FAQS: FaqItem[] = [
   },
   {
     q: 'Can I edit a listing after posting?',
-    a: 'Yes. Go to <strong>Dashboard → My Ads</strong>, pick the listing, and click <strong>Edit</strong>. Photos, price, description, and category can all be updated. The listing will re-appear in search results after a quick re-moderation (usually &lt; 5 minutes).',
+    a: 'Yes. Go to <strong>Dashboard → My Products</strong>, pick the listing, and click <strong>Edit</strong>. Photos, price, description, and category can all be updated. The listing will re-appear in search results after a quick re-moderation (usually &lt; 5 minutes).',
   },
   {
     q: 'How does eSawda keep buyers and sellers safe?',

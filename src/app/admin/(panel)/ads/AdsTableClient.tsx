@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { useRouter } from 'next/navigation';
@@ -35,9 +35,12 @@ export type AdminAdRow = {
  */
 export function AdsTableClient({ initialRows }: { initialRows: AdminAdRow[] }) {
   const router = useRouter();
-  const [rows] = useState<AdminAdRow[]>(initialRows);
+  const [rows, setRows] = useState<AdminAdRow[]>(initialRows);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [pending, start] = useTransition();
+
+  // router.refresh() hands back fresh rows after an action — keep in sync.
+  useEffect(() => { setRows(initialRows); }, [initialRows]);
 
   const call = async (id: number, path: string, method: 'POST' | 'DELETE' = 'POST', body?: unknown, success = 'Done') => {
     setBusyId(id);

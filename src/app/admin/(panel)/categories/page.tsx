@@ -17,7 +17,7 @@ export default async function AdminCategoriesPage() {
   );
   return (
     <>
-      <PageHeader title="Categories" description="Add, rename, or remove ad categories." />
+      <PageHeader title="Categories" description="Add, rename, or remove product categories." />
       <CategoriesTableClient initialRows={res.data} />
     </>
   );

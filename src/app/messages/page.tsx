@@ -3,7 +3,7 @@ import type { Route } from 'next';
 import type { Metadata } from 'next';
 import { MessageSquare } from 'lucide-react';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
-import { ThreadsList } from '@/components/chat/ThreadsList';
+import { ThreadsSidebar } from '@/components/chat/ThreadsSidebar';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { apiFromServer, ApiError } from '@/lib/api';
@@ -35,7 +35,7 @@ export default async function MessagesIndex() {
               <h1 className="text-lg font-semibold text-ink">Inbox</h1>
               <p className="text-xs text-ink-muted">{threads.length} conversations</p>
             </div>
-            <ThreadsList threads={threads} />
+            <ThreadsSidebar />
           </aside>
 
           <section className="surface-card flex flex-col items-center justify-center overflow-hidden">
@@ -45,7 +45,7 @@ export default async function MessagesIndex() {
               <EmptyState
                 icon={<MessageSquare size={20} />}
                 title="No conversations yet"
-                description="Message sellers on any ad to start chatting."
+                description="Message sellers on any product to start chatting."
                 action={<Link href={'/ads' as Route} className="contents"><Button variant="filled">Browse ads</Button></Link>}
               />
             ) : (

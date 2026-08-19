@@ -34,7 +34,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
     items = (adsRes.data ?? []) as Ad[];
     meta  = { ...meta, ...(adsRes.meta as Partial<typeof meta>) };
   } catch (e) {
-    error = e instanceof ApiError ? e.message : 'Could not load ads.';
+    error = e instanceof ApiError ? e.message : 'Could not load products.';
   }
 
   return (

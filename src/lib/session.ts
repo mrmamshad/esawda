@@ -32,7 +32,7 @@ export async function requireUser(redirectTo: string): Promise<User> {
       ? '/shop/login'
       : redirectTo.startsWith('/admin')
         ? '/admin/login'
-        : '/auth/login';
+        : '/login';
     redirect(`${loginPath}?redirect=${encodeURIComponent(redirectTo)}`);
   }
   return user;

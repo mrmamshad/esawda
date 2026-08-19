@@ -6,7 +6,7 @@ import { ThreadListItem } from './ThreadListItem';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { Thread } from '@/types/api';
 
-export function ThreadsList({ threads, activeUserId }: { threads: Thread[]; activeUserId?: number }) {
+export function ThreadsList({ threads, activeUserId, hrefPrefix }: { threads: Thread[]; activeUserId?: number; hrefPrefix?: string }) {
   const [q, setQ] = useState('');
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -40,7 +40,7 @@ export function ThreadsList({ threads, activeUserId }: { threads: Thread[]; acti
         ) : (
           <div className="flex flex-col gap-1">
             {filtered.map((t) => (
-              <ThreadListItem key={t.id} thread={t} active={t.counterpart.id === activeUserId} />
+              <ThreadListItem key={t.id} thread={t} active={t.counterpart.id === activeUserId} hrefPrefix={hrefPrefix} />
             ))}
           </div>
         )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -25,7 +25,10 @@ export type AdminTxRow = {
 
 export function TxTableClient({ initialRows }: { initialRows: AdminTxRow[] }) {
   const router = useRouter();
-  const [rows] = useState<AdminTxRow[]>(initialRows);
+  const [rows, setRows] = useState<AdminTxRow[]>(initialRows);
+
+  // router.refresh() hands back fresh rows after an action — keep in sync.
+  useEffect(() => { setRows(initialRows); }, [initialRows]);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [pending, start] = useTransition();
 

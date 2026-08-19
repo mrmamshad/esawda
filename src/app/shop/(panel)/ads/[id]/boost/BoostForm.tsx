@@ -63,7 +63,7 @@ export function BoostForm({ ad }: { ad: AdDetail }) {
 
       <aside className="surface-card h-fit space-y-3 p-5">
         <h3 className="text-sm font-semibold text-ink">Order summary</h3>
-        <div className="text-xs text-ink-muted">Ad: {ad.title}</div>
+        <div className="text-xs text-ink-muted">Product: {ad.title}</div>
         <div className="flex justify-between border-t border-line pt-3 text-sm">
           <span className="text-ink-muted">Total</span>
           <span className="text-lg font-bold text-ink">৳{total}</span>

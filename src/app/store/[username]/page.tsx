@@ -69,8 +69,13 @@ function humanAgo(iso: string | null): string | null {
   return `${years}+ year${years === 1 ? '' : 's'} ago`;
 }
 
-export default async function SellerProfilePage({ params }: { params: Promise<{ username: string }> }) {
+export default async function SellerProfilePage({ params, searchParams }: {
+  params: Promise<{ username: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { username } = await params;
+  const sp = await searchParams;
+  const activeCat = typeof sp.cat === 'string' ? sp.cat : '';
 
   const [seller, ads, reviews] = await Promise.all([
     api<Seller>(`/sellers/${username}`,                       { revalidate: 120 }).catch(() => null),
@@ -96,6 +101,12 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
   }
   const categories = Array.from(catCounts.values()).sort((a, b) => b.count - a.count);
 
+  // Profile-scoped category filter: when a category chip is chosen, show
+  // only this seller's ads in that category (default = all).
+  const visibleAds = activeCat
+    ? ads.data.filter((ad) => String(ad.category?.slug ?? ad.category?.id) === activeCat)
+    : ads.data;
+
   const waHref = s.whatsapp ? `https://wa.me/${encodeURIComponent(s.whatsapp.replace(/\D/g, ''))}` : null;
   const memberSince = humanAgo(s.member_since);
   const lastSeen    = humanAgo(s.last_active);
@@ -115,6 +126,9 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
             <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
               {/* Seller identity card */}
               <div className="surface-card overflow-hidden">
+                {s.cover_url && (
+                  <img src={s.cover_url} alt="" className="h-32 w-full object-cover" />
+                )}
                 <div className="flex flex-col items-center px-6 pt-8 pb-6 text-center">
                   <div className="relative">
                     <Avatar src={s.avatar_url} alt={s.name} size="xl" />
@@ -223,15 +237,18 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
               <div className="surface-card p-3">
                 <div className="flex items-center gap-3 overflow-x-auto pb-1">
                   <CategoryChip
-                    active
+                    active={!activeCat}
                     label="All categories"
                     count={s.stats.total_listings}
+                    href={`?cat=`}
                   />
                   {categories.map((c) => (
                     <CategoryChip
                       key={c.slug}
                       label={c.name}
                       count={c.count}
+                      active={activeCat === String(c.slug)}
+                      href={`?cat=${encodeURIComponent(String(c.slug))}`}
                     />
                   ))}
                 </div>
@@ -240,8 +257,8 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
               {/* Sort + view toggles */}
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-line bg-white px-4 py-2.5">
                 <p className="text-sm text-ink-muted">
-                  Showing <span className="font-semibold text-ink">{ads.data.length}</span>{' '}
-                  {ads.data.length === 1 ? 'ad' : 'ads'}
+                  Showing <span className="font-semibold text-ink">{visibleAds.length}</span>{' '}
+                  {visibleAds.length === 1 ? 'product' : 'products'}
                 </p>
                 <div className="flex items-center gap-2">
                   <button
@@ -271,13 +288,15 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
               </div>
 
               {/* Listings grid */}
-              {ads.data.length === 0 ? (
+              {visibleAds.length === 0 ? (
                 <div className="rounded-card border border-dashed border-line bg-white p-12 text-center text-ink-muted">
-                  This seller hasn&apos;t posted any ads yet.
+                  {activeCat
+                    ? 'No products in this category yet.'
+                    : 'This seller hasn&apos;t posted any products yet.'}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {ads.data.map((ad) => (
+                  {visibleAds.map((ad) => (
                     <ListingCard
                       key={ad.id}
                       ad={ad}
@@ -309,20 +328,18 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
   );
 }
 
-/** Small pill used for the seller's own category rail. */
+/** Small pill used for the seller's own category rail. Links to the
+ *  public category browse page so it actually navigates. */
 function CategoryChip({
-  label, count, active,
-}: { label: string; count: number; active?: boolean }) {
-  return (
-    <button
-      type="button"
-      className={
-        'inline-flex shrink-0 items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-medium transition ' +
-        (active
-          ? 'bg-brand-600 text-white shadow-sm'
-          : 'bg-surface-muted text-ink hover:bg-brand-50 hover:text-brand-700')
-      }
-    >
+  label, count, active, href,
+}: { label: string; count: number; active?: boolean; href?: string }) {
+  const cls =
+    'inline-flex shrink-0 items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-medium transition ' +
+    (active
+      ? 'bg-brand-600 text-white shadow-sm'
+      : 'bg-surface-muted text-ink hover:bg-brand-50 hover:text-brand-700');
+  const inner = (
+    <>
       <span>{label}</span>
       <span
         className={
@@ -332,6 +349,11 @@ function CategoryChip({
       >
         {count}
       </span>
-    </button>
+    </>
+  );
+  return href ? (
+    <Link href={href as Route} className={cls}>{inner}</Link>
+  ) : (
+    <button type="button" className={cls}>{inner}</button>
   );
 }

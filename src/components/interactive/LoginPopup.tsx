@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import { X } from 'lucide-react';
+import { PasswordInput } from '@/components/forms/PasswordInput';
 import { api, ApiError } from '@/lib/api';
 import { saveToken } from '@/lib/auth';
 import type { User } from '@/types/api';
@@ -222,8 +223,8 @@ export function LoginPopup({ open, onClose, onSuccess, reason }: LoginPopupProps
                 value={identifier} onChange={(e) => setIdentifier(e.target.value)}
                 className={INP}
               />
-              <input
-                required minLength={8} type="password"
+              <PasswordInput
+                required minLength={8}
                 placeholder={t.password}
                 value={password} onChange={(e) => setPassword(e.target.value)}
                 className={INP}
@@ -258,14 +259,14 @@ export function LoginPopup({ open, onClose, onSuccess, reason }: LoginPopupProps
                 value={identifier} onChange={(e) => setIdentifier(e.target.value)}
                 className={INP}
               />
-              <input
-                required minLength={8} type="password"
+              <PasswordInput
+                required minLength={8}
                 placeholder={t.password}
                 value={password} onChange={(e) => setPassword(e.target.value)}
                 className={INP}
               />
-              <input
-                required minLength={8} type="password"
+              <PasswordInput
+                required minLength={8}
                 placeholder={t.confirmPassword}
                 value={confirm} onChange={(e) => setConfirm(e.target.value)}
                 className={INP}

@@ -73,9 +73,9 @@ export function ListingGrid({
         ) : items.length === 0 ? (
           <EmptyState
             icon={<ListChecks size={20} />}
-            title="No ads found"
+            title="No products found"
             description="Try adjusting your filters or explore all listings."
-            action={<Link href={'/ads' as Route} className="contents"><Button variant="filled">Browse all ads</Button></Link>}
+            action={<Link href={'/ads' as Route} className="contents"><Button variant="filled">Browse all products</Button></Link>}
           />
         ) : (
           <>

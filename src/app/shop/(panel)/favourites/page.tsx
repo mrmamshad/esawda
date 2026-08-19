@@ -37,7 +37,7 @@ export default async function FavouritesPage({ searchParams }: { searchParams: S
     <>
       <header>
         <h1 className="text-2xl font-bold text-ink">Favourites</h1>
-        <p className="text-sm text-ink-muted">Ads you saved for later.</p>
+        <p className="text-sm text-ink-muted">Products you saved for later.</p>
       </header>
 
       {error ? (
@@ -46,7 +46,7 @@ export default async function FavouritesPage({ searchParams }: { searchParams: S
         <EmptyState
           icon={<Heart size={20} />}
           title="No favourites yet"
-          description="Tap the heart icon on any ad to save it here."
+          description="Tap the heart icon on any product to save it here."
           action={<Link href={'/ads' as Route} className="contents"><Button variant="filled">Browse ads</Button></Link>}
         />
       ) : (

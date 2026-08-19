@@ -18,11 +18,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(env.site.base),
   title: {
-    default: 'eSawda — Buy, Sell, Browse Ads',
+    default: 'eSawda — Buy, Sell, Browse Products',
     template: '%s · eSawda',
   },
   description:
-    'Browse thousands of classified ads across vehicles, mobiles, electronics, houses and more. Post your ad in minutes on eSawda.',
+    'Browse thousands of classified products across vehicles, mobiles, electronics, houses and more. Post your product in minutes on eSawda.',
   applicationName: env.site.name,
   openGraph: {
     siteName: env.site.name,

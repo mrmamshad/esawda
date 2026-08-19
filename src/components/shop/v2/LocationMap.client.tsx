@@ -1,6 +1,6 @@
 'use client';
 
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import { useEffect, useState } from 'react';
 import L from 'leaflet';
 
@@ -34,10 +34,11 @@ export default function LocationMapClient({
         className="h-full w-full"
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
         <ClickHandler onPick={(p) => { setPos(p); onChange(p); }} />
+        <FlyTo initial={initial} />
         <Marker
           position={[pos.lat, pos.lng]}
           draggable
@@ -59,5 +60,14 @@ function ClickHandler({ onPick }: { onPick: (p: { lat: number; lng: number }) =>
   useMapEvents({
     click: (e) => onPick({ lat: e.latlng.lat, lng: e.latlng.lng }),
   });
+  return null;
+}
+
+/** Pans the map to a new pin position (e.g. an autocomplete choice). */
+function FlyTo({ initial }: { initial: { lat: number; lng: number } }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView([initial.lat, initial.lng], 13);
+  }, [initial.lat, initial.lng, map]);
   return null;
 }

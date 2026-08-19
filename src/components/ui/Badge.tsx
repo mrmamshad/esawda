@@ -1,14 +1,16 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
-type Tone = 'featured' | 'urgent' | 'muted' | 'success' | 'onDark';
+type Tone = 'featured' | 'urgent' | 'paid' | 'highlight' | 'muted' | 'success' | 'onDark';
 
 const tones: Record<Tone, string> = {
-  featured: 'bg-brand-700 text-white',
-  urgent:   'bg-warning text-white',
-  muted:    'bg-brand-100 text-brand-800',
-  success:  'bg-success text-white',
-  onDark:   'bg-white/10 text-white border border-white/20 backdrop-blur',
+  featured:  'bg-brand-700 text-white',
+  urgent:    'bg-warning text-white',
+  paid:      'bg-emerald-600 text-white',
+  highlight: 'bg-violet-600 text-white',
+  muted:     'bg-brand-100 text-brand-800',
+  success:   'bg-success text-white',
+  onDark:    'bg-white/10 text-white border border-white/20 backdrop-blur',
 };
 
 export function Badge({

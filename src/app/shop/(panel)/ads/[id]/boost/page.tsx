@@ -32,7 +32,7 @@ export default async function BoostAdPage({ params }: { params: Promise<{ id: st
   return (
     <main className="container-page py-8">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-ink">Boost this ad</h1>
+        <h1 className="text-2xl font-bold text-ink">Boost this product</h1>
         <p className="text-sm text-ink-muted">Increase visibility with paid placements. Paid via SSLCommerz.</p>
       </header>
       <BoostForm ad={ad} />

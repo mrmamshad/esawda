@@ -43,7 +43,7 @@ export function AdminShell({ user, children }: { user: User; children: ReactNode
               <p className="mb-2 font-semibold text-brand-800">Quick actions</p>
               <Link href={'/shop/ads/new' as Route}
                 className="inline-flex items-center gap-1 rounded-md bg-white px-2 py-1 text-brand-700 hover:bg-brand-100"
-              >+ Post Ad</Link>
+              >+ Post Product</Link>
               <Link href={'/' as Route}
                 className="mt-2 flex items-center gap-1 text-brand-700 hover:text-brand-600"
               ><ExternalLink size={12} /> View site as guest</Link>

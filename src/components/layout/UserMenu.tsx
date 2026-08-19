@@ -104,7 +104,7 @@ export function UserMenu({ user, onDark = false }: { user: User; onDark?: boolea
             {user.is_shop ? (
               <>
                 <Item href={'/shop' as Route}           icon={<LayoutDashboard size={16} />} label="Shop Dashboard"    onClick={() => setOpen(false)} />
-                <Item href={'/shop/ads' as Route}       icon={<Package size={16} />}         label="My Ads"            onClick={() => setOpen(false)} />
+                <Item href={'/shop/ads' as Route}       icon={<Package size={16} />}         label="My Products"        onClick={() => setOpen(false)} />
                 <Item href={`/store/${user.username}` as Route} icon={<Store size={16} />}   label="My Public Store"   onClick={() => setOpen(false)} />
               </>
             ) : (

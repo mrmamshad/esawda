@@ -76,7 +76,7 @@ function deriveFeatures(plan: Plan): string[] {
   // Fallback bullet copy when the backend didn't provide a features list.
   return [
     `${plan.name} tier access`,
-    plan.recommended ? 'Featured badge on your ads' : 'Standard ad listings',
+    plan.recommended ? 'Featured badge on your products' : 'Standard product listings',
     'Direct chat with buyers',
     'Analytics & insights',
   ];

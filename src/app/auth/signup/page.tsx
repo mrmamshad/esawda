@@ -8,6 +8,7 @@ import { api, ApiError } from '@/lib/api';
 import { saveToken } from '@/lib/auth';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
 import { PageSurface } from '@/components/layout/PageSurface';
+import { PasswordInput } from '@/components/forms/PasswordInput';
 import { Button } from '@/components/ui/Button';
 import type { User } from '@/types/api';
 
@@ -24,11 +25,19 @@ function Field({ label, name, value, onChange, error, type = 'text' }: {
   return (
     <label className="block">
       <span className="text-sm font-medium text-ink">{label}</span>
-      <input
-        type={type} value={value} required
-        onChange={(e) => onChange(name, e.target.value)}
-        className="mt-1 h-11 w-full rounded-field bg-surface-muted px-3 outline-none focus:ring-2 focus:ring-brand-500"
-      />
+      {type === 'password' ? (
+        <PasswordInput
+          value={value} required
+          onChange={(e) => onChange(name, e.target.value)}
+          className="mt-1 h-11 w-full rounded-field bg-surface-muted px-3 outline-none focus:ring-2 focus:ring-brand-500"
+        />
+      ) : (
+        <input
+          type={type} value={value} required
+          onChange={(e) => onChange(name, e.target.value)}
+          className="mt-1 h-11 w-full rounded-field bg-surface-muted px-3 outline-none focus:ring-2 focus:ring-brand-500"
+        />
+      )}
       {error && <span className="mt-1 block text-xs text-danger">{error}</span>}
     </label>
   );
@@ -55,7 +64,13 @@ export default function SignupPage() {
         },
       });
       saveToken(data.token);
-      router.push('/' as Route);
+      const redirectTo = typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('redirect')
+        : null;
+      const next = redirectTo?.startsWith('/') && !redirectTo.startsWith('//')
+        ? redirectTo
+        : '/';
+      router.push(next as Route);
       router.refresh();
     } catch (err) {
       if (err instanceof ApiError) {
@@ -73,7 +88,7 @@ export default function SignupPage() {
         <form onSubmit={submit} className="w-full max-w-md space-y-4 surface-card p-8">
           <div>
             <h1 className="text-2xl font-bold text-ink">Create your account</h1>
-            <p className="mt-1 text-sm text-ink-muted">Free to join. Start posting ads in seconds.</p>
+            <p className="mt-1 text-sm text-ink-muted">Free to join. Start posting products in seconds.</p>
           </div>
 
           <Field label="Full name" name="name" value={form.name} onChange={set} error={errors.name?.[0]} />
@@ -87,7 +102,7 @@ export default function SignupPage() {
           <Button type="submit" fullWidth disabled={busy}>{busy ? 'Creating…' : 'Create account'}</Button>
 
           <div className="text-center text-sm text-ink-muted">
-            Already a member? <Link href={'/auth/login' as Route} className="text-brand-700 hover:underline">Sign in</Link>
+            Already a member? <Link href={'/login' as Route} className="text-brand-700 hover:underline">Sign in</Link>
           </div>
         </form>
       </div>

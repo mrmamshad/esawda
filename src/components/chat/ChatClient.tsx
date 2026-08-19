@@ -55,14 +55,26 @@ export function ChatClient({ userId }: { userId: number }) {
     };
   }, [load]);
 
-  useEffect(() => {
+  const lastId = messages.at(-1)?.id ?? 0;
+  const scrollToBottom = useCallback(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, [messages.length]);
+  }, []);
+  useEffect(() => {
+    scrollToBottom();
+  }, [lastId, scrollToBottom]);
 
-  const onSend = useCallback(async (body: string) => {
+  const onSend = useCallback(async (body: string, image?: File | null) => {
     try {
       // Backend `SendMessageRequest` expects `to` (recipient user id) — not `to_id`.
-      await api('/messages', { method: 'POST', body: { to: userId, body }, token: readToken() });
+      // Image messages go out as multipart so the file rides along.
+      const fd = new FormData();
+      fd.append('to', String(userId));
+      if (image) {
+        fd.append('image', image);
+      } else {
+        fd.append('body', body);
+      }
+      await api('/messages', { method: 'POST', body: fd, token: readToken() });
       await load();
     } catch (e) {
       setError(e instanceof ApiError ? e.message : 'Failed to send.');
@@ -85,7 +97,7 @@ export function ChatClient({ userId }: { userId: number }) {
         {error && (
           <div className="rounded-field border border-danger/40 bg-danger/5 px-3 py-2 text-sm text-danger">{error}</div>
         )}
-        {messages.map((m) => <MessageBubble key={m.id} body={m.body} mine={m.mine} sentAt={m.sent_at} />)}
+        {messages.map((m) => <MessageBubble key={m.id} body={m.body} mine={m.mine} sentAt={m.sent_at} type={m.type} imageUrl={m.image_url} onImageLoad={scrollToBottom} />)}
         <div ref={endRef} />
       </div>
       <ChatComposer onSend={onSend} />

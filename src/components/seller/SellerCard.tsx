@@ -16,8 +16,15 @@ import type { SellerMini } from '@/types/api';
  * shop profile (`/store/[username]`) so buyers can jump straight to the
  * seller's store from the ad detail page.
  */
-export function SellerCard({ seller }: { seller: SellerMini }) {
-  const waHref = seller.whatsapp ? `https://wa.me/${encodeURIComponent(seller.whatsapp.replace(/\D/g, ''))}` : null;
+export function SellerCard({ seller, productId, productTitle, adWhatsapp }: {
+  seller: SellerMini;
+  productId?: number;
+  productTitle?: string;
+  adWhatsapp?: string | null;
+}) {
+  // Listing-level whatsapp wins — the seller may set a different number per ad.
+  const waNumber = adWhatsapp ?? seller.whatsapp;
+  const waHref = waNumber ? `https://wa.me/${encodeURIComponent(waNumber.replace(/\D/g, ''))}` : null;
   const hasSocials =
     seller.socials &&
     Object.values(seller.socials).some((v) => !!v);
@@ -26,7 +33,7 @@ export function SellerCard({ seller }: { seller: SellerMini }) {
   return (
     <aside className="surface-card p-6 text-center">
       <div className="flex items-center justify-between text-sm text-ink-muted">
-        <span>Active Member</span>
+        <span>Contact Seller</span>
         <OnlineDot active={seller.online} />
       </div>
 
@@ -55,10 +62,10 @@ export function SellerCard({ seller }: { seller: SellerMini }) {
         href={storeHref}
         className="mt-1 inline-block text-sm font-medium text-brand-700 hover:text-brand-600 hover:underline underline-offset-2"
       >
-        View all ads
+        View all products
       </Link>
 
-      <SellerCardActions sellerId={seller.id} sellerName={seller.name} waHref={waHref} />
+      <SellerCardActions sellerId={seller.id} sellerName={seller.name} waHref={waHref} productId={productId} productTitle={productTitle} />
 
       {hasSocials && (
         <div className="mt-5 border-t border-line pt-4">

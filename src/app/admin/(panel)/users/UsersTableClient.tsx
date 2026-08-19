@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -23,7 +23,10 @@ export type AdminUserRow = {
 
 export function UsersTableClient({ initialRows }: { initialRows: AdminUserRow[] }) {
   const router = useRouter();
-  const [rows] = useState<AdminUserRow[]>(initialRows);
+  const [rows, setRows] = useState<AdminUserRow[]>(initialRows);
+
+  // router.refresh() hands back fresh rows after an action — keep in sync.
+  useEffect(() => { setRows(initialRows); }, [initialRows]);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [pending, start] = useTransition();
 

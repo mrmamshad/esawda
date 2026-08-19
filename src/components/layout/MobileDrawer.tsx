@@ -13,7 +13,7 @@ import { cn } from '@/lib/cn';
 // to /shop/* avoids the extra hop.
 const LINKS: { href: string; label: string }[] = [
   { href: '/ads',                   label: 'Browse ads' },
-  { href: '/shop/ads/new',        label: 'Post ad' },
+  { href: '/post/product',      label: 'Post ad' },
   { href: '/shop',                label: 'Dashboard' },
   { href: '/shop/ads',            label: 'My ads' },
   { href: '/shop/favourites',     label: 'Favourites' },
@@ -115,7 +115,7 @@ export function MobileDrawer({ onDark = false }: { onDark?: boolean }) {
               ) : (
                 <div className="grid grid-cols-2 gap-2">
                   <Link
-                    href={'/auth/login' as Route}
+                    href={'/login' as Route}
                     onClick={() => setOpen(false)}
                     className="flex items-center justify-center gap-2 rounded-field border border-line px-3 py-2.5 text-sm font-semibold text-ink hover:bg-brand-50"
                   >

@@ -6,8 +6,8 @@ import { usePathname } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 import {
   LayoutDashboard, Crown, PlusSquare, List, CircleCheckBig, Clock, DollarSign,
-  Trash2, FileEdit, Heart, MessageSquare, Receipt, Settings, Store,
-  ChevronsLeft, ChevronsRight, LogOut, ChevronDown, ExternalLink,
+  Trash2, FileEdit, Heart, MessageSquare, Receipt, Settings, Store, CalendarX,
+  ChevronsLeft, ChevronsRight, LogOut, ChevronDown, ExternalLink, Package, ShoppingCart,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/cn';
@@ -24,7 +24,7 @@ import type { User } from '@/types/api';
 type NavItem = { href: Route; label: string; icon: ReactNode; count?: number };
 type NavGroup = { title: string; items: NavItem[] };
 
-export function buildShopGroups(counts?: { active?: number; pending?: number; sold_out?: number; removed?: number; drafts?: number; wishlisted?: number; messages?: number }): NavGroup[] {
+export function buildShopGroups(counts?: { active?: number; pending?: number; sold_out?: number; removed?: number; drafts?: number; expired?: number; wishlisted?: number; messages?: number }): NavGroup[] {
   return [
     {
       title: 'Store Management',
@@ -34,15 +34,17 @@ export function buildShopGroups(counts?: { active?: number; pending?: number; so
       ],
     },
     {
-      title: 'Sales & Ads',
+      title: 'Sales & Products',
       items: [
-        { href: '/shop/ads/new' as Route,      label: 'Post New Ad',         icon: <PlusSquare     size={17} /> },
-        { href: '/shop/ads' as Route,          label: 'All Ads',             icon: <List           size={17} /> },
-        { href: '/shop/ads/active' as Route,   label: 'Active Ads',          icon: <CircleCheckBig size={17} />, count: counts?.active },
-        { href: '/shop/ads/pending' as Route,  label: 'Pending Ads',         icon: <Clock          size={17} />, count: counts?.pending },
-        { href: '/shop/ads/sold-out' as Route, label: 'Sold Out Ads',        icon: <DollarSign     size={17} />, count: counts?.sold_out },
-        { href: '/shop/ads/removed' as Route,  label: 'Removed Ads',         icon: <Trash2         size={17} />, count: counts?.removed },
+        { href: '/shop/ads/new' as Route,      label: 'Post New Product',   icon: <PlusSquare     size={17} /> },
+        { href: '/shop/ads/bundle/new' as Route, label: 'Create Bundle',   icon: <Package       size={17} /> },
+        { href: '/shop/ads' as Route,          label: 'All Products',        icon: <List           size={17} /> },
+        { href: '/shop/ads/active' as Route,   label: 'Active Products',     icon: <CircleCheckBig size={17} />, count: counts?.active },
+        { href: '/shop/ads/pending' as Route,  label: 'Pending Products',    icon: <Clock          size={17} />, count: counts?.pending },
+        { href: '/shop/ads/sold-out' as Route, label: 'Sold Out Products',   icon: <DollarSign     size={17} />, count: counts?.sold_out },
+        { href: '/shop/ads/removed' as Route,  label: 'Removed Products',    icon: <Trash2         size={17} />, count: counts?.removed },
         { href: '/shop/ads/drafts' as Route,   label: 'Drafts',              icon: <FileEdit       size={17} />, count: counts?.drafts },
+        { href: '/shop/ads/expire' as Route,   label: 'Expired Products',    icon: <CalendarX      size={17} />, count: counts?.expired },
         { href: '/shop/wishlisted' as Route,   label: 'Wishlisted by Users', icon: <Heart          size={17} />, count: counts?.wishlisted },
       ],
     },
@@ -50,6 +52,7 @@ export function buildShopGroups(counts?: { active?: number; pending?: number; so
       title: 'Account',
       items: [
         { href: '/shop/messages' as Route,     label: 'Messages',      icon: <MessageSquare size={17} />, count: counts?.messages },
+        { href: '/shop/orders' as Route,       label: 'Orders',        icon: <ShoppingCart   size={17} /> },
         { href: '/shop/transactions' as Route, label: 'Transactions',  icon: <Receipt       size={17} /> },
         { href: '/shop/profile' as Route,      label: 'Shop Profile',  icon: <Store         size={17} /> },
         { href: '/shop/settings' as Route,     label: 'Account Setting', icon: <Settings    size={17} /> },

@@ -37,7 +37,7 @@ export default async function SubCategoryPage({ params, searchParams }: { params
     items = (adsRes.data ?? []) as Ad[];
     meta  = { ...meta, ...(adsRes.meta as Partial<typeof meta>) };
   } catch (e) {
-    error = e instanceof ApiError ? e.message : 'Could not load ads.';
+    error = e instanceof ApiError ? e.message : 'Could not load products.';
   }
 
   return (

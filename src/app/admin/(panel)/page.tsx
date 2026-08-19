@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { apiFromServer, ApiError } from '@/lib/api';
 import { PageHeader } from '@/components/admin/v2/PageHeader';
+import { DateRangeFilter } from '@/components/admin/v2/DateRangeFilter';
 import { StatCard } from '@/components/admin/v2/StatCard';
 import { RevenueChart } from '@/components/admin/v2/RevenueChart';
 import { CategoryDonut } from '@/components/admin/v2/CategoryDonut';
@@ -16,6 +17,10 @@ import { StatusBadge } from '@/components/admin/v2/StatusBadge';
 import type { AdminDashboardData, AdminRecentAd, AdminRecentUser, AdminRecentTx, TrendPoint } from '@/types/admin';
 
 export const metadata: Metadata = { title: 'Dashboard' };
+
+const RANGE_LABEL: Record<string, string> = {
+  today: 'Today', week: 'This Week', month: 'This Month', custom: 'Custom',
+};
 
 const FALLBACK: AdminDashboardData = {
   counts: { users: 0, ads_total: 0, ads_active: 0, ads_pending: 0, ads_expired: 0, tx_total: 0, tx_success: 0, revenue_total: 0 },
@@ -31,14 +36,35 @@ async function safe<T>(fn: () => Promise<T>, fb: T): Promise<T> {
   try { return await fn(); } catch (e) { if (e instanceof ApiError) return fb; throw e; }
 }
 
-export default async function AdminDashboardPage() {
+export default async function AdminDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string; from?: string; to?: string }>;
+}) {
+  const sp = await searchParams;
+  const range = sp.range ?? 'week';
+
+  const qs = new URLSearchParams({ range });
+  if (range === 'custom' && sp.from && sp.to) {
+    qs.set('from', sp.from);
+    qs.set('to', sp.to);
+  }
+
   const res = await safe(
-    () => apiFromServer<AdminDashboardData>('/admin/dashboard', { cache: 'no-store' }),
+    () => apiFromServer<AdminDashboardData>(`/admin/dashboard?${qs.toString()}`, { cache: 'no-store' }),
     { data: FALLBACK },
   );
   const d = res.data;
   const rev = d.revenue_series ?? FALLBACK.revenue_series!;
+  const win = d.window;
+  const rangeLabel = RANGE_LABEL[range] ?? range;
   const sparkFrom = (series: TrendPoint[]) => series.slice(-14).map((p) => p.total);
+
+  // When a master filter window is present, charts/sparklines follow it;
+  // otherwise fall back to the legacy trailing series.
+  const revSpark  = win ? win.revenue.map((p) => p.total)      : sparkFrom(rev['30D'] ?? []);
+  const usrSpark  = win ? win.users.map((p) => p.total)        : sparkFrom(d.user_growth ?? []);
+  const txSpark   = win ? win.transactions.map((p) => p.total) : sparkFrom(rev['30D'] ?? []);
 
   return (
     <>
@@ -56,35 +82,43 @@ export default async function AdminDashboardPage() {
         }
       />
 
+      {/* Master date filter — scopes the whole dashboard to a window. */}
+      <div className="mb-6 -mt-2">
+        <DateRangeFilter />
+      </div>
+
       {/* ── Row 1: KPI cards ── */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Total users"    value={d.counts.users}         delta={d.trend?.users_delta}
           icon={<Users size={17} />}       tone="info"
-          sparkline={sparkFrom(d.user_growth ?? [])}
+          sparkline={usrSpark}
         />
         <StatCard
-          label="Active ads"     value={d.counts.ads_active}    delta={d.trend?.ads_delta}
+          label="Active products" value={d.counts.ads_active}    delta={d.trend?.ads_delta}
           icon={<PackageCheck size={17} />} tone="warning"
-          sparkline={sparkFrom(rev['30D'] ?? [])}
+          sparkline={revSpark}
         />
         <StatCard
           label="Revenue"        value={d.counts.revenue_total} delta={d.trend?.revenue_delta}
           icon={<Wallet size={17} />}      tone="brand"
           currency emphasis="hero"
-          sparkline={(rev['30D'] ?? []).map((p) => p.total)}
+          sparkline={revSpark}
         />
         <StatCard
           label="Transactions"   value={d.counts.tx_total}      delta={d.trend?.tx_delta}
           icon={<ShoppingBag size={17} />} tone="success"
-          sparkline={sparkFrom(rev['30D'] ?? [])}
+          sparkline={txSpark}
         />
       </section>
 
       {/* ── Row 2: Revenue chart + category donut ── */}
       <section className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-5">
         <div className="lg:col-span-3">
-          <RevenueChart series={rev} />
+          <RevenueChart
+            series={rev}
+            window={win ? { label: rangeLabel, points: win.revenue } : undefined}
+          />
         </div>
         <div className="lg:col-span-2">
           <CategoryDonut data={d.category_breakdown ?? []} />
@@ -97,7 +131,7 @@ export default async function AdminDashboardPage() {
           <TopCategoriesBar data={d.top_categories ?? []} />
         </div>
         <div className="lg:col-span-1">
-          <UserGrowthCard series={d.user_growth ?? []} />
+          <UserGrowthCard series={win ? win.users : (d.user_growth ?? [])} subtitle={win ? `New users · ${rangeLabel}` : undefined} />
         </div>
         <div className="lg:col-span-1">
           <ActivityFeed events={buildActivityFeed(d)} />
@@ -128,12 +162,12 @@ function LatestAdsTable({ rows }: { rows: AdminRecentAd[] }) {
   ];
   return (
     <DataTableV2
-      title="Latest ads"
+      title="Latest products"
       description="Newly posted listings across all categories"
       viewAllHref="/admin/ads"
       rows={rows}
       columns={cols}
-      emptyTitle="No ads yet"
+      emptyTitle="No products yet"
       emptyDescription="New listings will appear here as sellers post them."
     />
   );
@@ -147,10 +181,10 @@ function LatestUsersTable({ rows }: { rows: AdminRecentUser[] }) {
           className="grid h-7 w-7 place-items-center rounded-full text-[10px] font-semibold text-white"
           style={{ background: 'linear-gradient(135deg, #FF003F 0%, #4F46E5 100%)' }}
         >
-          {r.username.slice(0, 2).toUpperCase()}
+          {(r.username || r.email || '?').slice(0, 2).toUpperCase()}
         </span>
         <div>
-          <p className="font-medium">{r.username}</p>
+          <p className="font-medium">{r.username || 'No username'}</p>
           <p className="text-[11px]" style={{ color: 'var(--adm-fg-faint)' }}>{r.email}</p>
         </div>
       </div>
@@ -194,7 +228,7 @@ function LatestTransactionsTable({ rows }: { rows: AdminRecentTx[] }) {
 
 /* Minimal card wrapping the cumulative-signup line via RevenueChart's
    sibling look. Kept inline because it's a one-off variant. */
-function UserGrowthCard({ series }: { series: TrendPoint[] }) {
+function UserGrowthCard({ series, subtitle }: { series: TrendPoint[]; subtitle?: string }) {
   const total = series.at(-1)?.total ?? 0;
   return (
     <section
@@ -203,7 +237,7 @@ function UserGrowthCard({ series }: { series: TrendPoint[] }) {
     >
       <header className="mb-2">
         <h2 className="text-[15px] font-semibold" style={{ color: 'var(--adm-fg)' }}>User growth</h2>
-        <p className="mt-0.5 text-xs" style={{ color: 'var(--adm-fg-muted)' }}>Cumulative signups · 30 days</p>
+        <p className="mt-0.5 text-xs" style={{ color: 'var(--adm-fg-muted)' }}>{subtitle ?? 'Cumulative signups · 30 days'}</p>
       </header>
       <p className="mb-3 text-2xl font-bold tabular-nums" style={{ color: 'var(--adm-fg)' }}>
         {new Intl.NumberFormat('en-IN').format(total)}

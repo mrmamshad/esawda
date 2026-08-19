@@ -21,6 +21,7 @@ export function ReviewForm({
   const [rating, setRating] = useState(5);
   const [hover, setHover]   = useState(0);
   const [comment, setComment] = useState('');
+  const [image, setImage]   = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr]   = useState<string | null>(null);
   const { requireLogin } = useAuthGate();
@@ -30,9 +31,13 @@ export function ReviewForm({
     if (!token) return;
     setBusy(true); setErr(null);
     try {
-      await api(`/ads/${adId}/reviews`, { method: 'POST', body: { rating, comment }, token });
+      const fd = new FormData();
+      fd.append('rating', String(rating));
+      fd.append('comment', comment.trim());
+      if (image) fd.append('image', image);
+      await api(`/ads/${adId}/reviews`, { method: 'POST', body: fd, token });
       notify('success', 'Thanks for your review!');
-      setComment(''); setRating(5);
+      setComment(''); setRating(5); setImage(null);
       onSubmitted?.();
     } catch (e2) {
       if (e2 instanceof ApiError) setErr(e2.message);
@@ -81,6 +86,26 @@ export function ReviewForm({
         placeholder="How was your experience with this seller?"
         error={err ?? undefined}
       />
+
+      <label className="flex cursor-pointer items-center gap-2 text-sm text-ink-muted hover:text-ink">
+        <input
+          type="file" accept="image/*"
+          className="hidden"
+          onChange={(e) => setImage(e.target.files?.[0] ?? null)}
+        />
+        <span className="rounded-md border border-line bg-white px-3 py-2 transition hover:border-brand-300">
+          {image ? image.name : '📷 Attach a photo (optional)'}
+        </span>
+        {image && (
+          <button
+            type="button"
+            onClick={() => setImage(null)}
+            className="text-xs text-danger underline"
+          >
+            Remove
+          </button>
+        )}
+      </label>
 
       <div className="flex justify-end">
         <Button type="submit" variant="filled" disabled={busy}>{busy ? 'Submitting…' : 'Submit review'}</Button>

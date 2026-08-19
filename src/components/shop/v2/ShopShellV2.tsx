@@ -11,6 +11,7 @@ export type ShopCounts = {
   sold_out?:   number;
   removed?:    number;
   drafts?:     number;
+  expired?:    number;
   wishlisted?: number;
   messages?:   number;
 };

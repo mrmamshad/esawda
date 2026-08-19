@@ -2,13 +2,18 @@
 
 import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { RichTextEditor } from '@/components/shop/v2/RichTextEditor';
+import { PasswordInput } from '@/components/forms/PasswordInput';
+import { GeocodeAddress } from '@/components/interactive/GeocodeAddress';
 import { LocationMap } from '@/components/shop/v2/LocationMap';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import type { Route } from 'next';
 import { api, ApiError } from '@/lib/api';
 import { readToken, saveToken } from '@/lib/auth';
+import type { User } from '@/types/api';
 import { Button } from '@/components/ui/Button';
+import { ArrowRight, Crown, LockKeyhole, Sparkles } from 'lucide-react';
 import type { Ad, Category } from '@/types/api';
 
 /**
@@ -33,8 +38,9 @@ type FormState = {
   price:        string;
   negotiable:   boolean;
   phone:        string;
+  whatsapp:     string;
   hide_phone:   boolean;
-  alt_phone:    string;
+  duration_days: string;
   address:      string;
   city:         string;
   state:        string;
@@ -49,19 +55,65 @@ type FormState = {
   urgent:       boolean;
   highlight:    boolean;
   agree:        boolean;
+  // Guest "Post a Product" sign-up (public page only).
+  guestName:     string;
+  guestMobile:   string;
+  guestPassword: string;
 };
 
 const INITIAL: FormState = {
   title: '', description: '', category: '', sub_category: '', child_category: '',
-  price: '', negotiable: false, phone: '', hide_phone: false, alt_phone: '',
+  price: '', negotiable: false, phone: '', whatsapp: '', hide_phone: false, duration_days: '30',
   address: '', city: '', state: '', country: 'BD', tags: '',
   item_name: '', condition: '', authenticity: '', brand: '',
   plan: 'premium', featured: false, urgent: false, highlight: false, agree: false,
+  guestName: '', guestMobile: '', guestPassword: '',
 };
 
-export default function AdForm({ categories }: { categories: Category[] }) {
+export default function AdForm({
+  categories,
+  settings = {},
+  hasActivePlan,
+  adsRemaining,
+  planName,
+  planExpiresAt,
+  mode = 'shop',
+  guest = false,
+}: {
+  categories: Category[];
+  settings?: Record<string, string>;
+  hasActivePlan: boolean;
+  adsRemaining: number;
+  planName: string;
+  planExpiresAt: string | null;
+  /** 'shop' = inside the seller panel; 'public' = standalone /post/product page */
+  mode?: 'shop' | 'public';
+  /** Signed-out visitor on the public page — renders the name/mobile/password register card */
+  guest?: boolean;
+}) {
   const router = useRouter();
+  const canUseSubscription = hasActivePlan && adsRemaining > 0;
+  // Guests get a free listing quota when their account is created, so start
+  // them on the subscription path even though the pre-auth server render
+  // reports hasActivePlan=false.
+  const [postingMode, setPostingMode] = useState<'subscription' | 'paid'>(
+    canUseSubscription || (mode === 'public' && guest) ? 'subscription' : 'paid',
+  );
   const [form,   setForm]   = useState<FormState>(INITIAL);
+
+  // Premium upgrade prices come from admin settings (৳). Fall back to the
+  // same numbers the backend uses when it doesn't run with config either.
+  const price = (key: string, fb: number) => {
+    const v = Number(settings[key]);
+    return Number.isFinite(v) && v > 0 ? v : fb;
+  };
+  const upgradePrices = {
+    featured:  price('upgrade_featured_price',  200),
+    urgent:    price('upgrade_urgent_price',    150),
+    highlight: price('upgrade_highlight_price', 100),
+  };
+  const paidListingPrice = price('paid_listing_price', 500);
+  const sym = settings.currency_symbol || '৳';
   const [busy,   setBusy]   = useState(false);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [error,  setError]  = useState<string | null>(null);
@@ -83,7 +135,13 @@ export default function AdForm({ categories }: { categories: Category[] }) {
     (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
       const target = e.target as HTMLInputElement;
       const value  = target.type === 'checkbox' ? target.checked : target.value;
-      setForm((s) => ({ ...s, [k]: value as FormState[K] }));
+      setForm((s) => {
+        const next = { ...s, [k]: value as FormState[K] };
+        // Guest phone is the user's contact number — carry it into the
+        // listing's Phone Number so we don't ask for it twice.
+        if (k === 'guestMobile' && !s.phone) next.phone = value as string;
+        return next;
+      });
     };
 
   const featuredPreview = useMemo(
@@ -114,11 +172,14 @@ export default function AdForm({ categories }: { categories: Category[] }) {
     fd.append('price',       String(Number(form.price) || 0));
     fd.append('negotiable',  form.negotiable ? '1' : '0');
     if (form.phone)   fd.append('phone', form.phone);
+    if (form.whatsapp) fd.append('whatsapp', form.whatsapp);
+    fd.append('duration_days', form.duration_days || '30');
     fd.append('hide_phone',  form.hide_phone ? '1' : '0');
     if (form.address) fd.append('address', form.address);
     if (form.city)    fd.append('city',    form.city);
     if (form.state)   fd.append('state',   form.state);
     if (form.country) fd.append('country', form.country);
+    if (form.lat && form.lng) { fd.append('lat', form.lat); fd.append('lng', form.lng); }
 
     form.tags.split(',').map((t) => t.trim()).filter(Boolean)
       .forEach((t) => fd.append('tags[]', t));
@@ -129,7 +190,6 @@ export default function AdForm({ categories }: { categories: Category[] }) {
     if (form.authenticity) fd.append('custom[authenticity]', form.authenticity);
     if (form.brand)        fd.append('custom[brand]',        form.brand);
     if (form.item_name)    fd.append('custom[item_name]',    form.item_name);
-    if (form.alt_phone)    fd.append('custom[alt_phone]',    form.alt_phone);
 
     // Upgrade flags are advisory here; the backend charges via the plan
     // endpoint. Included as metadata so admins can pick these up on review.
@@ -143,33 +203,74 @@ export default function AdForm({ categories }: { categories: Category[] }) {
     galleryImages.slice(0, 7).forEach((f) => fd.append('images[]', f));
 
     try {
-      // No token? Create a throwaway seller account first so the ad can be
-      // posted in the same click. Email/password come from the contact field —
-      // the anonymous flow is a demo concession until the real backend is wired.
+      // Signed-out visitor on the public page: auto-register with
+      // name/phone/password, then continue posting. Signed-in users skip
+      // this entirely (token already present).
       let token = readToken();
       if (!token) {
-        const suffix = Date.now().toString(36);
-        const { data: reg } = await api<{ token: string }>('/auth/register', {
-          method: 'POST',
-          body: {
-            username: `guest_${suffix}`,
-            email:    `${suffix}@guest.local`,
-            name:     'Guest',
-            password: 'GuestPass!1',
-            password_confirmation: 'GuestPass!1',
-          },
-        });
-        token = reg.token;
-        saveToken(token);
+        if (mode === 'public' && form.guestName && form.guestMobile && form.guestPassword) {
+          const { data } = await api<{ user: User; token: string }>('/auth/guest-register', {
+            method: 'POST',
+            body:   { name: form.guestName, mobile: form.guestMobile, password: form.guestPassword },
+          });
+          saveToken(data.token);
+          token = data.token;
+        } else {
+          router.push('/login?redirect=/post/product' as Route);
+          return;
+        }
       }
 
-      const { data } = await api<Ad>('/ads', { method: 'POST', token, body: fd });
-      router.push(`/ads/${data.url_slug}` as Route);
+      if (postingMode === 'paid') {
+        const { data: payment } = await api<{ transaction_id: number; post_id: number; gateway_url: string }>(
+          '/checkout/paid-listing',
+          { method: 'POST', token, body: fd },
+        );
+        const hostname = new URL(payment.gateway_url).hostname;
+        if (!/(^|\.)(sslcommerz\.com)$/i.test(hostname)) {
+          throw new Error('Unsafe payment redirect blocked.');
+        }
+        window.location.assign(payment.gateway_url);
+        return;
+      }
+
+      const { data: ad } = await api<Ad>('/ads', { method: 'POST', token, body: fd });
+
+      // Premium upgrades are paid, not advisory. Charge the selected
+      // upgrades via the existing SSLCommerz checkout — the ad is created
+      // as `pending` either way and stays hidden until an admin approves.
+      if (form.plan === 'premium') {
+        const upgrades: Record<string, boolean> = {
+          featured:  form.featured,
+          urgent:    form.urgent,
+          highlight: form.highlight,
+        };
+        const hasUpgrades = Object.values(upgrades).some(Boolean);
+        if (hasUpgrades) {
+          const { data: pay } = await api<{ transaction_id: number; gateway_url: string }>(
+            `/checkout/ad-upgrade/${ad.id}`,
+            { method: 'POST', token, body: upgrades },
+          );
+          window.location.href = pay.gateway_url;
+          return;
+        }
+      }
+
+      // Free listing (or premium without paid upgrades): done. Shop users go
+      // to the seller dashboard; public-page guests land on /dashboard where
+      // the pending ad is listed "under review".
+      router.push((mode === 'public' ? '/dashboard' : '/shop/ads/pending') as Route);
     } catch (err) {
       if (err instanceof ApiError) {
+        if (err.status === 402 && err.code === 'SUBSCRIPTION_REQUIRED') {
+          setPostingMode('paid');
+          setError('Your subscription slots are finished. Pay per listing is selected so you can continue without using quota.');
+          setBusy(false);
+          return;
+        }
         setError(err.message);
         if (err.fields) setErrors(err.fields);
-        if (err.status === 401) router.push('/auth/login' as Route);
+        if (err.status === 401) router.push('/login' as Route);
       } else {
         setError('Unexpected error. Please try again.');
       }
@@ -187,27 +288,50 @@ export default function AdForm({ categories }: { categories: Category[] }) {
         the shop panel.
       */}
       <div>
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--shp-fg)' }}>Post an ad</h1>
-        <p className="mt-1 text-sm" style={{ color: 'var(--shp-fg-muted)' }}>
-          Fill out the details below to list a new item for sale.
-        </p>
-
-        <form onSubmit={submit} className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
+        <form
+          onSubmit={submit}
+          className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]"
+        >
           {/* ── main column ─────────────────────────────────────────── */}
           <div className="space-y-6">
+            {/* Guest register — only on the public page, signed-out ------ */}
+            {guest && mode === 'public' && (
+              <Card icon="👤" title="Create your account">
+                <p className="text-sm text-ink-muted">
+                  Your product goes to review as soon as you submit. Enter your details to
+                  create your account — you'll be logged in automatically.
+                </p>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <Row label="Your Name *" error={errors.guestName?.[0]}>
+                    <input
+                      required minLength={2} maxLength={225}
+                      placeholder="Full name"
+                      value={form.guestName} onChange={set('guestName')}
+                      className={inp}
+                    />
+                  </Row>
+                  <Row label="Phone Number *" error={errors.guestMobile?.[0]}>
+                    <input
+                      required type="tel" maxLength={30}
+                      placeholder="+880 17xx xxx xxx"
+                      value={form.guestMobile} onChange={set('guestMobile')}
+                      className={inp}
+                    />
+                  </Row>
+                  <Row label="Password *" error={errors.guestPassword?.[0]}>
+                    <PasswordInput
+                      required minLength={8}
+                      placeholder="At least 8 characters"
+                      value={form.guestPassword} onChange={set('guestPassword')}
+                      className={inp}
+                    />
+                  </Row>
+                </div>
+              </Card>
+            )}
+
             {/* Listing Details ────────────────────────────────────── */}
             <Card icon="🛒" title="Listing Details">
-              <div className="flex justify-center py-2">
-                <Button
-                  type="button"
-                  variant="filled"
-                  size="md"
-                  onClick={() => document.getElementById('cat-select')?.focus()}
-                >
-                  + Choose Category
-                </Button>
-              </div>
-
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <Row label="Category *" error={errors.category?.[0]}>
                   <select
@@ -245,12 +369,11 @@ export default function AdForm({ categories }: { categories: Category[] }) {
               </Row>
 
               <Row label="Description *" error={errors.description?.[0]}>
-                <RichToolbar />
                 <textarea
                   required minLength={10} rows={6}
                   placeholder="Tell us more about your listing"
                   value={form.description} onChange={set('description')}
-                  className={`${inp} h-auto rounded-t-none py-3`}
+                  className={`${inp} h-auto py-3`}
                 />
               </Row>
             </Card>
@@ -258,9 +381,19 @@ export default function AdForm({ categories }: { categories: Category[] }) {
             {/* Address ─────────────────────────────────────────────── */}
             <Card title="Address">
               <Row label="Address" error={errors.address?.[0]}>
-                <input
-                  placeholder="House / Road / Area, Dhaka"
-                  value={form.address} onChange={set('address')}
+                <GeocodeAddress
+                  value={form.address}
+                  onAddress={(address) => setForm((s) => ({ ...s, address }))}
+                  onPick={({ lat, lng, address, city, state, country }) =>
+                    setForm((s) => ({
+                      ...s,
+                      lat: String(lat), lng: String(lng),
+                      ...(address ? { address } : {}),
+                      ...(city ? { city } : {}),
+                      ...(state ? { state } : {}),
+                      ...(country ? { country } : {}),
+                    }))
+                  }
                   className={inp}
                 />
               </Row>
@@ -284,13 +417,26 @@ export default function AdForm({ categories }: { categories: Category[] }) {
 
               <Row label="Tags">
                 <input
-                  placeholder="Enter the tags separated by commas"
+                  placeholder="Enter tags separated by commas, e.g. iPhone, mobile, gadget"
                   value={form.tags} onChange={set('tags')}
                   className={inp}
                 />
-                <span className="mt-1 block text-xs text-ink-muted">
-                  Enter the tags separated by commas.
-                </span>
+                {(() => {
+                  const tags = form.tags.split(',').map(t => t.trim()).filter(Boolean);
+                  return tags.length > 0 ? (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {tags.map((t) => (
+                        <span key={t} className="rounded-full bg-brand-50 px-2.5 py-1 text-xs text-brand-700">
+                          #{t}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="mt-1 block text-xs text-ink-muted">
+                      Enter tags separated by commas.
+                    </span>
+                  );
+                })()}
               </Row>
             </Card>
 
@@ -324,13 +470,25 @@ export default function AdForm({ categories }: { categories: Category[] }) {
                 Hide My Phone Number
               </label>
 
-              <Row label="Alternate Phone">
+              <Row label="WhatsApp Number">
                 <input
                   type="tel"
                   placeholder="+880 1911 000 000"
-                  value={form.alt_phone} onChange={set('alt_phone')}
+                  value={form.whatsapp} onChange={set('whatsapp')}
                   className={inp}
                 />
+              </Row>
+
+              <Row label="Post Duration" hint={`Listing stays live for ${form.duration_days || '30'} days from posting`}>
+                <select
+                  value={form.duration_days}
+                  onChange={set('duration_days')}
+                  className={inp}
+                >
+                  <option value="7">7 days</option>
+                  <option value="30">30 days</option>
+                  <option value="90">90 days</option>
+                </select>
               </Row>
             </Card>
 
@@ -339,33 +497,10 @@ export default function AdForm({ categories }: { categories: Category[] }) {
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <Row label="Item Name *">
                   <input
-                    placeholder="Select Category"
+                    placeholder="e.g. Apple iPhone 15 Pro"
                     value={form.item_name} onChange={set('item_name')}
                     className={inp}
                   />
-                </Row>
-                <Row label="Sub Category">
-                  <select
-                    value={form.sub_category}
-                    onChange={set('sub_category')}
-                    className={inp}
-                    disabled={!chosenCat?.sub_categories?.length}
-                  >
-                    <option value="">Select Sub Category</option>
-                    {chosenCat?.sub_categories?.map((s) => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
-                    ))}
-                  </select>
-                </Row>
-                <Row label="Child Category">
-                  <select
-                    value={form.child_category}
-                    onChange={set('child_category')}
-                    className={inp}
-                    disabled
-                  >
-                    <option value="">Select Child Category</option>
-                  </select>
                 </Row>
               </div>
 
@@ -415,48 +550,41 @@ export default function AdForm({ categories }: { categories: Category[] }) {
               />
             </Card>
 
-            {/* Premium ─────────────────────────────────────────────── */}
-            <Card title="Make your listing premium (Optional)" iconRight="✨">
-              <div className="rounded-field border border-brand-200 bg-white">
-                <label className="flex cursor-pointer items-center gap-3 border-b border-brand-100 px-4 py-3">
-                  <input type="radio" name="plan" value="free"
-                         checked={form.plan === 'free'}
-                         onChange={() => setForm((s) => ({ ...s, plan: 'free' }))} />
-                  <span className="font-medium">Free Listing</span>
-                  <span className="ml-auto text-xs text-ink-muted">Your ad go live after check by reviewer</span>
-                </label>
-                <label className="flex cursor-pointer items-center gap-3 px-4 py-3">
-                  <input type="radio" name="plan" value="premium"
-                         checked={form.plan === 'premium'}
-                         onChange={() => setForm((s) => ({ ...s, plan: 'premium' }))} />
-                  <span className="font-medium">Premium</span>
-                  <span className="ml-auto rounded-pill bg-brand-100 px-2 py-0.5 text-xs text-brand-700">Recommended</span>
-                </label>
-              </div>
-
-              {form.plan === 'premium' && (
-                <div className="mt-4 space-y-2">
-                  <p className="text-sm text-ink-muted">
-                    You can optionally select some upgrades to get the best results.
-                  </p>
-                  <UpgradeRow
-                    tag="Featured" tagClass="bg-purple-100 text-purple-700"
-                    price="$10.00" checked={form.featured} onChange={set('featured')}
-                    copy="Featured ads attract higher-quality viewer and are displayed prominently in the Featured ads section home page."
-                  />
-                  <UpgradeRow
-                    tag="Urgent" tagClass="bg-amber-100 text-amber-700"
-                    price="$10.00" checked={form.urgent} onChange={set('urgent')}
-                    copy="Make your ad stand out and let viewer know that your advertise is time sensitive."
-                  />
-                  <UpgradeRow
-                    tag="Highlight" tagClass="bg-rose-100 text-rose-700"
-                    price="$10.00" checked={form.highlight} onChange={set('highlight')}
-                    copy="Make your ad highlighted with border in listing search result page. Easy to focus."
-                  />
+            {/* Visibility upgrades ─────────────────────────────────── */}
+            {postingMode === 'subscription' ? (
+              <Card title="Recommended" iconRight="✨">
+                <div className="rounded-field border border-brand-200 bg-white">
+                  <label className="flex cursor-pointer items-center gap-3 border-b border-brand-100 px-4 py-3">
+                    <input type="radio" name="plan" value="premium"
+                           checked={form.plan === 'premium'}
+                           onChange={() => setForm((s) => ({ ...s, plan: 'premium' }))} />
+                    <span className="font-medium">Premium</span>
+                    <span className="ml-auto rounded-pill bg-brand-100 px-2 py-0.5 text-xs text-brand-700">Recommended</span>
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-3 px-4 py-3">
+                    <input type="radio" name="plan" value="free"
+                           checked={form.plan === 'free'}
+                           onChange={() => setForm((s) => ({ ...s, plan: 'free' }))} />
+                    <span className="font-medium">Free Listing</span>
+                  </label>
                 </div>
-              )}
-            </Card>
+
+                {form.plan === 'premium' && (
+                  <div className="mt-4 space-y-2">
+                    <p className="text-sm text-ink-muted">Select any boosts you want to purchase after the base listing is submitted for review.</p>
+                    <UpgradeRow tag="Featured" tagClass="bg-purple-100 text-purple-700" price={`${sym}${upgradePrices.featured}`} checked={form.featured} onChange={set('featured')} copy="Show the product prominently in featured sections after admin approval." />
+                    <UpgradeRow tag="Urgent" tagClass="bg-amber-100 text-amber-700" price={`${sym}${upgradePrices.urgent}`} checked={form.urgent} onChange={set('urgent')} copy="Mark the listing as time-sensitive after admin approval." />
+                    <UpgradeRow tag="Highlight" tagClass="bg-rose-100 text-rose-700" price={`${sym}${upgradePrices.highlight}`} checked={form.highlight} onChange={set('highlight')} copy="Add visual emphasis in approved listing results." />
+                  </div>
+                )}
+              </Card>
+            ) : (
+              <Card title="Recommended" iconRight="✨">
+                <p className="text-sm leading-6 text-ink-muted">
+                  Pay-per-listing bypasses subscription quota only. After admin approval, you can purchase Featured, Urgent or Highlight boosts from product management.
+                </p>
+              </Card>
+            )}
 
             {error && (
               <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-danger">{error}</div>
@@ -470,7 +598,9 @@ export default function AdForm({ categories }: { categories: Category[] }) {
             <div className="flex justify-end gap-3">
               <Button type="button" variant="ghost" onClick={() => history.back()}>Cancel</Button>
               <Button type="submit" disabled={busy} leftIcon={<span>＋</span>}>
-                {busy ? 'Publishing…' : 'Post Listing'}
+                {busy
+                  ? (postingMode === 'paid' ? 'Opening payment…' : 'Submitting…')
+                  : (postingMode === 'paid' ? `Pay ${sym}${paidListingPrice} & submit` : 'Use 1 slot & submit')}
               </Button>
             </div>
           </div>
@@ -479,16 +609,96 @@ export default function AdForm({ categories }: { categories: Category[] }) {
           <aside className="space-y-6">
             <Card title="Tips!" icon="ⓘ">
               <ul className="space-y-2 text-sm text-ink">
-                <Tip>Enter a brief description of the advertise.</Tip>
+                <Tip>Enter a brief description of the product.</Tip>
                 <Tip>Add your product photo.</Tip>
-                <Tip>Choose the correct category and sub-category of the ad.</Tip>
-                <Tip>Check again before submit the ad.</Tip>
+                <Tip>Choose the correct category and sub-category of the product.</Tip>
+                <Tip>Check again before submit the product.</Tip>
               </ul>
             </Card>
           </aside>
         </form>
       </div>
     </div>
+  );
+}
+
+function SubscriptionGate({
+  hasActivePlan,
+  adsRemaining,
+  planName,
+  planExpiresAt,
+}: {
+  hasActivePlan: boolean;
+  adsRemaining: number;
+  planName: string;
+  planExpiresAt: string | null;
+}) {
+  const quotaExhausted = hasActivePlan && adsRemaining <= 0;
+  const expiryLabel = planExpiresAt
+    ? new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(planExpiresAt))
+    : null;
+
+  return (
+    <section className="relative mt-6 overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-[0_18px_50px_-28px_rgba(255,0,63,0.45)]">
+      <div aria-hidden className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-brand-100 blur-3xl" />
+      <div aria-hidden className="absolute bottom-0 right-1/3 h-20 w-40 rounded-full bg-amber-100/70 blur-3xl" />
+
+      <div className="relative grid gap-6 p-6 md:grid-cols-[1fr_auto] md:items-center md:p-8">
+        <div className="flex items-start gap-4">
+          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand-700 text-white shadow-lg shadow-brand-700/20">
+            <LockKeyhole size={25} />
+          </span>
+          <div>
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-brand-700">
+                <Crown size={12} /> Subscription required
+              </span>
+              {quotaExhausted && (
+                <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-amber-800">
+                  Listing limit reached
+                </span>
+              )}
+            </div>
+            <h2 className="max-w-2xl text-xl font-bold tracking-tight text-ink md:text-2xl">
+              {quotaExhausted
+                ? 'আপনার বর্তমান প্যাকেজের প্রোডাক্ট পোস্টিং লিমিট শেষ হয়েছে।'
+                : 'আগে সাবস্ক্রাইব করুন, তারপর আপনি একটি প্রোডাক্ট পোস্ট করতে পারবেন।'}
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-muted">
+              {quotaExhausted
+                ? 'আরও প্রোডাক্ট পোস্ট করতে আপনার প্যাকেজ renew বা upgrade করুন।'
+                : 'একটি seller package বেছে নিলে নিচের form unlock হবে এবং আপনি সঙ্গে সঙ্গে product listing তৈরি করতে পারবেন।'}
+            </p>
+
+            <div className="mt-4 flex flex-wrap gap-2 text-xs">
+              <span className="rounded-lg border border-line bg-surface-muted px-3 py-2 text-ink-muted">
+                Current plan: <strong className="capitalize text-ink">{hasActivePlan ? planName : 'No active plan'}</strong>
+              </span>
+              <span className="rounded-lg border border-line bg-surface-muted px-3 py-2 text-ink-muted">
+                Listings remaining: <strong className="text-ink">{adsRemaining}</strong>
+              </span>
+              {expiryLabel && (
+                <span className="rounded-lg border border-line bg-surface-muted px-3 py-2 text-ink-muted">
+                  Expires: <strong className="text-ink">{expiryLabel}</strong>
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex min-w-[210px] flex-col gap-2 md:items-stretch">
+          <Link
+            href={'/membership' as Route}
+            className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand-700 px-6 text-sm font-bold text-white shadow-lg shadow-brand-700/20 transition hover:-translate-y-0.5 hover:bg-brand-600"
+          >
+            <Sparkles size={16} />
+            {quotaExhausted ? 'Upgrade package' : 'Subscribe now'}
+            <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+          </Link>
+          <p className="text-center text-[11px] text-ink-faint">Secure payment via SSLCommerz</p>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -517,13 +727,14 @@ function Card({
 }
 
 function Row({
-  label, error, children,
-}: { label: string; error?: string; children: React.ReactNode }) {
+  label, error, hint, children,
+}: { label: string; error?: string; hint?: string; children: React.ReactNode }) {
   return (
     <label className="block">
       <span className="text-sm font-medium text-ink">{label}</span>
       {children}
       {error && <span className="mt-1 block text-xs text-danger">{error}</span>}
+      {hint && <span className="mt-1 block text-xs text-ink-muted">{hint}</span>}
     </label>
   );
 }
@@ -566,31 +777,6 @@ function Tip({ children }: { children: React.ReactNode }) {
  * and can be swapped for a real editor (Tiptap / Lexical) later without
  * changing the surrounding markup.
  */
-function RichToolbar() {
-  return (
-    <div className="mt-1 flex items-center gap-2 rounded-t-field border border-b-0 border-brand-100 bg-white px-3 py-2 text-sm text-ink">
-      <button type="button" className="font-bold">B</button>
-      <button type="button" className="italic">I</button>
-      <button type="button" className="underline">U</button>
-      <span className="mx-1 text-ink-muted">|</span>
-      <button type="button">≔</button>
-      <button type="button">☰</button>
-      <button type="button">❝</button>
-      <button type="button">🔗</button>
-    </div>
-  );
-}
-
-function MapPlaceholder() {
-  return (
-    <div className="relative h-44 w-full overflow-hidden rounded-field border border-brand-100 bg-surface-muted">
-      <div className="absolute inset-0 grid place-items-center text-sm text-ink-muted">
-        📍 Map preview — drag pin to set location
-      </div>
-    </div>
-  );
-}
-
 function Uploader({
   label, hint, multiple, preview, previews, onFilesPicked, inputRef, onRemove, onClearFeatured,
 }: {

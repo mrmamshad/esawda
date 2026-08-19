@@ -1,7 +1,7 @@
 export type CategoryScore = { name: string; count: number };
 
 export function TopCategoriesBar({
-  data, title = 'Top categories', metric = 'ads',
+  data, title = 'Top categories', metric = 'products',
 }: {
   data: CategoryScore[];
   title?: string;
