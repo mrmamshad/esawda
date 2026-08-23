@@ -112,8 +112,8 @@ export function ListingCard({
           {ad.highlight && (
             <Badge className="rounded-md px-2 py-0.5" tone="highlight">Highlight</Badge>
           )}
-          {ad.bundle_items && ad.bundle_items.length > 1 && (
-            <Badge className="rounded-md px-2 py-0.5" tone="highlight">Bundle · {ad.bundle_items.length} items</Badge>
+          {ad.bundle_items && ad.bundle_items.length >= 1 && (
+            <Badge className="rounded-md px-2 py-0.5" tone="highlight">Bundle · {ad.bundle_items.length} {ad.bundle_items.length === 1 ? 'item' : 'items'}</Badge>
           )}
           {ad.condition && (
             <span className={cn(

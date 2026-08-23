@@ -83,7 +83,7 @@ export function HomeSections({
         <section className="reveal container-page py-24">
           <SectionHeader
             eyebrow="Urgent products"
-            title={<>Urgent <span className="text-brand-700">Products</span></>}
+            title={<>Limited <span className="text-brand-700">Time Offers</span></>}
             description="Sellers marked these as urgent — expect quick replies."
             actionLabel="See all urgent"
             actionHref={'/ads' as Route}
@@ -140,7 +140,7 @@ export function HomeSections({
         <section className="reveal container-page pb-24">
           <SectionHeader
             eyebrow="Highlight Products"
-            title={<>Highlight <span className="text-brand-700">Products</span></>}
+            title={<>Hot <span className="text-brand-700">Listings</span></>}
             description="Listings sellers chose to spotlight."
             actionLabel="See all"
             actionHref={'/ads' as Route}

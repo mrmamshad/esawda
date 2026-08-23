@@ -117,23 +117,43 @@ export function Header({
           {user ? (
             <>
               <UserMenu user={user} onDark={onDark} />
+              {!(user.is_shop || user.user_type === 'seller') && (
+                <Link href={'/shop/apply' as Route} className="hidden sm:inline-flex">
+                  <Button variant="outline" size="sm">Create a Shop</Button>
+                </Link>
+              )}
               <Link href={(user.is_shop || user.user_type === 'seller' ? '/shop/ads/new' : '/post/product') as Route} className="hidden sm:inline-flex">
                 <Button variant="filled" size="sm" leftIcon={<Plus size={16} />}>Post Product</Button>
               </Link>
             </>
           ) : (
-            <Link href={'/post/product' as Route} className="hidden sm:inline-flex">
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-[14px] font-semibold text-white transition active:translate-y-[1px] hover:brightness-95"
-                style={{
-                  backgroundColor: '#FF003F',
-                  boxShadow: '0 10px 22px -10px rgba(255,0,63,0.55)',
-                }}
-              >
-                Post a Product
-              </button>
-            </Link>
+            <>
+              <Link href={'/shop/apply' as Route} className="hidden sm:inline-flex">
+                <button
+                  type="button"
+                  className={cn(
+                    'inline-flex items-center gap-2 rounded-full border px-6 py-2.5 text-[14px] font-semibold transition active:translate-y-[1px] hover:brightness-95',
+                    onDark
+                      ? 'border-white/40 text-white hover:bg-white/10'
+                      : 'border-[#FF003F]/40 text-[#FF003F] hover:bg-[#FF003F]/5',
+                  )}
+                >
+                  Create a Shop
+                </button>
+              </Link>
+              <Link href={'/post/product' as Route} className="hidden sm:inline-flex">
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-[14px] font-semibold text-white transition active:translate-y-[1px] hover:brightness-95"
+                  style={{
+                    backgroundColor: '#FF003F',
+                    boxShadow: '0 10px 22px -10px rgba(255,0,63,0.55)',
+                  }}
+                >
+                  Post a Product
+                </button>
+              </Link>
+            </>
           )}
 
           <MobileDrawer onDark={onDark} />

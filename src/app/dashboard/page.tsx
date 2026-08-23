@@ -8,6 +8,7 @@ import { requireUser } from '@/lib/session';
 import { apiFromServer, ApiError } from '@/lib/api';
 import type { Thread } from '@/types/api';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { PublicProfileEditor } from '@/components/dashboard/PublicProfileEditor';
 import { PriceTag } from '@/components/ui/PriceTag';
 import { Badge } from '@/components/ui/Badge';
 
@@ -241,6 +242,8 @@ export default async function BuyerDashboardPage() {
               </ul>
             )}
           </section>
+
+          <PublicProfileEditor user={user} />
         </div>
       </main>
     </>

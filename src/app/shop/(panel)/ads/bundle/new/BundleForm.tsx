@@ -37,13 +37,13 @@ export function BundleForm() {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    if (selected.size < 2) { setError('Select at least two products.'); return; }
+    if (selected.size < 1) { setError('Select at least one product.'); return; }
     if (!title.trim() || !price) { setError('Bundle title and price are required.'); return; }
     setBusy(true); setError(null);
     try {
       const fd = new FormData();
       fd.append('title', title.trim());
-      fd.append('description', `Bundle of ${selected.size} products.`);
+      fd.append('description', `Bundle of ${selected.size} ${selected.size === 1 ? 'product' : 'products'}.`);
       fd.append('condition', 'used');
       fd.append('price', String(Number(price) || 0));
       fd.append('category', '1');
@@ -88,9 +88,9 @@ export function BundleForm() {
 
       <div className="surface-card p-6">
         <h2 className="mb-1 text-base font-semibold text-ink">Select products</h2>
-        <p className="mb-4 text-xs text-ink-muted">Pick two or more of your active listings ({selected.size} selected).</p>
+        <p className="mb-4 text-xs text-ink-muted">Pick one or more of your active listings ({selected.size} selected).</p>
         {mine.length === 0 ? (
-          <EmptyState icon={<></>} title="No active products" description="You need at least two active listings to create a bundle." />
+          <EmptyState icon={<></>} title="No active products" description="You need at least one active listing to create a bundle." />
         ) : (
           <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
             {mine.map((ad) => (
