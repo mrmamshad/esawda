@@ -26,10 +26,10 @@ const SIZE_SPEC: Record<AdSlotSize, { h: string; label: string; tone: 'leaderboa
 };
 
 const SIZE_IMG: Partial<Record<AdSlotSize, { src: string; alt: string }>> = {
-  large:       { src: '/ad-large-970x250.jpg', alt: 'Advertisement banner' },
-  wide:        { src: '/ad-wide-970x90.jpg',    alt: 'Advertisement banner' },
-  mpu:         { src: '/ad-mpu-300x250.jpg',    alt: 'Advertisement banner' },
-  infeed:      { src: '/ad-mpu-300x250.jpg',    alt: 'Advertisement banner' },
+  large:       { src: '/ad-large.gif',  alt: 'Advertisement banner' },
+  wide:        { src: '/ad-large.gif',  alt: 'Advertisement banner' },
+  mpu:         { src: '/ad-mpu.gif',    alt: 'Advertisement banner' },
+  infeed:      { src: '/ad-infeed.gif', alt: 'Advertisement banner' },
 };
 
 export function AdSlot({
@@ -52,7 +52,7 @@ export function AdSlot({
       ].join(' ')}
     >
       {img ? (
-        <Image src={img.src} alt={img.alt} fill sizes="100vw" priority={false} className="object-contain" />
+        <Image src={img.src} alt={img.alt} fill sizes="100vw" priority={false} unoptimized className="object-contain" />
       ) : (
         <div className="flex h-full w-full items-center justify-center border-2 border-dashed border-ink/20 bg-[repeating-linear-gradient(135deg,rgba(0,0,0,0.025)_0_12px,transparent_12px_24px)]">
           <span className="px-6 text-center text-body-md font-semibold text-ink/60">
