@@ -19,7 +19,7 @@ export function Logo({
   className?: string;
   height?: number;
 }) {
-  const width = Math.round(height * 3.3);   // native aspect after crop
+  const width = Math.round(height * 2.7);   // native aspect (2180×808 ≈ 2.7)
   return (
     <Link
       href={'/' as Route}
