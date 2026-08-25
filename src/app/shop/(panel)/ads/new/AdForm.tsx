@@ -45,8 +45,6 @@ type FormState = {
   city:         string;
   state:        string;
   country:      string;
-  tags:         string;         // comma-separated in the UI
-  item_name:    string;
   condition:    '' | 'used' | 'new';
   authenticity: '' | 'original' | 'refurbished';
   brand:        string;
@@ -64,8 +62,8 @@ type FormState = {
 const INITIAL: FormState = {
   title: '', description: '', category: '', sub_category: '', child_category: '',
   price: '', negotiable: false, phone: '', whatsapp: '', hide_phone: false, duration_days: '30',
-  address: '', city: '', state: '', country: 'BD', tags: '',
-  item_name: '', condition: '', authenticity: '', brand: '',
+  address: '', city: '', state: '', country: 'BD',
+  condition: '', authenticity: '', brand: '',
   plan: 'premium', featured: false, urgent: false, highlight: false, agree: false,
   guestName: '', guestMobile: '', guestPassword: '',
 };
@@ -182,15 +180,11 @@ export default function AdForm({
     if (form.country) fd.append('country', form.country);
     if (form.lat && form.lng) { fd.append('lat', form.lat); fd.append('lng', form.lng); }
 
-    form.tags.split(',').map((t) => t.trim()).filter(Boolean)
-      .forEach((t) => fd.append('tags[]', t));
-
     // Item-attributes flow via the custom-field bag so they get stored in
     // custom_field_data without needing a migration for every new attribute.
     if (form.condition)    fd.append('condition',            form.condition);
     if (form.authenticity) fd.append('custom[authenticity]', form.authenticity);
     if (form.brand)        fd.append('custom[brand]',        form.brand);
-    if (form.item_name)    fd.append('custom[item_name]',    form.item_name);
 
     // Upgrade flags are advisory here; the backend charges via the plan
     // endpoint. Included as metadata so admins can pick these up on review.
@@ -418,41 +412,14 @@ export default function AdForm({
                 onChange={({ lat, lng }) => setForm((s) => ({ ...s, lat: String(lat), lng: String(lng) }))}
               />
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <Row label="City" error={errors.city?.[0]}>
                   <input value={form.city} onChange={set('city')} className={inp} />
-                </Row>
-                <Row label="State" error={errors.state?.[0]}>
-                  <input value={form.state} onChange={set('state')} className={inp} />
                 </Row>
                 <Row label="Country" error={errors.country?.[0]}>
                   <input value={form.country} onChange={set('country')} className={inp} maxLength={2} />
                 </Row>
               </div>
-
-              <Row label="Tags">
-                <input
-                  placeholder="Enter tags separated by commas, e.g. iPhone, mobile, gadget"
-                  value={form.tags} onChange={set('tags')}
-                  className={inp}
-                />
-                {(() => {
-                  const tags = form.tags.split(',').map(t => t.trim()).filter(Boolean);
-                  return tags.length > 0 ? (
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {tags.map((t) => (
-                        <span key={t} className="rounded-full bg-brand-50 px-2.5 py-1 text-xs text-brand-700">
-                          #{t}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <span className="mt-1 block text-xs text-ink-muted">
-                      Enter tags separated by commas.
-                    </span>
-                  );
-                })()}
-              </Row>
             </Card>
 
             {/* Price + Phone ───────────────────────────────────────── */}
@@ -509,16 +476,6 @@ export default function AdForm({
 
             {/* About Item ──────────────────────────────────────────── */}
             <Card title="About Item">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <Row label="Item Name *">
-                  <input
-                    placeholder="e.g. Apple iPhone 15 Pro"
-                    value={form.item_name} onChange={set('item_name')}
-                    className={inp}
-                  />
-                </Row>
-              </div>
-
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FieldSet legend="This item has Condition">
                   <Radio name="condition" value="used" checked={form.condition === 'used'} onChange={set('condition')}>Used</Radio>
@@ -530,17 +487,14 @@ export default function AdForm({
                 </FieldSet>
               </div>
 
-              <Row label="Brand">
-                <select value={form.brand} onChange={set('brand')} className={inp}>
-                  <option value="">Select Brand</option>
-                  <option value="apple">Apple</option>
-                  <option value="samsung">Samsung</option>
-                  <option value="sony">Sony</option>
-                  <option value="lg">LG</option>
-                  <option value="hp">HP</option>
-                  <option value="dell">Dell</option>
-                  <option value="other">Other</option>
-                </select>
+              <Row label="Brand" error={errors.brand?.[0]}>
+                <input
+                  type="text"
+                  maxLength={100}
+                  placeholder="e.g. Apple, Samsung, Sony"
+                  value={form.brand} onChange={set('brand')}
+                  className={inp}
+                />
               </Row>
             </Card>
 
@@ -607,7 +561,7 @@ export default function AdForm({
 
             <label className="flex items-center gap-2 text-sm text-ink">
               <input type="checkbox" checked={form.agree} onChange={set('agree')} required />
-              I have read and agree to the <a href="#" className="text-brand-700 underline">Terms &amp; Conditions</a>
+              I have read and agree to the <Link href={'/terms' as Route} className="text-brand-700 underline">Terms &amp; Conditions</Link>
             </label>
 
             <div className="flex justify-end gap-3">

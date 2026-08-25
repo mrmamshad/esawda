@@ -26,7 +26,6 @@ export function EditAdForm({ ad }: { ad: AdDetail }) {
     city:        ad.location.city ?? '',
     state:       ad.location.state ?? '',
     country:     ad.location.country ?? '',
-    tags:        (ad.tags ?? []).join(', '),
   });
   const [busy, setBusy] = useState(false);
   const [err,  setErr]  = useState<string | null>(null);
@@ -47,7 +46,6 @@ export function EditAdForm({ ad }: { ad: AdDetail }) {
       city: form.city,
       state: form.state,
       country: form.country,
-      tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
     };
 
     try {
@@ -126,11 +124,6 @@ export function EditAdForm({ ad }: { ad: AdDetail }) {
           <label className="block text-xs uppercase tracking-widest text-ink-muted">Country</label>
           <input value={form.country} maxLength={2} onChange={(e) => setForm({ ...form, country: e.target.value })} className={inp} />
         </div>
-      </div>
-
-      <div>
-        <label className="block text-xs uppercase tracking-widest text-ink-muted">Tags (comma separated)</label>
-        <input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} className={inp} />
       </div>
 
       <div className="flex justify-end gap-2">
