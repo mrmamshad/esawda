@@ -15,7 +15,7 @@ function ToggleBtn({
       aria-selected={active}
       onClick={onClick}
       className={
-        'rounded-full px-4 py-1.5 text-sm font-semibold transition ' +
+        'rounded-full px-6 py-2 text-sm font-semibold transition ' +
         (active
           ? 'bg-brand-700 text-white shadow-sm'
           : 'text-ink-muted hover:text-ink')
@@ -27,47 +27,55 @@ function ToggleBtn({
 }
 
 /**
- * Categories grid with a Used/New pill toggle. The toggle's state lives in
- * HomeSections so the category counts AND the product sections below flip
- * in sync. Each card shows the live per-condition ad count from the API.
+ * Centered Used/New pill toggle. Sits above the whole homepage (not inside
+ * the categories grid) so visitors can see it applies to every section,
+ * not just the category cards below it.
+ */
+export function ConditionToggle({
+  condition, onChange,
+}: {
+  condition: Condition;
+  onChange: (c: Condition) => void;
+}) {
+  return (
+    <div
+      role="tablist"
+      aria-label="Filter the whole page by product condition"
+      className="inline-flex items-center rounded-full border border-line bg-white p-1 shadow-sm"
+    >
+      <ToggleBtn active={condition === 'used'} onClick={() => onChange('used')}>
+        Used
+      </ToggleBtn>
+      <ToggleBtn active={condition === 'new'} onClick={() => onChange('new')}>
+        New
+      </ToggleBtn>
+    </div>
+  );
+}
+
+/**
+ * Pure category grid — counts reflect the active condition. The toggle
+ * itself lives in HomeSections, positioned above the section header.
  */
 export function CategoryConditionGrid({
-  categories, condition, onConditionChange,
+  categories, condition,
 }: {
   categories: Category[];
   condition: Condition;
-  onConditionChange: (c: Condition) => void;
 }) {
   return (
-    <div>
-      <div className="mt-2 mb-6 flex justify-end">
-        <div
-          role="tablist"
-          aria-label="Filter categories by condition"
-          className="inline-flex items-center rounded-full border border-line bg-white p-1 shadow-sm"
-        >
-          <ToggleBtn active={condition === 'used'} onClick={() => onConditionChange('used')}>
-            Used
-          </ToggleBtn>
-          <ToggleBtn active={condition === 'new'} onClick={() => onConditionChange('new')}>
-            New
-          </ToggleBtn>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-        {categories.map((c) => {
-          const count = condition === 'used' ? c.used_count : c.new_count;
-          return (
-            <CategoryCard
-              key={c.id}
-              category={c}
-              adCount={count}
-              countTone={condition}
-            />
-          );
-        })}
-      </div>
+    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+      {categories.map((c) => {
+        const count = condition === 'used' ? c.used_count : c.new_count;
+        return (
+          <CategoryCard
+            key={c.id}
+            category={c}
+            adCount={count}
+            countTone={condition}
+          />
+        );
+      })}
     </div>
   );
 }

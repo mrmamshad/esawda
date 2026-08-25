@@ -5,7 +5,7 @@ import type { Route } from 'next';
 import { Fragment, useState } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { SectionHeader } from './SectionHeader';
-import { CategoryConditionGrid, type Condition } from './CategoryConditionGrid';
+import { CategoryConditionGrid, ConditionToggle, type Condition } from './CategoryConditionGrid';
 import { ListingCard } from '@/components/listing/ListingCard';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -48,8 +48,14 @@ export function HomeSections({
 
   return (
     <>
-      {/* ── 0. Popular categories + Used/New toggle ── */}
-      <section className="reveal container-page py-24">
+{/* ── Global Used/New filter — centered above the page, applies to
+          every section (categories + product grids) ── */}
+      <div className="container-page flex justify-center pt-20 pb-2">
+        <ConditionToggle condition={condition} onChange={setCondition} />
+      </div>
+
+      {/* ── 0. Popular categories ── */}
+      <section className="reveal container-page pb-24 pt-6">
         <SectionHeader
           eyebrow="Browse by category"
           title={<>Find exactly what you need, <span className="text-brand-700">faster.</span></>}
@@ -62,7 +68,7 @@ export function HomeSections({
             <EmptyState title="No categories yet" description="Categories will appear once seeded." />
           </div>
         ) : (
-          <CategoryConditionGrid categories={categories.slice(0, 12)} condition={condition} onConditionChange={setCondition} />
+          <CategoryConditionGrid categories={categories.slice(0, 12)} condition={condition} />
         )}
       </section>
 
