@@ -13,6 +13,8 @@ export type Category = {
   icon: string | null;
   picture_url: string | null;
   ads_count?: number;
+  new_count?: number;
+  used_count?: number;
   sub_categories?: SubCategory[];
 };
 

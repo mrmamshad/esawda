@@ -32,14 +32,31 @@ export default async function HomePage() {
   // dynamic, defeating ISR). Auth state resolves client-side in AuthGate and
   // Header falls back to it. Settings join the parallel fan-out so nothing
   // is awaited serially before first HTML.
-  const [settings, cats, featured, urgent, last24h, highlights, used, plans, testimonials, blogs] = await Promise.all([
+  const [settings, cats, sections, plans, testimonials, blogs] = await Promise.all([
     api<{ settings: Record<string, string> }>('/settings', { revalidate: 300, tags: ['settings'] }),
     safe(api<Category[]>('/categories?with_counts=true', { revalidate: 300 }),                                  { data: [] as Category[] }),
-    safe(api<Ad[]>('/ads/featured?per_page=6', { revalidate: 120, tags: ['ads'] }),                              { data: [] as Ad[] }),
-    safe(api<Ad[]>('/ads?per_page=8&filter[urgent]=1&sort=-created_at', { revalidate: 120, tags: ['ads'] }),     { data: [] as Ad[] }),
-    safe(api<Ad[]>('/ads?per_page=8&since_hours=24&sort=-created_at', { revalidate: 120, tags: ['ads'] }),       { data: [] as Ad[] }),
-    safe(api<Ad[]>('/ads?per_page=8&filter[highlight]=1&sort=-created_at', { revalidate: 120, tags: ['ads'] }),  { data: [] as Ad[] }),
-    safe(api<Ad[]>('/ads?per_page=8&sort=-created_at&filter[condition]=used', { revalidate: 120, tags: ['ads'] }), { data: [] as Ad[] }),
+    safe(Promise.all([
+      api<Ad[]>('/ads?per_page=6&filter[featured]=1&sort=-created_at&filter[condition]=used', { revalidate: 120, tags: ['ads'] }),
+      api<Ad[]>('/ads?per_page=6&filter[featured]=1&sort=-created_at&filter[condition]=new', { revalidate: 120, tags: ['ads'] }),
+      api<Ad[]>('/ads?per_page=8&filter[urgent]=1&sort=-created_at&filter[condition]=used', { revalidate: 120, tags: ['ads'] }),
+      api<Ad[]>('/ads?per_page=8&filter[urgent]=1&sort=-created_at&filter[condition]=new', { revalidate: 120, tags: ['ads'] }),
+      api<Ad[]>('/ads?per_page=8&since_hours=24&sort=-created_at&filter[condition]=used', { revalidate: 120, tags: ['ads'] }),
+      api<Ad[]>('/ads?per_page=8&since_hours=24&sort=-created_at&filter[condition]=new', { revalidate: 120, tags: ['ads'] }),
+      api<Ad[]>('/ads?per_page=8&filter[highlight]=1&sort=-created_at&filter[condition]=used', { revalidate: 120, tags: ['ads'] }),
+      api<Ad[]>('/ads?per_page=8&filter[highlight]=1&sort=-created_at&filter[condition]=new', { revalidate: 120, tags: ['ads'] }),
+      api<Ad[]>('/ads?per_page=8&sort=-created_at&filter[condition]=used', { revalidate: 120, tags: ['ads'] }),
+      api<Ad[]>('/ads?per_page=8&sort=-created_at&filter[condition]=new', { revalidate: 120, tags: ['ads'] }),
+    ]).then(([
+      featUsed, featNew, urgentUsed, urgentNew,
+      last24hUsed, last24hNew, hiUsed, hiNew, usedUsed, usedNew,
+    ]) => ({
+      featured:   { used: featUsed.data as Ad[],   new: featNew.data as Ad[] },
+      urgent:     { used: urgentUsed.data as Ad[], new: urgentNew.data as Ad[] },
+      last24h:    { used: last24hUsed.data as Ad[], new: last24hNew.data as Ad[] },
+      highlights: { used: hiUsed.data as Ad[],      new: hiNew.data as Ad[] },
+      used:       { used: usedUsed.data as Ad[],    new: usedNew.data as Ad[] },
+    })),
+    { featured: { used: [], new: [] }, urgent: { used: [], new: [] }, last24h: { used: [], new: [] }, highlights: { used: [], new: [] }, used: { used: [], new: [] } }),
     safe(api<Plan[]>('/plans', { revalidate: 300 }),                                                            { data: [] as Plan[] }),
     safe(api<Testimonial[]>('/testimonials?limit=3', { revalidate: 600 }),                                      { data: [] as Testimonial[] }),
     safe(api<Blog[]>('/blogs?per_page=3', { revalidate: 300 }),                                                 { data: [] as Blog[] }),
@@ -76,20 +93,15 @@ export default async function HomePage() {
             label above a chunky navy heading, muted body, and (optionally)
             a ghost "See all" pill on the right. This is the Eris cadence. */}
 
-        {/* ═══ AD SLOT #1 — large (970×250), directly under hero ═══
-            First slot on the page, sits between hero and the toggle. */}
-        <div className="container-page pb-8 pt-10">
-          <AdSlot placement="home.after_categories" size="large" />
-        </div>
-
-        {/* ── Five fixed sections: Featured → Urgent → Last 24h → Highlights →
-            Pre-owned (used). ── */}
+        {/* ── Popular categories (with Used/New toggle) → Featured → Urgent →
+            Last 24h → Highlights → Pre-owned (used). ── */}
         <HomeSections
-          featured={featured.data as Ad[]}
-          urgent={urgent.data as Ad[]}
-          last24h={last24h.data as Ad[]}
-          highlights={highlights.data as Ad[]}
-          used={used.data as Ad[]}
+          categories={cats.data as Category[]}
+          featured={sections.featured}
+          urgent={sections.urgent}
+          last24h={sections.last24h}
+          highlights={sections.highlights}
+          used={sections.used}
         />
 
         {/* ═══ AD SLOT — wide banner, after Pre-owned section ═══

@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import type { Route } from 'next';
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { SectionHeader } from './SectionHeader';
+import { CategoryConditionGrid, type Condition } from './CategoryConditionGrid';
 import { ListingCard } from '@/components/listing/ListingCard';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -17,31 +18,61 @@ function stripTestAds<T extends { title?: string | null }>(ads: T[]): T[] {
 
 const GRID = 'grid gap-6 sm:grid-cols-2 lg:grid-cols-4';
 
+/** A product section that has one list per condition (used/new). */
+type ConditionedSection = { used: Ad[]; new: Ad[] };
+
 /**
- * The five home sections, in order:
- *   1. Featured products
- *   2. Urgent products (posted with Urgent selected)
- *   3. Great condition / Pre-owned (used only)
- *   4. Fresh from sellers, in the last 24h
- *   5. Highlight Products (posted with Highlight selected)
+ * The home sections plus a global Used/New filter.
+ *
+ * The toggle sits above the categories grid; flipping it re-renders the
+ * categories (real per-condition counts) AND every product section below
+ * with the matching condition's data, so the whole homepage filters in sync.
  */
 export function HomeSections({
+  categories,
   featured,
   urgent,
   used,
   last24h,
   highlights,
 }: {
-  featured: Ad[];
-  urgent: Ad[];
-  used: Ad[];
-  last24h: Ad[];
-  highlights: Ad[];
+  categories: Category[];
+  featured: ConditionedSection;
+  urgent: ConditionedSection;
+  used: ConditionedSection;
+  last24h: ConditionedSection;
+  highlights: ConditionedSection;
 }) {
+  const [condition, setCondition] = useState<Condition>('used');
+  const pick = (s: ConditionedSection) => (condition === 'used' ? s.used : s.new);
+
   return (
     <>
+      {/* ── 0. Popular categories + Used/New toggle ── */}
+      <section className="reveal container-page py-24">
+        <SectionHeader
+          eyebrow="Browse by category"
+          title={<>Find exactly what you need, <span className="text-brand-700">faster.</span></>}
+          description="Twelve most-loved categories, ranked by weekly buyer activity."
+          actionLabel="View all"
+          actionHref={'/ads' as Route}
+        />
+        {categories.length === 0 ? (
+          <div className="mt-12">
+            <EmptyState title="No categories yet" description="Categories will appear once seeded." />
+          </div>
+        ) : (
+          <CategoryConditionGrid categories={categories.slice(0, 12)} condition={condition} onConditionChange={setCondition} />
+        )}
+      </section>
+
+      {/* ═══ AD SLOT #1 — large (970×250), under hero ═══ */}
+      <div className="container-page pb-8 pt-10">
+        <AdSlot placement="home.after_categories" size="large" />
+      </div>
+
       {/* ── 1. Featured products ── */}
-      {featured.length > 0 && (
+      {pick(featured).length > 0 && (
         <section className="reveal relative overflow-hidden bg-white py-24">
           <div className="container-page relative">
             <div className="flex flex-wrap items-end justify-between gap-4">
@@ -67,7 +98,7 @@ export function HomeSections({
               </Link>
             </div>
             <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {stripTestAds(featured).slice(0, 6).map((ad, i) => (
+              {stripTestAds(pick(featured)).slice(0, 6).map((ad, i) => (
                 <Fragment key={ad.id}>
                   <ListingCard ad={ad} variant="featured" />
                   {i === 2 && <AdSlot placement="home.sponsored_infeed" size="infeed" />}
@@ -79,7 +110,7 @@ export function HomeSections({
       )}
 
       {/* ── 2. Urgent products ── */}
-      {urgent.length > 0 && (
+      {pick(urgent).length > 0 && (
         <section className="reveal container-page py-24">
           <SectionHeader
             eyebrow="Urgent products"
@@ -89,24 +120,34 @@ export function HomeSections({
             actionHref={'/ads' as Route}
           />
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {stripTestAds(urgent).slice(0, 8).map((ad) => <ListingCard key={ad.id} ad={ad} variant="featured" />)}
+            {stripTestAds(pick(urgent)).slice(0, 8).map((ad) => <ListingCard key={ad.id} ad={ad} variant="featured" />)}
           </div>
         </section>
       )}
 
-      {/* ── 3. Great condition — used only ── */}
-      {used.length > 0 && (
+      {/* ── 3. Great condition — follows the Used/New toggle ── */}
+      {pick(used).length > 0 && (
         <section className="reveal container-page pb-24">
-          <SectionHeader
-            eyebrow="Pre-owned"
-            title={<>Great condition, <span className="text-brand-700">great value.</span></>}
-            description="Verified second-hand deals — save an average of 42% versus buying new."
-            actionLabel="See all used"
-            actionHref={'/ads?condition=used' as Route}
-            statPill={{ label: '42% avg savings', tone: 'success' }}
-          />
+          {condition === 'new' ? (
+            <SectionHeader
+              eyebrow="Brand new"
+              title={<>Never used, still <span className="text-brand-700">in the box.</span></>}
+              description="Factory-fresh listings from verified retailers and everyday sellers."
+              actionLabel="See all new"
+              actionHref={'/ads?condition=new' as Route}
+            />
+          ) : (
+            <SectionHeader
+              eyebrow="Pre-owned"
+              title={<>Great condition, <span className="text-brand-700">great value.</span></>}
+              description="Verified second-hand deals — save an average of 42% versus buying new."
+              actionLabel="See all used"
+              actionHref={'/ads?condition=used' as Route}
+              statPill={{ label: '42% avg savings', tone: 'success' }}
+            />
+          )}
           <div className={`mt-12 ${GRID}`}>
-            {stripTestAds(used).slice(0, 8).map((ad) => <ListingCard key={ad.id} ad={ad} variant="featured" />)}
+            {stripTestAds(pick(used)).slice(0, 8).map((ad) => <ListingCard key={ad.id} ad={ad} variant="featured" />)}
           </div>
         </section>
       )}
@@ -121,7 +162,7 @@ export function HomeSections({
             actionLabel="Browse all"
             actionHref={'/ads' as Route}
           />
-          {last24h.length === 0 ? (
+          {pick(last24h).length === 0 ? (
             <div className="mt-12">
               <EmptyState title="Nothing posted in the last 24 hours" description="New products land here as sellers post them." action={
                 <Link href={'/post/product' as Route} className="contents"><Button variant="filled">Post a product</Button></Link>
@@ -129,14 +170,14 @@ export function HomeSections({
             </div>
           ) : (
             <div className={`mt-12 ${GRID}`}>
-              {stripTestAds(last24h).slice(0, 8).map((ad) => <ListingCard key={ad.id} ad={ad} variant="featured" />)}
+              {stripTestAds(pick(last24h)).slice(0, 8).map((ad) => <ListingCard key={ad.id} ad={ad} variant="featured" />)}
             </div>
           )}
         </div>
       </section>
 
       {/* ── 5. Highlight Products ── */}
-      {highlights.length > 0 && (
+      {pick(highlights).length > 0 && (
         <section className="reveal container-page pb-24">
           <SectionHeader
             eyebrow="Highlight Products"
@@ -146,7 +187,7 @@ export function HomeSections({
             actionHref={'/ads' as Route}
           />
           <div className={`mt-12 ${GRID}`}>
-            {stripTestAds(highlights).slice(0, 8).map((ad) => <ListingCard key={ad.id} ad={ad} variant="featured" />)}
+            {stripTestAds(pick(highlights)).slice(0, 8).map((ad) => <ListingCard key={ad.id} ad={ad} variant="featured" />)}
           </div>
         </section>
       )}

@@ -20,8 +20,10 @@ export function CategoryCard({
   adCount?: number;
   countTone?: 'used' | 'new';
 }) {
-  const href = (category.slug ? `/category/${category.slug}` : `/ads?filter[category]=${category.id}`) as Route;
-  const condLabel = countTone === 'new' ? 'new' : 'used';
+  const base = (category.slug ? `/category/${category.slug}` : `/ads?filter[category]=${category.id}`) as Route;
+  const cond = countTone === 'new' ? 'new' : 'used';
+  const href = (base.includes('?') ? `${base}&condition=${cond}` : `${base}?condition=${cond}`) as Route;
+  const condLabel = cond;
   return (
     <Link href={href} className={cn('group block', className)}>
       <div className="relative mb-4 aspect-square overflow-hidden rounded-2xl bg-brand-50">
