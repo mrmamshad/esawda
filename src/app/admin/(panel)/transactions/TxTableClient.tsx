@@ -19,9 +19,67 @@ export type AdminTxRow = {
   transaction_gatway: string;
   purpose: string | null;
   product_name: string | null;
+  meta?: string | null;
   created_at: string | null;
   seller?: { username: string; email: string } | null;
 };
+
+type MetaBag = Record<string, unknown>;
+
+/** Decode the transaction.meta JSON blob (already a raw JSON string from the API). */
+function parseMeta(raw?: string | null): MetaBag {
+  if (!raw) return {};
+  try { const v = JSON.parse(raw); return v && typeof v === 'object' ? v as MetaBag : {}; } catch { return {}; }
+}
+
+const UPGRADE_LABELS: Record<string, string> = {
+  featured:  'Featured',
+  urgent:    'Urgent',
+  highlight: 'Highlight',
+};
+
+/** Which paid upgrades a transaction meta actually enabled (ad_upgrade only). */
+function upgradeChips(meta: MetaBag): string[] {
+  return (['featured', 'urgent', 'highlight'] as const)
+    .filter((k) => meta[k] === true || meta[k] === '1' || meta[k] === 1)
+    .map((k) => UPGRADE_LABELS[k])
+    .filter((v): v is string => Boolean(v));
+}
+
+/**
+ * Build a descriptive, human-readable purpose line.
+ *
+ *   plan              → "Plan subscription · Monthly"
+ *   ad_upgrade        → "Ad boost · Featured, Highlight"  (+ chips)
+ *   paid_listing      → "Paid listing · <product>"
+ *   ad_post           → "Ad posting · <product>"
+ *   product_purchase  → "Product purchase · <product>"
+ *   legacy (null)     → falls back to the product_name column
+ */
+export function formatPurpose(row: AdminTxRow): { label: string; chips: string[] } {
+  const meta = parseMeta(row.meta);
+
+  switch (row.purpose) {
+    case 'plan': {
+      const cadence = typeof meta.cadence === 'string' ? meta.cadence : '';
+      const pretty = cadence.charAt(0).toUpperCase() + cadence.slice(1);
+      return { label: pretty ? `Plan subscription · ${pretty}` : 'Plan subscription', chips: [] };
+    }
+    case 'ad_upgrade': {
+      const chips = upgradeChips(meta);
+      const suffix = chips.length ? ` · ${chips.join(', ')}` : '';
+      return { label: `Ad boost${suffix}`, chips };
+    }
+    case 'paid_listing':
+      return { label: row.product_name ? `Paid listing · ${row.product_name}` : 'Paid listing', chips: [] };
+    case 'ad_post':
+      return { label: row.product_name ? `Ad posting · ${row.product_name}` : 'Ad posting', chips: [] };
+    case 'product_purchase':
+      return { label: row.product_name ? `Product purchase · ${row.product_name}` : 'Product purchase', chips: [] };
+    default:
+      return { label: row.product_name ?? row.purpose ?? '—', chips: [] };
+  }
+}
 
 export function TxTableClient({ initialRows }: { initialRows: AdminTxRow[] }) {
   const router = useRouter();
@@ -56,8 +114,23 @@ export function TxTableClient({ initialRows }: { initialRows: AdminTxRow[] }) {
       cell: (info) => <span style={{ color: 'var(--adm-fg)' }}>{info.getValue() as string}</span>,
     },
     {
-      id: 'purpose', accessorFn: (r) => r.purpose ?? r.product_name ?? '—', header: 'Purpose',
-      cell: (info) => <span className="text-[12.5px] capitalize" style={{ color: 'var(--adm-fg-muted)' }}>{info.getValue() as string}</span>,
+      id: 'purpose', accessorFn: (r) => formatPurpose(r).label, header: 'Purpose',
+      cell: (info) => {
+        const row = info.row.original;
+        const { label, chips } = formatPurpose(row);
+        const CHIP_COLORS: Record<string, string> = { featured: '#7c3aed', urgent: '#d97706', highlight: '#e11d48' };
+        return (
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[12.5px]" style={{ color: 'var(--adm-fg-muted)' }}>{label}</span>
+            {chips.map((c) => (
+              <span key={c} className="inline-block rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white"
+                style={{ backgroundColor: CHIP_COLORS[c] ?? '#6b7280' }}>
+                {c}
+              </span>
+            ))}
+          </div>
+        );
+      },
     },
     {
       id: 'gateway', accessorKey: 'transaction_gatway', header: 'Gateway',
