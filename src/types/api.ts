@@ -80,6 +80,8 @@ export type SellerMini = {
   id: number;
   username: string;
   name: string;
+  is_shop?: boolean;
+  shop_name?: string | null;
   avatar_url: string;
   cover_url?: string | null;
   online: boolean;

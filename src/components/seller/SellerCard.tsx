@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { Route } from 'next';
+import { Store, UserRound } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
 import { OnlineDot } from '@/components/ui/OnlineDot';
 import { SocialRow } from '@/components/ui/SocialRow';
@@ -29,6 +30,9 @@ export function SellerCard({ seller, productId, productTitle, adWhatsapp }: {
     seller.socials &&
     Object.values(seller.socials).some((v) => !!v);
   const storeHref = `/store/${seller.username}` as Route;
+  const isShop = seller.is_shop === true;
+  const sellerLabel = isShop ? (seller.shop_name || seller.name) : seller.name;
+  const typeLabel = isShop ? 'Shop owner' : 'Individual seller';
 
   return (
     <aside className="surface-card p-6 text-center">
@@ -40,8 +44,8 @@ export function SellerCard({ seller, productId, productTitle, adWhatsapp }: {
       <div className="mt-6 flex justify-center">
         <Link
           href={storeHref}
-          aria-label={`View ${seller.name}'s public shop`}
-          title={`Visit ${seller.name}'s shop`}
+          aria-label={`View ${seller.name}'s public ${isShop ? 'shop' : 'profile'}`}
+          title={`Visit ${seller.name}'s ${isShop ? 'shop' : 'profile'}`}
           className="group inline-flex rounded-full outline-none ring-offset-2 transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-brand-500"
         >
           <Avatar src={seller.avatar_url} alt={seller.name} size="xl" />
@@ -51,16 +55,22 @@ export function SellerCard({ seller, productId, productTitle, adWhatsapp }: {
       <h3 className="mt-4 line-clamp-2 text-lg font-bold leading-snug text-ink">
         <Link
           href={storeHref}
-          title={`Visit ${seller.name}'s shop`}
+          title={`Visit ${seller.name}'s ${isShop ? 'shop' : 'profile'}`}
           className="rounded-md outline-none transition hover:text-brand-700 focus-visible:ring-2 focus-visible:ring-brand-500"
         >
-          {seller.name}
+          {sellerLabel}
         </Link>
       </h3>
 
+      {/* Shop vs individual-seller indicator — makes the seller type obvious. */}
+      <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
+        {isShop ? <Store size={13} aria-hidden /> : <UserRound size={13} aria-hidden />}
+        {typeLabel}
+      </p>
+
       <Link
         href={storeHref}
-        className="mt-1 inline-block text-sm font-medium text-brand-700 hover:text-brand-600 hover:underline underline-offset-2"
+        className="mt-3 inline-block text-sm font-medium text-brand-700 hover:text-brand-600 hover:underline underline-offset-2"
       >
         View all products
       </Link>

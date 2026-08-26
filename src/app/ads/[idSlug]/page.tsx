@@ -90,7 +90,7 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
       priceCurrency:    'BDT',
       availability:     'https://schema.org/InStock',
       url:              `${env.site.base}/ads/${ad.url_slug}`,
-      seller:           ad.seller ? { '@type': 'Person', name: ad.seller.name } : undefined,
+      seller:           ad.seller ? { '@type': ad.seller.is_shop ? 'Store' : 'Person', name: ad.seller.name } : undefined,
     },
   };
 
