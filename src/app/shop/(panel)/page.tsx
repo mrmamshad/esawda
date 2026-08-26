@@ -9,6 +9,7 @@ import { requireUser } from '@/lib/session';
 import { apiFromServer, ApiError } from '@/lib/api';
 import { PageHeader } from '@/components/shop/v2/PageHeader';
 import { StoreHero } from '@/components/shop/v2/StoreHero';
+import { BannerUpload } from '@/components/shop/v2/BannerUpload';
 import { StatCard } from '@/components/shop/v2/StatCard';
 import { SalesPanel } from '@/components/shop/v2/SalesPanel';
 import { MessagesWidget } from '@/components/shop/v2/MessagesWidget';
@@ -67,6 +68,11 @@ export default async function ShopDashboardPage() {
         totalOrders={stats.store.total_orders}
         activeOrders={stats.store.active_orders}
       />
+
+      {/* ── Update banner (next to the store hero) ── */}
+      <section className="mt-5">
+        <BannerUpload user={user} />
+      </section>
 
       {/* ── Row 1: KPI cards ── */}
       <section className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">

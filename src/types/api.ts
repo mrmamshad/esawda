@@ -82,6 +82,7 @@ export type SellerMini = {
   name: string;
   is_shop?: boolean;
   shop_name?: string | null;
+  shop_banner_url?: string | null;
   avatar_url: string;
   cover_url?: string | null;
   online: boolean;
@@ -95,6 +96,9 @@ export type Seller = {
   id: number;
   username: string;
   name: string;
+  is_shop?: boolean;
+  shop_name?: string | null;
+  shop_banner_url?: string | null;
   tagline: string | null;
   description: string | null;
   avatar_url: string;
@@ -153,6 +157,7 @@ export type User = {
   ads_remaining?: number;
   shop_name?: string | null;
   shop_address?: string | null;
+  shop_banner_url?: string | null;
   avatar_url: string;
   avatar_set?: boolean;
   cover_url?: string | null;

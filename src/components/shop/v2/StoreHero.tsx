@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { Star, ExternalLink, Store, ShoppingBag } from 'lucide-react';
+import { Star, ExternalLink, ShoppingBag } from 'lucide-react';
 import type { User } from '@/types/api';
 
 /**
@@ -54,12 +54,6 @@ export function StoreHero({
               <h2 className="text-lg font-bold tracking-tight md:text-xl" style={{ color: 'var(--shp-fg)' }}>
                 {shopName}
               </h2>
-              <span
-                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest"
-                style={{ background: 'var(--shp-brand-soft)', color: 'var(--shp-brand)' }}
-              >
-                <Store size={10} /> Verified shop
-              </span>
             </div>
             <p className="mt-1 flex items-center gap-1.5 text-[13px]" style={{ color: 'var(--shp-fg-muted)' }}>
               <Star size={13} className="fill-current" style={{ color: 'var(--shp-gold)' }} />

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type FormEvent, useRef } from 'react';
-import { Store, UploadCloud, CheckCircle2, ShieldCheck, UserPlus } from 'lucide-react';
+import { Store, UploadCloud, CheckCircle2, ShieldCheck, UserPlus, ImageUp } from 'lucide-react';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { useRouter } from 'next/navigation';
@@ -37,6 +37,12 @@ export function ShopApplyForm({
   const [shopCategory, setShopCategory] = useState('');
   const [shopDescription, setShopDescription] = useState('');
   const [files, setFiles] = useState<File[]>([]);
+  const [avatar, setAvatar] = useState<File | null>(null);
+  const [cover, setCover] = useState<File | null>(null);
+  const [banner, setBanner] = useState<File | null>(null);
+  const avatarRef = useRef<HTMLInputElement>(null);
+  const coverRef = useRef<HTMLInputElement>(null);
+  const bannerRef = useRef<HTMLInputElement>(null);
   const [accountCreated, setAccountCreated] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -93,6 +99,9 @@ export function ShopApplyForm({
       if (shopCategory.trim()) fd.append('shop_category', shopCategory.trim());
       if (shopDescription.trim()) fd.append('shop_description', shopDescription.trim());
       files.forEach(f => fd.append('documents[]', f));
+      if (avatar) fd.append('avatar', avatar);
+      if (cover) fd.append('cover', cover);
+      if (banner) fd.append('banner', banner);
 
       await api('/me/shop/apply', { method: 'POST', body: fd });
       setDone(true);
@@ -232,6 +241,41 @@ export function ShopApplyForm({
         </div>
       </div>
 
+      {/* Optional profile photos (avatar / cover / banner) */}
+      <div className="mt-6">
+        <span className={label}>Shop photos <span className="text-ink-faint">(optional)</span></span>
+        <p className="mb-3 text-xs text-ink-muted">
+          Add a profile photo, cover and wide banner for your public store. You can change these later
+          from the shop panel.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <PhotoUpload
+            label="Profile photo"
+            hint="Square, e.g. 512×512"
+            file={avatar}
+            inputRef={avatarRef}
+            onPick={() => avatarRef.current?.click()}
+            onFile={(f) => setAvatar(f)}
+          />
+          <PhotoUpload
+            label="Cover"
+            hint="Wide, e.g. 1920×300"
+            file={cover}
+            inputRef={coverRef}
+            onPick={() => coverRef.current?.click()}
+            onFile={(f) => setCover(f)}
+          />
+          <PhotoUpload
+            label="Banner"
+            hint="Wide, e.g. 1920×400"
+            file={banner}
+            inputRef={bannerRef}
+            onPick={() => bannerRef.current?.click()}
+            onFile={(f) => setBanner(f)}
+          />
+        </div>
+      </div>
+
       {/* Documents */}
       <div className="mt-6">
         <span className={label}>Supporting documents *</span>
@@ -274,5 +318,44 @@ export function ShopApplyForm({
         </Button>
       </div>
     </form>
+  );
+}
+
+function PhotoUpload({
+  label, hint, file, inputRef, onPick, onFile,
+}: {
+  label: string;
+  hint: string;
+  file: File | null;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+  onPick: () => void;
+  onFile: (f: File | null) => void;
+}) {
+  const preview = file ? URL.createObjectURL(file) : null;
+  return (
+    <div className="rounded-lg border border-line bg-surface-muted p-3">
+      <button
+        type="button"
+        onClick={onPick}
+        className="flex w-full flex-col items-center justify-center gap-1 rounded-md border border-dashed border-line bg-white px-3 py-6 text-center hover:border-brand-400"
+      >
+        {preview ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={preview} alt={label} className="h-14 w-14 rounded-md object-cover" />
+        ) : (
+          <ImageUp size={20} className="text-ink-faint" />
+        )}
+        <span className="mt-1 text-xs font-medium text-ink">{file ? 'Change' : 'Upload'}</span>
+      </button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => onFile(e.target.files?.[0] ?? null)}
+      />
+      <p className="mt-2 text-center text-[11px] font-semibold text-ink">{label}</p>
+      <p className="text-center text-[10px] text-ink-faint">{hint}</p>
+    </div>
   );
 }

@@ -119,6 +119,18 @@ export default async function SellerProfilePage({ params, searchParams }: {
 
       {/* Classic white page background. */}
       <div className="bg-white">
+        {/* Full-width shop banner (if the owner uploaded one) */}
+        {s.shop_banner_url && (
+          <div className="relative h-40 w-full overflow-hidden bg-ink md:h-56">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={s.shop_banner_url}
+              alt={`${s.shop_name || s.name} banner`}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        )}
+
         <div className="container-page py-6 md:py-8">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
 
