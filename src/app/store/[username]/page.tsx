@@ -120,18 +120,6 @@ export default async function SellerProfilePage({ params, searchParams }: {
       {/* Classic white page background. */}
       <div className="bg-white">
         <div className="container-page py-6 md:py-8">
-          {/* Shop banner — sits inside the container, above the two-column grid */}
-          {s.shop_banner_url && (
-            <div className="relative mb-6 h-40 overflow-hidden rounded-xl bg-ink md:h-56">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={s.shop_banner_url}
-                alt={`${s.shop_name || s.name} banner`}
-                className="h-full w-full object-cover"
-              />
-            </div>
-          )}
-
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
 
             {/* ───────── Left: sticky seller sidebar ───────── */}
@@ -245,6 +233,18 @@ export default async function SellerProfilePage({ params, searchParams }: {
 
             {/* ───────── Right: listings ───────── */}
             <section className="min-w-0 space-y-4">
+              {/* Shop banner — full width of the right column */}
+              {s.shop_banner_url && (
+                <div className="relative h-40 overflow-hidden rounded-xl bg-ink md:h-56">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={s.shop_banner_url}
+                    alt={`${s.shop_name || s.name} banner`}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              )}
+
               {/* Category chips row */}
               <div className="surface-card p-3">
                 <div className="flex items-center gap-3 overflow-x-auto pb-1">
