@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { ColumnDef } from '@tanstack/react-table';
-import { BadgeCheck, BadgeX } from 'lucide-react';
+import { BadgeCheck, BadgeX, KeyRound } from 'lucide-react';
 import { AdminTable } from '@/components/admin/v2/AdminTable';
 import { StatusBadge } from '@/components/admin/v2/StatusBadge';
 import { RowActionsMenu, type RowAction } from '@/components/admin/v2/RowActionsMenu';
@@ -36,6 +36,22 @@ export function ShopsTableClient({ initialRows }: { initialRows: AdminShopRow[] 
       await api(`/admin/users/${id}${path}`, { method: 'POST', token: readToken() });
       toast.success(success);
       start(() => router.refresh());
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Action failed');
+    } finally { setBusyId(null); }
+  };
+
+  const resetPassword = async (r: AdminShopRow) => {
+    const password = window.prompt(`New password for ${r.shop_name || r.username}:`, '');
+    if (!password) return;
+    if (password.length < 8) { toast.error('Password must be at least 8 characters.'); return; }
+    setBusyId(r.id);
+    try {
+      await api(`/admin/users/${r.id}/reset-password`, {
+        method: 'POST', token: readToken(),
+        body: { password },
+      });
+      toast.success('Password updated');
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Action failed');
     } finally { setBusyId(null); }
@@ -98,6 +114,8 @@ export function ShopsTableClient({ initialRows }: { initialRows: AdminShopRow[] 
               onClick: () => call(r.id, '/unverify-shop', 'Verification removed') }
             : { label: 'Verify', icon: <BadgeCheck size={13} />, disabled: busyId === r.id || pending,
               onClick: () => call(r.id, '/verify-shop', 'Shop verified') },
+          { label: 'Reset password', icon: <KeyRound size={13} />, disabled: busyId === r.id || pending,
+            onClick: () => resetPassword(r) },
         ];
         return <div className="flex justify-end"><RowActionsMenu actions={actions} /></div>;
       },
