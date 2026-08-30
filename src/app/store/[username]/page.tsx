@@ -121,7 +121,7 @@ export default async function SellerProfilePage({ params, searchParams }: {
       {/* Classic white page background. */}
       <div className="bg-white">
         <div className="container-page py-6 md:py-8">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[300px_1fr_160px]">
 
             {/* ───────── Left: sticky seller sidebar ───────── */}
             <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
@@ -347,6 +347,13 @@ export default async function SellerProfilePage({ params, searchParams }: {
                 </div>
               )}
             </section>
+
+            {/* ───────── Right rail: visible skyscraper ad ───────── */}
+            <aside className="hidden xl:block">
+              <div className="sticky top-6">
+                <AdSlot placement="store.right_rail" size="skyscraper" />
+              </div>
+            </aside>
           </div>
         </div>
       </div>

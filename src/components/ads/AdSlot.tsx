@@ -1,7 +1,11 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import type { ReactNode } from 'react';
+import { env } from '@/lib/env';
 
-export type AdSlotSize = 'leaderboard' | 'large' | 'mpu' | 'infeed' | 'wide';
+export type AdSlotSize = 'leaderboard' | 'large' | 'mpu' | 'infeed' | 'wide' | 'skyscraper';
 
 type AdSlotProps = {
   /** Logical placement id — used for the ad server / admin targeting later. */
@@ -13,25 +17,30 @@ type AdSlotProps = {
   children?: ReactNode;
 };
 
-/**
- * Visual specs for each size — height, aspect, and where they sit in the page.
- * Heights capped so layout never explodes before the ad is wired up.
- */
-const SIZE_SPEC: Record<AdSlotSize, { h: string; label: string; tone: 'leaderboard' | 'large' | 'mpu' | 'infeed' | 'wide' }> = {
-  // Containers match their GIF's native aspect so nothing is cropped or letterboxed.
-  leaderboard: { h: 'aspect-[4042/375]',  label: '728 × 90',   tone: 'leaderboard' }, // wide banner GIF
-  large:       { h: 'aspect-[2425/625]',  label: '970 × 250',  tone: 'large' },       // ad-large.gif
-  mpu:         { h: 'aspect-[1250/1042] w-full max-w-[320px] mx-auto', label: '300 × 250', tone: 'mpu' }, // ad-mpu.gif
-  infeed:      { h: 'aspect-[1250/1042] w-full max-w-[320px] mx-auto', label: 'In-feed native', tone: 'infeed' }, // square GIF
-  wide:        { h: 'aspect-[4042/375]',  label: '970 × 90',   tone: 'wide' },        // ad-infeed.gif (super-wide)
+/** Shape of a live ad returned by GET /api/v1/ads/placements. */
+type PlacementAd = {
+  slug: string;
+  title: string | null;
+  image_url: string | null;
+  link_url: string | null;
+  alt_text: string | null;
 };
 
-const SIZE_IMG: Partial<Record<AdSlotSize, { src: string; alt: string }>> = {
-  leaderboard: { src: '/ad-infeed.gif', alt: 'Advertisement banner' }, // super-wide 10.78:1
-  large:       { src: '/ad-large.gif',  alt: 'Advertisement banner' }, // 3.88:1
-  wide:        { src: '/ad-infeed.gif', alt: 'Advertisement banner' }, // super-wide 10.78:1
-  mpu:         { src: '/ad-mpu.gif',    alt: 'Advertisement banner' }, // 1.2:1 square-ish
-  infeed:      { src: '/ad-mpu.gif',    alt: 'Advertisement banner' }, // 1.2:1 square-ish
+const SIZE_SPEC: Record<AdSlotSize, { h: string; label: string }> = {
+  leaderboard: { h: 'aspect-[4042/375]',  label: '728 × 90',  },
+  large:       { h: 'aspect-[2425/625]',  label: '970 × 250', },
+  mpu:         { h: 'aspect-[1250/1042] w-full max-w-[320px] mx-auto', label: '300 × 250' },
+  infeed:      { h: 'aspect-[1250/1042] w-full max-w-[320px] mx-auto', label: 'In-feed native' },
+  wide:        { h: 'aspect-[4042/375]',  label: '970 × 90',  },
+  skyscraper:  { h: 'aspect-[160/600] w-full max-w-[160px] mx-auto', label: '160 × 600' },
+};
+
+const FALLBACK_IMG: Partial<Record<AdSlotSize, string>> = {
+  leaderboard: '/ad-infeed.gif',
+  large:       '/ad-large.gif',
+  wide:        '/ad-infeed.gif',
+  mpu:         '/ad-mpu.gif',
+  infeed:      '/ad-mpu.gif',
 };
 
 export function AdSlot({
@@ -40,7 +49,50 @@ export function AdSlot({
   className = '',
 }: AdSlotProps) {
   const spec = SIZE_SPEC[size];
-  const img = SIZE_IMG[size];
+  const fallback = FALLBACK_IMG[size];
+  const [ad, setAd] = useState<PlacementAd | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${env.api.base}/ads/placements?placements=${encodeURIComponent(placement)}`, {
+      headers: { Accept: 'application/json' },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((payload) => {
+        if (cancelled) return;
+        setAd(payload?.data?.[placement] ?? null);
+      })
+      .catch(() => { /* fall back to static placeholder */ });
+    return () => { cancelled = true; };
+  }, [placement]);
+
+  // Real admin-uploaded ad wins; otherwise show the static placeholder
+  // (or "Ad will be here" when a size has no built-in GIF).
+  const src = ad?.image_url ?? fallback;
+
+  const inner = src ? (
+    <Image
+      src={src}
+      alt={ad?.alt_text || 'Advertisement banner'}
+      fill
+      sizes="100vw"
+      priority={false}
+      unoptimized
+      className="object-cover"
+    />
+  ) : (
+    <div className="flex h-full w-full items-center justify-center border-2 border-dashed border-ink/20 bg-[repeating-linear-gradient(135deg,rgba(0,0,0,0.025)_0_12px,transparent_12px_24px)]">
+      <span className="px-6 text-center text-body-md font-semibold text-ink/60">
+        Ad will be here
+      </span>
+    </div>
+  );
+
+  const body = ad?.link_url ? (
+    <a href={ad.link_url} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
+      {inner}
+    </a>
+  ) : inner;
 
   return (
     <aside
@@ -53,15 +105,7 @@ export function AdSlot({
         className,
       ].join(' ')}
     >
-      {img ? (
-        <Image src={img.src} alt={img.alt} fill sizes="100vw" priority={false} unoptimized className="object-cover" />
-      ) : (
-        <div className="flex h-full w-full items-center justify-center border-2 border-dashed border-ink/20 bg-[repeating-linear-gradient(135deg,rgba(0,0,0,0.025)_0_12px,transparent_12px_24px)]">
-          <span className="px-6 text-center text-body-md font-semibold text-ink/60">
-            Ad will be here
-          </span>
-        </div>
-      )}
+      {body}
     </aside>
   );
 }
