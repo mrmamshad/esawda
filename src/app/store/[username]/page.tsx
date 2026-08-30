@@ -15,6 +15,7 @@ import { SocialRow } from '@/components/ui/SocialRow';
 import { Button } from '@/components/ui/Button';
 import { ListingCard } from '@/components/listing/ListingCard';
 import { TestimonialCard } from '@/components/ui/TestimonialCard';
+import { AdSlot } from '@/components/ads/AdSlot';
 import type { Ad, Review, Seller } from '@/types/api';
 
 /**
@@ -236,6 +237,9 @@ export default async function SellerProfilePage({ params, searchParams }: {
                   </div>
                 </div>
               )}
+
+              {/* ── Sidebar ad slot (MPU, 300×250) ── */}
+              <AdSlot placement="store.sidebar" size="mpu" />
             </aside>
 
             {/* ───────── Right: listings ───────── */}
@@ -325,6 +329,9 @@ export default async function SellerProfilePage({ params, searchParams }: {
                   ))}
                 </div>
               )}
+
+              {/* ── Content ad slot (wide banner) between listings and reviews ── */}
+              <AdSlot placement="store.listings_bottom" size="wide" />
 
               {/* Testimonials */}
               {reviews.data.length > 0 && (
