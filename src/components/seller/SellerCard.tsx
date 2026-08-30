@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Route } from 'next';
-import { Store, UserRound } from 'lucide-react';
+import { Store, UserRound, BadgeCheck } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
 import { OnlineDot } from '@/components/ui/OnlineDot';
 import { SocialRow } from '@/components/ui/SocialRow';
@@ -63,9 +63,16 @@ export function SellerCard({ seller, productId, productTitle, adWhatsapp }: {
       </h3>
 
       {/* Shop vs individual-seller indicator — makes the seller type obvious. */}
-      <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
-        {isShop ? <Store size={13} aria-hidden /> : <UserRound size={13} aria-hidden />}
-        {typeLabel}
+      <p className="mt-2 flex flex-wrap items-center justify-center gap-1.5">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
+          {isShop ? <Store size={13} aria-hidden /> : <UserRound size={13} aria-hidden />}
+          {typeLabel}
+        </span>
+        {seller.shop_verified === true && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+            <BadgeCheck size={13} aria-hidden /> Verified
+          </span>
+        )}
       </p>
 
       <Link

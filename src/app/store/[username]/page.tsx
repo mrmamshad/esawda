@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Route } from 'next';
 import {
-  MapPin, MessageCircle, Phone, Clock, ShieldCheck,
+  MapPin, MessageCircle, Phone, Clock, ShieldCheck, BadgeCheck,
   LayoutGrid, List, ChevronDown,
 } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -139,7 +139,14 @@ export default async function SellerProfilePage({ params, searchParams }: {
                       />
                     )}
                   </div>
-                  <h1 className="mt-4 text-lg font-bold leading-tight text-ink line-clamp-2">{s.name}</h1>
+                  <div className="mt-2 flex items-center justify-center gap-1.5">
+                    <h1 className="text-lg font-bold leading-tight text-ink line-clamp-2">{s.name}</h1>
+                    {s.shop_verified === true && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-brand-700">
+                        <BadgeCheck size={12} /> Verified
+                      </span>
+                    )}
+                  </div>
                   {s.tagline && (
                     <p className="mt-1 line-clamp-2 text-xs text-ink-muted">{s.tagline}</p>
                   )}

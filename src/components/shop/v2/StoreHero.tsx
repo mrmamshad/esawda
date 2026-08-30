@@ -1,8 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { Star, ExternalLink, ShoppingBag } from 'lucide-react';
+import { Star, BadgeCheck, ExternalLink, ShoppingBag } from 'lucide-react';
 import type { User } from '@/types/api';
+import { BannerUpload } from '@/components/shop/v2/BannerUpload';
 
 /**
  * Storefront header at the top of the Shop Dashboard.
@@ -18,64 +19,86 @@ export function StoreHero({
   totalOrders: number;
   activeOrders: number;
 }) {
-  const shopName = user.name || user.username || 'My Shop';
+  const shopName  = user.shop_name || user.name || user.username || 'My Shop';
+  const ownerName = user.name || user.username;
 
   return (
     <section
-      className="relative overflow-hidden rounded-2xl border p-6 md:p-7"
+      className="overflow-hidden rounded-2xl border"
       style={{
-        background:
-          'linear-gradient(135deg, rgba(228,51,86,0.06) 0%, rgba(249,115,22,0.04) 100%), var(--shp-surface)',
+        background: 'var(--shp-surface)',
         borderColor: 'var(--shp-border)',
         boxShadow: 'var(--shp-shadow-sm)',
       }}
     >
-      {/* Decorative blobs to give the shop hero life */}
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="absolute right-[-40px] top-[-40px] h-40 w-40 rounded-full opacity-40 blur-3xl"
-          style={{ background: 'var(--shp-brand)' }} />
-        <div className="absolute right-40 bottom-[-40px] h-32 w-32 rounded-full opacity-30 blur-3xl"
-          style={{ background: 'var(--shp-accent)' }} />
-      </div>
+      <BannerUpload user={user} />
 
-      <div className="relative flex flex-wrap items-center gap-6">
-        <div className="flex items-center gap-4 flex-1 min-w-[240px]">
-          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full ring-2" style={{ boxShadow: '0 0 0 4px var(--shp-brand-soft)' }}>
-            {user.avatar_set ? (
-              <Image src={user.avatar_url} alt={shopName} fill sizes="64px" className="object-cover" />
-            ) : (
-              <div className="grid h-full w-full place-items-center text-lg font-bold" style={{ background: 'var(--shp-brand-soft)', color: 'var(--shp-brand)' }}>
-                {shopName.trim().charAt(0).toUpperCase() || 'S'}
-              </div>
-            )}
-          </div>
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-lg font-bold tracking-tight md:text-xl" style={{ color: 'var(--shp-fg)' }}>
-                {shopName}
-              </h2>
+      <div className="px-5 pb-5 sm:px-6 md:px-7 md:pb-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex min-w-0 items-start gap-4">
+            <div
+              className="relative -mt-9 h-[76px] w-[76px] shrink-0 overflow-hidden rounded-2xl border-4 sm:-mt-10 sm:h-20 sm:w-20"
+              style={{
+                background: 'var(--shp-surface)',
+                borderColor: 'var(--shp-surface)',
+                boxShadow: '0 10px 28px rgba(20, 15, 24, 0.16)',
+              }}
+            >
+              {user.avatar_set ? (
+                <Image src={user.avatar_url} alt={shopName} fill sizes="80px" className="object-cover" />
+              ) : (
+                <div
+                  className="grid h-full w-full place-items-center text-xl font-bold"
+                  style={{ background: 'var(--shp-brand-soft)', color: 'var(--shp-brand)' }}
+                >
+                  {shopName.trim().charAt(0).toUpperCase() || 'S'}
+                </div>
+              )}
             </div>
-            <p className="mt-1 flex items-center gap-1.5 text-[13px]" style={{ color: 'var(--shp-fg-muted)' }}>
-              <Star size={13} className="fill-current" style={{ color: 'var(--shp-gold)' }} />
-              <span className="font-semibold tabular-nums" style={{ color: 'var(--shp-fg)' }}>{rating.toFixed(1)}</span>
-              <span style={{ color: 'var(--shp-fg-faint)' }}>/ 5</span>
-              {reviewsCount > 0 && <span style={{ color: 'var(--shp-fg-faint)' }}>· {reviewsCount} reviews</span>}
-              <span className="mx-1" style={{ color: 'var(--shp-fg-faint)' }}>·</span>
-              <span className="font-mono text-xs" style={{ color: 'var(--shp-fg-faint)' }}>@{user.username}</span>
-            </p>
-          </div>
-        </div>
 
-        <div className="flex flex-wrap gap-3">
-          <MiniStat label="Total Orders"  value={totalOrders}  icon={<ShoppingBag size={15} />} tone="brand" />
-          <MiniStat label="Active Orders" value={activeOrders} icon={<ShoppingBag size={15} />} tone="accent" />
-          <Link
-            href={`/store/${user.username}` as Route} target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 self-center rounded-lg border px-3 py-2 text-[12px] font-semibold transition hover:opacity-80"
-            style={{ borderColor: 'var(--shp-border)', color: 'var(--shp-fg)' }}
-          >
-            View public store <ExternalLink size={12} />
-          </Link>
+            <div className="min-w-0 pt-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="truncate text-lg font-bold tracking-tight md:text-xl" style={{ color: 'var(--shp-fg)' }}>
+                  {shopName}
+                </h2>
+                {user.shop_verified === true && (
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest"
+                    style={{ background: 'var(--shp-brand-soft)', color: 'var(--shp-brand)' }}
+                  >
+                    <BadgeCheck size={11} /> Verified
+                  </span>
+                )}
+              </div>
+              {ownerName && (
+                <p className="mt-0.5 text-[13px]" style={{ color: 'var(--shp-fg-muted)' }}>
+                  Owner: <span className="font-semibold" style={{ color: 'var(--shp-fg)' }}>{ownerName}</span>
+                </p>
+              )}
+              <p className="mt-1 flex flex-wrap items-center gap-1.5 text-[13px]" style={{ color: 'var(--shp-fg-muted)' }}>
+                <Star size={13} className="fill-current" style={{ color: 'var(--shp-gold)' }} />
+                <span className="font-semibold tabular-nums" style={{ color: 'var(--shp-fg)' }}>{rating.toFixed(1)}</span>
+                <span style={{ color: 'var(--shp-fg-faint)' }}>/ 5</span>
+                {reviewsCount > 0 && <span style={{ color: 'var(--shp-fg-faint)' }}>· {reviewsCount} reviews</span>}
+                <span className="mx-0.5" style={{ color: 'var(--shp-fg-faint)' }}>·</span>
+                <span className="font-mono text-xs" style={{ color: 'var(--shp-fg-faint)' }}>@{user.username}</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center lg:justify-end">
+            <MiniStat label="Total Orders" value={totalOrders} icon={<ShoppingBag size={15} />} tone="brand" />
+            <MiniStat label="Active Orders" value={activeOrders} icon={<ShoppingBag size={15} />} tone="accent" />
+            <Link
+              href={`/store/${user.username}` as Route}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="col-span-2 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-[12px] font-semibold transition hover:bg-black/[0.025] sm:self-center"
+              style={{ borderColor: 'var(--shp-border)', color: 'var(--shp-fg)' }}
+            >
+              View public store <ExternalLink size={12} />
+            </Link>
+          </div>
         </div>
       </div>
     </section>

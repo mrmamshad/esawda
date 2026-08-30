@@ -5,7 +5,7 @@ import type { Route } from 'next';
 import { usePathname } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 import {
-  LayoutDashboard, Users, PackageCheck, FolderTree, CreditCard, PackageOpen,
+  LayoutDashboard, Users, Store, PackageCheck, FolderTree, CreditCard, PackageOpen,
   Receipt, Newspaper, Settings, ChevronsLeft, ChevronsRight, LogOut, ChevronDown,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -47,6 +47,7 @@ const GROUPS: NavGroup[] = [
     title: 'People',
     items: [
       { href: '/admin/users' as Route, label: 'Users', icon: <Users size={17} /> },
+      { href: '/admin/shops' as Route, label: 'Shops', icon: <Store size={17} /> },
     ],
   },
   {
