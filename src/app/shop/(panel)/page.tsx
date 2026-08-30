@@ -2,14 +2,14 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
 import {
-  Package, DollarSign, MessageSquare, Heart, PlusSquare,
+  Package, DollarSign, MessageSquare, Heart,
   CircleCheckBig, Clock, DollarSign as DollarIcon, Trash2, FileEdit,
 } from 'lucide-react';
 import { requireUser } from '@/lib/session';
 import { apiFromServer, ApiError } from '@/lib/api';
 import { PageHeader } from '@/components/shop/v2/PageHeader';
 import { StoreHero } from '@/components/shop/v2/StoreHero';
-import { BannerUpload } from '@/components/shop/v2/BannerUpload';
+import { ProfileMediaUpload } from '@/components/shop/v2/ProfileMediaUpload';
 import { StatCard } from '@/components/shop/v2/StatCard';
 import { SalesPanel } from '@/components/shop/v2/SalesPanel';
 import { MessagesWidget } from '@/components/shop/v2/MessagesWidget';
@@ -49,15 +49,6 @@ export default async function ShopDashboardPage() {
       <PageHeader
         title="Shop Dashboard"
         description={`Welcome back, ${user.name || user.username} — here is what is happening in your store.`}
-        actions={
-          <Link
-            href={'/shop/ads/new' as Route}
-            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[12.5px] font-semibold text-white transition active:translate-y-[1px]"
-            style={{ background: 'var(--shp-brand)' }}
-          >
-            <PlusSquare size={14} /> Post ad
-          </Link>
-        }
       />
 
       {/* ── Store hero banner ── */}
@@ -69,9 +60,9 @@ export default async function ShopDashboardPage() {
         activeOrders={stats.store.active_orders}
       />
 
-      {/* ── Update banner (next to the store hero) ── */}
+      {/* ── Profile media (photo + cover) ── */}
       <section className="mt-5">
-        <BannerUpload user={user} />
+        <ProfileMediaUpload user={user} />
       </section>
 
       {/* ── Row 1: KPI cards ── */}

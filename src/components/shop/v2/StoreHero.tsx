@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { Star, BadgeCheck, ExternalLink, ShoppingBag } from 'lucide-react';
+import { Star, BadgeCheck, BadgeX, ExternalLink, ShoppingBag } from 'lucide-react';
 import type { User } from '@/types/api';
 import { BannerUpload } from '@/components/shop/v2/BannerUpload';
 
@@ -61,12 +61,19 @@ export function StoreHero({
                 <h2 className="truncate text-lg font-bold tracking-tight md:text-xl" style={{ color: 'var(--shp-fg)' }}>
                   {shopName}
                 </h2>
-                {user.shop_verified === true && (
+                {user.shop_verified === true ? (
                   <span
                     className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest"
                     style={{ background: 'var(--shp-brand-soft)', color: 'var(--shp-brand)' }}
                   >
                     <BadgeCheck size={11} /> Verified
+                  </span>
+                ) : (
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest"
+                    style={{ background: 'var(--shp-warning-soft)', color: 'var(--shp-warning)' }}
+                  >
+                    <BadgeX size={11} /> Unverified
                   </span>
                 )}
               </div>
