@@ -53,8 +53,7 @@ export const PLACEMENT_PAGES: PlacementPage[] = [
     name: 'Store profile',
     description: 'The public /store/[username] shop page.',
     slots: [
-      { slug: 'store.sidebar', label: 'Left sidebar (MPU)', size: 'mpu', hint: '300×250 below seller card' },
-      { slug: 'store.listings_bottom', label: 'Below listings', size: 'wide', hint: '970×90 wide banner' },
+      { slug: 'store.listings_bottom', label: 'Bottom of listings', size: 'wide', hint: '970×90 wide banner below listings' },
       { slug: 'store.right_rail', label: 'Right rail (skyscraper)', size: 'skyscraper', hint: '160×600 vertical, top of screen' },
     ],
   },

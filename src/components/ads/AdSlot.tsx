@@ -15,6 +15,12 @@ type AdSlotProps = {
   className?: string;
   /** When the real ad lands it replaces the placeholder body. */
   children?: ReactNode;
+  /**
+   * 'auto' (default): fall back to the built-in GIF when no admin ad is set.
+   * 'text': always show the "Ads will be placed here" text box (used on the
+   * store profile page where the new bottom slot has no matching GIF).
+   */
+  placeholder?: 'auto' | 'text';
 };
 
 /** Shape of a live ad returned by GET /api/v1/ads/placements. */
@@ -47,6 +53,7 @@ export function AdSlot({
   placement,
   size = 'leaderboard',
   className = '',
+  placeholder = 'auto',
 }: AdSlotProps) {
   const spec = SIZE_SPEC[size];
   const fallback = FALLBACK_IMG[size];
@@ -66,9 +73,10 @@ export function AdSlot({
     return () => { cancelled = true; };
   }, [placement]);
 
-  // Real admin-uploaded ad wins; otherwise show the static placeholder
-  // (or "Ad will be here" when a size has no built-in GIF).
-  const src = ad?.image_url ?? fallback;
+  // Real admin-uploaded ad wins. Otherwise, in 'text' mode we always show
+  // the "Ads will be placed here" box; in 'auto' mode we fall back to the
+  // built-in GIF (or the text box when that size has no GIF).
+  const src = ad?.image_url ?? (placeholder === 'text' ? undefined : fallback);
 
   const inner = src ? (
     <Image
@@ -83,7 +91,7 @@ export function AdSlot({
   ) : (
     <div className="flex h-full w-full items-center justify-center border-2 border-dashed border-ink/20 bg-[repeating-linear-gradient(135deg,rgba(0,0,0,0.025)_0_12px,transparent_12px_24px)]">
       <span className="px-6 text-center text-body-md font-semibold text-ink/60">
-        Ad will be here
+        Ads will be placed here
       </span>
     </div>
   );

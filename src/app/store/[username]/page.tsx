@@ -237,9 +237,6 @@ export default async function SellerProfilePage({ params, searchParams }: {
                   </div>
                 </div>
               )}
-
-              {/* ── Sidebar ad slot (MPU, 300×250) ── */}
-              <AdSlot placement="store.sidebar" size="mpu" />
             </aside>
 
             {/* ───────── Right: listings ───────── */}
@@ -331,7 +328,7 @@ export default async function SellerProfilePage({ params, searchParams }: {
               )}
 
               {/* ── Content ad slot (wide banner) between listings and reviews ── */}
-              <AdSlot placement="store.listings_bottom" size="wide" />
+              <AdSlot placement="store.listings_bottom" size="wide" placeholder="text" />
 
               {/* Testimonials */}
               {reviews.data.length > 0 && (
@@ -351,7 +348,7 @@ export default async function SellerProfilePage({ params, searchParams }: {
             {/* ───────── Right rail: visible skyscraper ad ───────── */}
             <aside className="hidden xl:block">
               <div className="sticky top-6">
-                <AdSlot placement="store.right_rail" size="skyscraper" />
+                <AdSlot placement="store.right_rail" size="skyscraper" placeholder="text" />
               </div>
             </aside>
           </div>
