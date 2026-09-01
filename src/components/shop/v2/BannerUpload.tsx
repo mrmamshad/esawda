@@ -43,33 +43,34 @@ export function BannerUpload({ user }: { user: User }) {
       className="rounded-2xl border p-5"
       style={{ background: 'var(--shp-surface)', borderColor: 'var(--shp-border)', boxShadow: 'var(--shp-shadow-sm)' }}
     >
-      <div className="mb-3 flex items-center gap-2">
-        <span className="grid h-8 w-8 place-items-center rounded-md" style={{ background: 'var(--shp-brand-soft)', color: 'var(--shp-brand)' }}>
-          <ImageUp size={16} />
-        </span>
-        <div>
-          <h3 className="text-sm font-bold" style={{ color: 'var(--shp-fg)' }}>Update banner</h3>
-          <p className="text-[11.5px]" style={{ color: 'var(--shp-fg-faint)' }}>
-            Wide banner shown at the top of your public store. Recommended 1920×400.
-          </p>
+      <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md" style={{ background: 'var(--shp-brand-soft)', color: 'var(--shp-brand)' }}>
+            <ImageUp size={16} />
+          </span>
+          <div className="min-w-0">
+            <h3 className="text-sm font-bold" style={{ color: 'var(--shp-fg)' }}>Update banner</h3>
+            <p className="text-[11.5px]" style={{ color: 'var(--shp-fg-faint)' }}>
+              Wide banner shown at the top of your public store. Recommended 1920×400.
+            </p>
+          </div>
         </div>
+        <button
+          type="button"
+          onClick={pick}
+          disabled={busy}
+          className="inline-flex shrink-0 items-center justify-center gap-1.5 self-end rounded-lg px-3 py-2 text-[12px] font-semibold text-white transition active:translate-y-[1px] disabled:opacity-60 sm:self-center"
+          style={{ background: 'var(--shp-brand)' }}
+        >
+          <ImageUp size={14} /> {busy ? 'Uploading…' : url ? 'Change banner' : 'Upload banner'}
+        </button>
       </div>
 
       {url && (
-        <div className="relative mb-3 h-28 w-full overflow-hidden rounded-lg border" style={{ borderColor: 'var(--shp-border)' }}>
+        <div className="relative h-28 w-full overflow-hidden rounded-lg border" style={{ borderColor: 'var(--shp-border)' }}>
           <Image src={url} alt="Shop banner" fill sizes="100vw" className="object-cover" unoptimized />
         </div>
       )}
-
-      <button
-        type="button"
-        onClick={pick}
-        disabled={busy}
-        className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[12px] font-semibold text-white transition active:translate-y-[1px] disabled:opacity-60"
-        style={{ background: 'var(--shp-brand)' }}
-      >
-        <ImageUp size={14} /> {busy ? 'Uploading…' : url ? 'Change banner' : 'Upload banner'}
-      </button>
       <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={upload} />
       {err && <p className="mt-2 text-xs" style={{ color: 'var(--shp-danger)' }}>{err}</p>}
     </section>
