@@ -46,7 +46,8 @@ type FetchOpts = {
 };
 
 export async function api<T>(path: string, opts: FetchOpts = {}): Promise<ApiEnvelope<T>> {
-  const url = path.startsWith('http') ? path : env.api.base + (path.startsWith('/') ? path : `/${path}`);
+  const base = typeof window === 'undefined' ? env.api.serverBase : env.api.base;
+  const url = path.startsWith('http') ? path : base + (path.startsWith('/') ? path : `/${path}`);
 
   // Auto-read token from memory/cookie if not explicitly provided
   const token = opts.token ?? readToken();

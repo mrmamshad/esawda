@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const apiProxyTarget = process.env.API_PROXY_TARGET?.replace(/\/+$/, '');
+
 const nextConfig = {
   reactStrictMode: true,
   images: {
@@ -25,6 +27,17 @@ const nextConfig = {
   },
   poweredByHeader: false,
   compress: true,
+
+  async rewrites() {
+    if (!apiProxyTarget) return [];
+
+    return [
+      {
+        source: '/backend-api/:path*',
+        destination: `${apiProxyTarget}/:path*`,
+      },
+    ];
+  },
 
   async headers() {
     const securityHeaders = [
