@@ -36,10 +36,13 @@ export function ShopApplyForm({
   const [shopAddress, setShopAddress] = useState('');
   const [shopCategory, setShopCategory] = useState('');
   const [shopDescription, setShopDescription] = useState('');
-  const [files, setFiles] = useState<File[]>([]);
+  const [nidFile, setNidFile] = useState<File | null>(null);
+  const [tradeLicenceFile, setTradeLicenceFile] = useState<File | null>(null);
   const [avatar, setAvatar] = useState<File | null>(null);
   const [cover, setCover] = useState<File | null>(null);
   const [banner, setBanner] = useState<File | null>(null);
+  const nidRef = useRef<HTMLInputElement>(null);
+  const tradeLicenceRef = useRef<HTMLInputElement>(null);
   const avatarRef = useRef<HTMLInputElement>(null);
   const coverRef = useRef<HTMLInputElement>(null);
   const bannerRef = useRef<HTMLInputElement>(null);
@@ -47,7 +50,6 @@ export function ShopApplyForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -58,17 +60,12 @@ export function ShopApplyForm({
       return;
     }
 
-    if (!files.length) {
-      setError('Please attach at least one document (NID, trade licence or shop photo).');
+    if (!nidFile || !tradeLicenceFile) {
+      setError('Please attach both your NID and trade licence.');
       return;
     }
 
-    if (files.length > 6) {
-      setError('You can upload a maximum of 6 documents.');
-      return;
-    }
-
-    if (files.some(file => file.size > 5 * 1024 * 1024)) {
+    if ([nidFile, tradeLicenceFile].some(file => file.size > 5 * 1024 * 1024)) {
       setError('Each document must be 5MB or smaller.');
       return;
     }
@@ -98,7 +95,8 @@ export function ShopApplyForm({
       fd.append('shop_address', shopAddress.trim());
       if (shopCategory.trim()) fd.append('shop_category', shopCategory.trim());
       if (shopDescription.trim()) fd.append('shop_description', shopDescription.trim());
-      files.forEach(f => fd.append('documents[]', f));
+      fd.append('documents[nid]', nidFile);
+      fd.append('documents[trade_licence]', tradeLicenceFile);
       if (avatar) fd.append('avatar', avatar);
       if (cover) fd.append('cover', cover);
       if (banner) fd.append('banner', banner);
@@ -279,32 +277,27 @@ export function ShopApplyForm({
       {/* Documents */}
       <div className="mt-6">
         <span className={label}>Supporting documents *</span>
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed border-line bg-surface-muted px-6 py-8 text-center hover:border-brand-400"
-        >
-          <UploadCloud size={24} className="text-ink-faint" />
-          <span className="text-sm font-medium text-ink">Click to upload</span>
-          <span className="text-xs text-ink-muted">NID, trade licence or shop photos · JPG/PNG/PDF · max 5MB each</span>
-        </button>
-        <input
-          ref={inputRef}
-          type="file"
-          multiple
-          accept="image/*,.pdf"
-          className="hidden"
-          onChange={e => setFiles(Array.from(e.target.files ?? []))}
-        />
-        {files.length > 0 && (
-          <ul className="mt-3 space-y-1">
-            {files.map((f, i) => (
-              <li key={i} className="flex items-center gap-2 text-xs text-ink-muted">
-                <CheckCircle2 size={13} className="text-green-600" /> {f.name}
-              </li>
-            ))}
-          </ul>
-        )}
+        <p className="mb-3 text-xs text-ink-muted">
+          Upload both documents as JPG, PNG or PDF. Each file must be 5MB or smaller.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <DocumentUpload
+            label="NID"
+            hint="National identity document"
+            file={nidFile}
+            inputRef={nidRef}
+            onPick={() => nidRef.current?.click()}
+            onFile={setNidFile}
+          />
+          <DocumentUpload
+            label="Trade licence"
+            hint="Current business trade licence"
+            file={tradeLicenceFile}
+            inputRef={tradeLicenceRef}
+            onPick={() => tradeLicenceRef.current?.click()}
+            onFile={setTradeLicenceFile}
+          />
+        </div>
       </div>
 
       {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
@@ -356,6 +349,43 @@ function PhotoUpload({
       />
       <p className="mt-2 text-center text-[11px] font-semibold text-ink">{label}</p>
       <p className="text-center text-[10px] text-ink-faint">{hint}</p>
+    </div>
+  );
+}
+
+function DocumentUpload({
+  label, hint, file, inputRef, onPick, onFile,
+}: {
+  label: string;
+  hint: string;
+  file: File | null;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+  onPick: () => void;
+  onFile: (file: File | null) => void;
+}) {
+  return (
+    <div className="rounded-lg border border-line bg-surface-muted p-3">
+      <button
+        type="button"
+        onClick={onPick}
+        className="flex w-full flex-col items-center justify-center gap-2 rounded-md border border-dashed border-line bg-white px-3 py-6 text-center hover:border-brand-400"
+      >
+        {file ? (
+          <CheckCircle2 size={22} className="text-green-600" />
+        ) : (
+          <UploadCloud size={22} className="text-ink-faint" />
+        )}
+        <span className="text-xs font-medium text-ink">{file ? 'Change file' : `Upload ${label}`}</span>
+      </button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*,.pdf"
+        className="hidden"
+        onChange={(event) => onFile(event.target.files?.[0] ?? null)}
+      />
+      <p className="mt-2 text-center text-[11px] font-semibold text-ink">{label} *</p>
+      <p className="truncate text-center text-[10px] text-ink-faint">{file?.name ?? hint}</p>
     </div>
   );
 }
