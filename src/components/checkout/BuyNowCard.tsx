@@ -142,14 +142,6 @@ export function BuyNowCard({
               <span className="font-semibold">{productTitle}</span> — ৳{Number(price || 0).toLocaleString('en-US')}
             </p>
             {error && <div className="rounded-md bg-red-50 px-3 py-2 text-center text-xs text-danger">{error}</div>}
-            <button type="button" onClick={() => choose('payment')}
-                    className="flex w-full items-center gap-3 rounded-md border border-brand-200 bg-brand-50 p-3 text-left hover:bg-brand-100">
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-brand-700 text-white"><CreditCard size={16} /></span>
-              <span>
-                <span className="block text-sm font-semibold text-brand-900">Buy from eSawda</span>
-                <span className="block text-xs text-ink-muted">Pay securely online — the product is marked sold instantly.</span>
-              </span>
-            </button>
             <button type="button" onClick={() => choose('message')}
                     className="flex w-full items-center gap-3 rounded-md border border-line bg-white p-3 text-left hover:bg-surface-muted">
               <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-ink-soft text-ink"><MessageCircle size={16} /></span>
