@@ -18,12 +18,14 @@ export function CategoryCard({
   category: Category;
   className?: string;
   adCount?: number;
-  countTone?: 'used' | 'new';
+  countTone?: 'all' | 'used' | 'new';
 }) {
   const base = (category.slug ? `/category/${category.slug}` : `/ads?filter[category]=${category.id}`) as Route;
-  const cond = countTone === 'new' ? 'new' : 'used';
-  const href = (base.includes('?') ? `${base}&condition=${cond}` : `${base}?condition=${cond}`) as Route;
-  const condLabel = cond;
+  const href = countTone === 'all'
+    ? base
+    : (base.includes('?') ? `${base}&condition=${countTone}` : `${base}?condition=${countTone}`) as Route;
+  const countLabel = countTone === 'all' ? 'active' : countTone;
+
   return (
     <Link href={href} className={cn('group block', className)}>
       <div className="relative mb-4 aspect-square overflow-hidden rounded-2xl bg-brand-50">
@@ -47,7 +49,7 @@ export function CategoryCard({
       </h3>
       {adCount !== undefined && (
         <p className="mt-1 text-center text-body-sm text-ink-muted">
-          <span className="font-semibold text-ink">{adCount.toLocaleString()}</span> {condLabel} ads
+          <span className="font-semibold text-ink">{adCount.toLocaleString()}</span> {countLabel} ads
         </p>
       )}
     </Link>

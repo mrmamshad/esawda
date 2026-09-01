@@ -21,8 +21,18 @@ const GRID = 'grid gap-6 sm:grid-cols-2 lg:grid-cols-4';
 /** A product section that has one list per condition (used/new). */
 type ConditionedSection = { used: Ad[]; new: Ad[] };
 
+function createdAtTimestamp(ad: Ad): number {
+  const timestamp = Date.parse(ad.created_at ?? '');
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function newestFirst(ads: Ad[]): Ad[] {
+  const uniqueAds = Array.from(new Map(ads.map((ad) => [ad.id, ad])).values());
+  return uniqueAds.sort((a, b) => createdAtTimestamp(b) - createdAtTimestamp(a) || b.id - a.id);
+}
+
 /**
- * The home sections plus a global Used/New filter.
+ * The home sections plus a global All/Used/New filter.
  *
  * The toggle sits above the categories grid; flipping it re-renders the
  * categories (real per-condition counts) AND every product section below
@@ -43,8 +53,10 @@ export function HomeSections({
   last24h: ConditionedSection;
   highlights: ConditionedSection;
 }) {
-  const [condition, setCondition] = useState<Condition>('used');
-  const pick = (s: ConditionedSection) => (condition === 'used' ? s.used : s.new);
+  const [condition, setCondition] = useState<Condition>('all');
+  const pick = (section: ConditionedSection) => newestFirst(
+    condition === 'all' ? [...section.used, ...section.new] : section[condition],
+  );
 
   return (
     <>
@@ -142,7 +154,7 @@ export function HomeSections({
               actionLabel="See all new"
               actionHref={'/ads?condition=new' as Route}
             />
-          ) : (
+          ) : condition === 'used' ? (
             <SectionHeader
               eyebrow="Pre-owned"
               title={<>Great condition, <span className="text-brand-700">great value.</span></>}
@@ -150,6 +162,14 @@ export function HomeSections({
               actionLabel="See all used"
               actionHref={'/ads?condition=used' as Route}
               statPill={{ label: '42% avg savings', tone: 'success' }}
+            />
+          ) : (
+            <SectionHeader
+              eyebrow="Latest products"
+              title={<>Newest listings, <span className="text-brand-700">first.</span></>}
+              description="The latest new and pre-owned products from sellers across every category."
+              actionLabel="Browse all"
+              actionHref={'/ads?sort=-created_at' as Route}
             />
           )}
           <div className={`mt-12 ${GRID}`}>

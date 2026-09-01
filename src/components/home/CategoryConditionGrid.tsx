@@ -3,7 +3,7 @@
 import { CategoryCard } from './CategoryCard';
 import type { Category } from '@/types/api';
 
-export type Condition = 'used' | 'new';
+export type Condition = 'all' | 'used' | 'new';
 
 function ToggleBtn({
   active, onClick, children,
@@ -26,16 +26,12 @@ function ToggleBtn({
   );
 }
 
-/**
- * Centered Used/New pill toggle. Sits above the whole homepage (not inside
- * the categories grid) so visitors can see it applies to every section,
- * not just the category cards below it.
- */
+/** Global condition filter for categories and every homepage product section. */
 export function ConditionToggle({
   condition, onChange,
 }: {
   condition: Condition;
-  onChange: (c: Condition) => void;
+  onChange: (condition: Condition) => void;
 }) {
   return (
     <div
@@ -43,6 +39,9 @@ export function ConditionToggle({
       aria-label="Filter the whole page by product condition"
       className="inline-flex items-center rounded-full border border-line bg-white p-1 shadow-sm"
     >
+      <ToggleBtn active={condition === 'all'} onClick={() => onChange('all')}>
+        All
+      </ToggleBtn>
       <ToggleBtn active={condition === 'used'} onClick={() => onChange('used')}>
         Used
       </ToggleBtn>
@@ -53,10 +52,7 @@ export function ConditionToggle({
   );
 }
 
-/**
- * Pure category grid — counts reflect the active condition. The toggle
- * itself lives in HomeSections, positioned above the section header.
- */
+/** Pure category grid whose counts and links reflect the active condition. */
 export function CategoryConditionGrid({
   categories, condition,
 }: {
@@ -65,12 +61,14 @@ export function CategoryConditionGrid({
 }) {
   return (
     <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-      {categories.map((c) => {
-        const count = condition === 'used' ? c.used_count : c.new_count;
+      {categories.map((category) => {
+        const count = condition === 'all'
+          ? category.ads_count
+          : condition === 'used' ? category.used_count : category.new_count;
         return (
           <CategoryCard
-            key={c.id}
-            category={c}
+            key={category.id}
+            category={category}
             adCount={count}
             countTone={condition}
           />
