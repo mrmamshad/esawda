@@ -21,8 +21,9 @@ jobs:
         run: npm ci
       - name: Typecheck
         run: npx tsc --noEmit
-      - name: Lint
-        run: npm run lint
+      # NOTE: `npm run lint` (next lint) is interactive in Next 15 and has no
+      # config in this repo yet — enable this step once flat ESLint config
+      # lands, otherwise CI would hang on the setup prompt.
 
   deploy:
     needs: test
