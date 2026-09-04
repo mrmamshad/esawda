@@ -26,13 +26,50 @@ async function safe<T>(p: Promise<T>, fb: T): Promise<T> {
   return p.catch((e) => { if (e instanceof ApiError) return fb; throw e; });
 }
 
+type ConditionedAds = { used: Ad[]; new: Ad[] };
+type HomePayload = {
+  settings: Record<string, string>;
+  categories: Category[];
+  sections: {
+    featured: ConditionedAds; urgent: ConditionedAds; last24h: ConditionedAds;
+    highlights: ConditionedAds; used: ConditionedAds;
+  };
+  plans: Plan[];
+  testimonials: Testimonial[];
+  blogs: Blog[];
+};
+
+type HomeData = {
+  settings: { data: { settings: Record<string, string> } };
+  cats: { data: Category[] };
+  sections: HomePayload['sections'];
+  plans: { data: Plan[] };
+  testimonials: { data: Testimonial[] };
+  blogs: { data: Blog[] };
+};
+
 export default async function HomePage() {
-  // All homepage data is public, so we fetch via the cookie-free `api()`
-  // helper (NOT `apiFromServer`, which reads cookies() and forces this route
-  // dynamic, defeating ISR). Auth state resolves client-side in AuthGate and
-  // Header falls back to it. Settings join the parallel fan-out so nothing
-  // is awaited serially before first HTML.
-  const [settings, cats, sections, plans, testimonials, blogs] = await Promise.all([
+  // One-shot `/home` (single backend round-trip, cached 120s both sides).
+  // Falls back to the legacy parallel fan-out if the endpoint is missing
+  // (e.g. backend not yet deployed) so the page never hard-fails.
+  let data: HomeData;
+  try {
+    const home = await api<HomePayload>('/home', { revalidate: 120, tags: ['home'] });
+    data = {
+      settings: { data: { settings: home.data.settings } },
+      cats: { data: home.data.categories },
+      sections: home.data.sections,
+      plans: { data: home.data.plans },
+      testimonials: { data: home.data.testimonials },
+      blogs: { data: home.data.blogs },
+    };
+  } catch {
+    data = await loadLegacy();
+  }
+  const { settings, cats, sections, plans, testimonials, blogs } = data;
+
+async function loadLegacy(): Promise<HomeData> {
+  const [lSettings, lCats, lSections, lPlans, lTestimonials, lBlogs] = await Promise.all([
     api<{ settings: Record<string, string> }>('/settings', { revalidate: 300, tags: ['settings'] }),
     safe(api<Category[]>('/categories?with_counts=true', { revalidate: 300 }),                                  { data: [] as Category[] }),
     safe(Promise.all([
@@ -61,6 +98,16 @@ export default async function HomePage() {
     safe(api<Testimonial[]>('/testimonials?limit=3', { revalidate: 600 }),                                      { data: [] as Testimonial[] }),
     safe(api<Blog[]>('/blogs?per_page=3', { revalidate: 300 }),                                                 { data: [] as Blog[] }),
   ]);
+
+  return {
+    settings: lSettings,
+    cats: lCats,
+    sections: lSections,
+    plans: lPlans,
+    testimonials: lTestimonials,
+    blogs: lBlogs,
+  };
+}
 
   // Prefer the human "site_name" (short brand) over the SEO "site_title".
   const siteName   = ((settings.data?.settings ?? {}) as Record<string, string>).site_name || 'eSawda';

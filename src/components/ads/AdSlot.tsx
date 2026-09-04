@@ -32,6 +32,56 @@ type PlacementAd = {
   alt_text: string | null;
 };
 
+/**
+ * Same-tick placement batcher.
+ *
+ * A page renders 3-4 <AdSlot>s; the naive one-fetch-per-slot turns into a
+ * 4-request waterfall (~300ms each). Instead every slot mounted in the same
+ * tick joins ONE `?placements=a,b,c` request (the API already supports comma
+ * lists) and results fan back out. Client cache TTL (120s) matches the
+ * server's placements cache so admin edits still propagate.
+ */
+const CACHE_TTL_MS = 120_000;
+const placementCache = new Map<string, { v: PlacementAd | null; t: number }>();
+const placementWaiters = new Map<string, Array<(v: PlacementAd | null) => void>>();
+let batchTimer: ReturnType<typeof setTimeout> | null = null;
+
+function flushBatch() {
+  batchTimer = null;
+  const wanted = [...placementWaiters.keys()];
+  if (wanted.length === 0) return;
+  fetch(`${env.api.base}/ads/placements?placements=${encodeURIComponent(wanted.join(','))}`, {
+    headers: { Accept: 'application/json' },
+  })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((payload) => {
+      const data = payload?.data ?? {};
+      for (const p of wanted) {
+        const v = (data?.[p] ?? null) as PlacementAd | null;
+        placementCache.set(p, { v, t: Date.now() });
+        (placementWaiters.get(p) ?? []).forEach((fn) => fn(v));
+        placementWaiters.delete(p);
+      }
+    })
+    .catch(() => {
+      for (const p of wanted) {
+        placementCache.set(p, { v: null, t: Date.now() });
+        (placementWaiters.get(p) ?? []).forEach((fn) => fn(null));
+        placementWaiters.delete(p);
+      }
+    });
+}
+
+function getPlacement(p: string): Promise<PlacementAd | null> {
+  const hit = placementCache.get(p);
+  if (hit && Date.now() - hit.t < CACHE_TTL_MS) return Promise.resolve(hit.v);
+  return new Promise((resolve) => {
+    if (!placementWaiters.has(p)) placementWaiters.set(p, []);
+    placementWaiters.get(p)!.push(resolve);
+    if (!batchTimer) batchTimer = setTimeout(flushBatch, 0);
+  });
+}
+
 const SIZE_SPEC: Record<AdSlotSize, { h: string; label: string }> = {
   leaderboard: { h: 'aspect-[4042/375]',  label: '728 × 90',  },
   large:       { h: 'aspect-[2425/625]',  label: '970 × 250', },
@@ -61,15 +111,7 @@ export function AdSlot({
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`${env.api.base}/ads/placements?placements=${encodeURIComponent(placement)}`, {
-      headers: { Accept: 'application/json' },
-    })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((payload) => {
-        if (cancelled) return;
-        setAd(payload?.data?.[placement] ?? null);
-      })
-      .catch(() => { /* fall back to static placeholder */ });
+    getPlacement(placement).then((v) => { if (!cancelled) setAd(v); });
     return () => { cancelled = true; };
   }, [placement]);
 

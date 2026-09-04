@@ -1,5 +1,6 @@
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
+import { env } from './env';
 
 // laravel-echo 1.16+ exports Echo as a generic class. `Echo<any>` keeps the
 // existing untyped call sites (window.Echo, getEcho) compiling without
@@ -41,7 +42,9 @@ export function getEcho(token?: string | null): EchoInstance | null {
     wssPort: parseInt(process.env.NEXT_PUBLIC_REVERB_PORT || '8080', 10),
     forceTLS: (process.env.NEXT_PUBLIC_REVERB_SCHEME || 'http') === 'https',
     enabledTransports: ['ws', 'wss'],
-    authEndpoint: 'http://127.0.0.1:8001/broadcasting/auth',
+    // Same origin as the API (…/api/v1 → …/broadcasting/auth). The old code
+    // hardcoded 127.0.0.1:8001, so private-channel auth always failed in prod.
+    authEndpoint: `${env.api.base.replace(/\/api\/v1\/?$/, '')}/broadcasting/auth`,
     auth: {
       headers: {
         Authorization: `Bearer ${token}`,

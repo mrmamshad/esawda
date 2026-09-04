@@ -93,7 +93,7 @@ export default async function ThreadPage({ params, searchParams }: { params: Par
               )}
             </header>
 
-            <ChatClient userId={uid} />
+            <ChatClient userId={uid} myId={user.id} />
           </section>
         </div>
       </main>
