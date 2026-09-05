@@ -59,5 +59,14 @@ jobs:
             npm run build
             pm2 reload esawda-frontend --update-env || pm2 start npm --name esawda-frontend -- start
             pm2 save
-            curl -sf -o /dev/null https://esawda.com/
+            # Reload swaps workers gracefully but the fresh Next server needs
+            # seconds to boot — single-shot curl flaps 502 here, so poll.
+            for i in $(seq 1 18); do
+              sleep 5
+              if curl -sf -o /dev/null https://esawda.com/; then
+                echo "==> health OK after ${i}x5s"
+                break
+              fi
+              if [ "$i" = 18 ]; then echo "==> health check FAILED"; exit 1; fi
+            done
             echo "==> deploy complete on $(git rev-parse --short HEAD)"
