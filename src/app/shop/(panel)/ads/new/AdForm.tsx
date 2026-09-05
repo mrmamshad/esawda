@@ -10,6 +10,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { api, ApiError } from '@/lib/api';
+import { isValidBdMobile, normalizeBdMobile } from '@/lib/phone';
 import { readToken, saveToken } from '@/lib/auth';
 import type { User } from '@/types/api';
 import { Button } from '@/components/ui/Button';
@@ -214,7 +215,7 @@ function validateImages(files: File[]): string | null {
       if (form.guestName.trim().length < 2) {
         setError('Please enter your name.'); setBusy(false); return;
       }
-      if (!/^01[3-9]\d{8}$/.test(form.guestMobile.trim())) {
+      if (!isValidBdMobile(form.guestMobile.trim())) {
         setErrors({ guestMobile: ['Enter an 11-digit Bangladeshi mobile number, e.g. 01712345678.'] });
         setError('Please fix the highlighted fields.'); setBusy(false); return;
       }
@@ -228,6 +229,15 @@ function validateImages(files: File[]): string | null {
     }
     if (!form.category) {
       setErrors({ category: ['Please choose a category.'] });
+      setError('Please fix the highlighted fields.'); setBusy(false); return;
+    }
+    // Contact numbers are optional, but a half-typed one is never valid.
+    if (form.phone.trim() && !isValidBdMobile(form.phone.trim())) {
+      setErrors({ phone: ['Enter an 11-digit Bangladeshi mobile number, e.g. 01712345678.'] });
+      setError('Please fix the highlighted fields.'); setBusy(false); return;
+    }
+    if (form.whatsapp.trim() && !isValidBdMobile(form.whatsapp.trim())) {
+      setErrors({ whatsapp: ['Enter an 11-digit Bangladeshi mobile number, e.g. 01712345678.'] });
       setError('Please fix the highlighted fields.'); setBusy(false); return;
     }
     const imgErr = validateImages(featuredImage ? [featuredImage, ...galleryImages] : galleryImages);
@@ -368,11 +378,13 @@ function validateImages(files: File[]): string | null {
           // message lands under the right input instead of nowhere.
           const mapped: Record<string, string[]> = {};
           for (const [k, v] of Object.entries(err.fields)) {
+            // images.0 / images.3 … → the Images card.
             const target =
               k === 'username' ? 'guestName'
               : k === 'password' ? 'guestPassword'
+              : k === 'images' || k.startsWith('images.') ? 'images'
               : k;
-            mapped[target] = v;
+            mapped[target] = [...(mapped[target] ?? []), ...v];
             if (k === 'phone' && mode === 'public' && !readToken()) mapped['guestMobile'] = v;
           }
           setErrors(mapped);
@@ -439,11 +451,14 @@ function validateImages(files: File[]): string | null {
                       placeholder="01XXXXXXXXX"
                       value={form.guestMobile}
                       onChange={(e) => {
-                        const v = e.target.value.replace(/\D/g, '').slice(0, 11);
+                        const v = normalizeBdMobile(e.target.value);
                         setForm((s) => ({ ...s, guestMobile: v, ...(s.phone ? {} : { phone: v }) }));
                       }}
                       className={inp}
                     />
+                    {form.guestMobile.length > 0 && !isValidBdMobile(form.guestMobile) && (
+                      <p className="mt-1 text-xs font-medium text-red-600">11 digits, starts with 013–019.</p>
+                    )}
                   </Row>
                   <Row label="Password *" error={errors.guestPassword?.[0]}>
                     <PasswordInput
@@ -582,10 +597,16 @@ function validateImages(files: File[]): string | null {
                 <Row label="Phone Number" error={errors.phone?.[0]}>
                   <input
                     type="tel"
-                    placeholder="+880 1711 000 000"
-                    value={form.phone} onChange={set('phone')}
+                    inputMode="numeric" autoComplete="tel"
+                    placeholder="01XXXXXXXXX"
+                    maxLength={11}
+                    value={form.phone}
+                    onChange={(e) => setForm((s) => ({ ...s, phone: normalizeBdMobile(e.target.value) }))}
                     className={inp}
                   />
+                  {form.phone.length > 0 && !isValidBdMobile(form.phone) && (
+                    <p className="mt-1 text-xs font-medium text-red-600">11 digits, starts with 013–019.</p>
+                  )}
                 </Row>
               </div>
 
@@ -594,13 +615,19 @@ function validateImages(files: File[]): string | null {
                 Hide My Phone Number
               </label>
 
-              <Row label="WhatsApp Number">
+              <Row label="WhatsApp Number" error={errors.whatsapp?.[0]}>
                 <input
                   type="tel"
-                  placeholder="+880 1911 000 000"
-                  value={form.whatsapp} onChange={set('whatsapp')}
+                  inputMode="numeric" autoComplete="tel"
+                  placeholder="01XXXXXXXXX"
+                  maxLength={11}
+                  value={form.whatsapp}
+                  onChange={(e) => setForm((s) => ({ ...s, whatsapp: normalizeBdMobile(e.target.value) }))}
                   className={inp}
                 />
+                {form.whatsapp.length > 0 && !isValidBdMobile(form.whatsapp) && (
+                  <p className="mt-1 text-xs font-medium text-red-600">11 digits, starts with 013–019.</p>
+                )}
               </Row>
 
               <Row label="Post Duration" hint={`Listing stays live for ${form.duration_days || '30'} days from posting`}>
@@ -643,6 +670,7 @@ function validateImages(files: File[]): string | null {
 
             {/* Images ──────────────────────────────────────────────── */}
             <Card title="Images">
+              {errors.images?.[0] && <p className="text-xs font-medium text-danger">{errors.images[0]}</p>}
               <Uploader
                 label="Click to browse & Upload Featured Image"
                 hint="JPG, PNG or WebP up to 5MB — recommended size 810×450. iPhone HEIC photos are not accepted."

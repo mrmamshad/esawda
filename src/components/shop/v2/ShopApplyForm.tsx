@@ -7,6 +7,7 @@ import type { Route } from 'next';
 import { useRouter } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
 import { env } from '@/lib/env';
+import { isValidBdMobile, normalizeBdMobile } from '@/lib/phone';
 import { saveToken } from '@/lib/auth';
 import { Button } from '@/components/ui/Button';
 import { PasswordInput } from '@/components/forms/PasswordInput';
@@ -32,11 +33,6 @@ function parseCategories(raw: unknown): string[] {
     } catch { /* fall through to delimiter split */ }
   }
   return t.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
-}
-
-/** Bangladeshi mobile: 11 digits starting 013-019. */
-export function isValidBdMobile(v: string): boolean {
-  return /^01[3-9]\d{8}$/.test(v);
 }
 
 /**
@@ -320,7 +316,7 @@ export function ShopApplyForm({
           <input
             className={field}
             value={ownerPhone}
-            onChange={e => setOwnerPhone(e.target.value.replace(/\D/g, '').slice(0, 11))}
+            onChange={e => setOwnerPhone(normalizeBdMobile(e.target.value))}
             inputMode="numeric"
             autoComplete="tel"
             placeholder="01XXXXXXXXX"
