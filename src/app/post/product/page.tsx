@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
 import { PageSurface } from '@/components/layout/PageSurface';
 import { getSessionUser } from '@/lib/session';
@@ -21,6 +22,13 @@ export const dynamic = 'force-dynamic';
  */
 export default async function PublicPostPage() {
   const user = await getSessionUser();
+
+  // Shop owners always post from the /shop panel, where listing is gated
+  // behind an active subscription (no free trial). Sending them there keeps
+  // the paywall in one place. Guests and regular single users stay here.
+  if (user?.is_shop || user?.user_type === 'seller') {
+    redirect('/shop/ads/new');
+  }
 
   let cats: Category[] = [];
   let settings: Record<string, string> = {};

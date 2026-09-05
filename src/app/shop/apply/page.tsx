@@ -38,7 +38,7 @@ export default async function ShopApplyPage() {
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-ink">Open a shop & sell on eSawda</h1>
             <p className="mt-1 text-sm text-ink-muted">
-              Sell as a business — corporate shop panel, subscriptions and more. Your shop opens instantly after submitting.
+              Are you a shop owner or business?
             </p>
           </div>
           <ShopApplyForm

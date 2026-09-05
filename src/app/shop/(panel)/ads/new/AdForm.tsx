@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { RichTextEditor } from '@/components/shop/v2/RichTextEditor';
 import { PasswordInput } from '@/components/forms/PasswordInput';
 import { GeocodeAddress } from '@/components/interactive/GeocodeAddress';
@@ -57,15 +57,18 @@ type FormState = {
   guestName:     string;
   guestMobile:   string;
   guestPassword: string;
+  guestPasswordConfirm: string;
 };
 
 const INITIAL: FormState = {
   title: '', description: '', category: '', sub_category: '', child_category: '',
   price: '', negotiable: false, phone: '', whatsapp: '', hide_phone: false, duration_days: '30',
   address: '', city: '', state: '', country: 'BD',
-  condition: '', authenticity: '', brand: '',
+  // Condition defaults to `used` (backend requires it; most P2P listings are
+  // pre-owned) so an untouched form can never 422 on `condition`.
+  condition: 'used', authenticity: '', brand: '',
   plan: 'premium', featured: false, urgent: false, highlight: false, agree: false,
-  guestName: '', guestMobile: '', guestPassword: '',
+  guestName: '', guestMobile: '', guestPassword: '', guestPasswordConfirm: '',
 };
 
 export default function AdForm({
@@ -100,6 +103,32 @@ export default function AdForm({
   );
   const [form,   setForm]   = useState<FormState>(INITIAL);
 
+  // Draft autosave — a 401/token-expiry mid-form (or accidental refresh)
+  // used to wipe everything. Text fields persist to localStorage (files
+  // can't) and restore on mount; cleared on successful submit.
+  const draftKey = `ad-draft:${mode}`;
+  const clearDraft = () => {
+    try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
+  };
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (!raw) return;
+      const saved = JSON.parse(raw) as Partial<FormState>;
+      setForm((s) => ({ ...s, ...saved, agree: false }));
+    } catch { /* corrupt draft — start fresh */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        const { guestPassword: _gp, guestPasswordConfirm: _gpc, ...rest } = form;
+        localStorage.setItem(draftKey, JSON.stringify(rest));
+      } catch { /* quota — ignore */ }
+    }, 600);
+    return () => clearTimeout(t);
+  }, [form, draftKey]);
+
   // Premium upgrade prices come from admin settings (৳). Fall back to the
   // same numbers the backend uses when it doesn't run with config either.
   const price = (key: string, fb: number) => {
@@ -111,9 +140,27 @@ export default function AdForm({
     urgent:    price('upgrade_urgent_price',    150),
     highlight: price('upgrade_highlight_price', 100),
   };
-  const paidListingPrice = price('paid_listing_price', 500);
+    const paidListingPrice = price('paid_listing_price', 500);
   const sym = settings.currency_symbol || '৳';
-  const [busy,   setBusy]   = useState(false);
+
+/** Mirrors StoreAdRequest images.* — JPG/PNG/WebP ≤5MB. Returns a human message or null. */
+function validateImages(files: File[]): string | null {
+  if (files.length > 8) return 'Maximum 8 images allowed.';
+  const okTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  for (const f of files) {
+    const ext = f.name.split('.').pop()?.toLowerCase();
+    if (f.type === 'image/heic' || f.type === 'image/heif' || ext === 'heic' || ext === 'heif') {
+      return `"${f.name}" is an iPhone HEIC photo, which is not accepted. Please re-save it as JPG (e.g. screenshot it) and try again.`;
+    }
+    if (!okTypes.includes(f.type) && !['jpg', 'jpeg', 'png', 'webp'].includes(ext ?? '')) {
+      return `"${f.name}" is not accepted — please use JPG, PNG or WebP.`;
+    }
+    if (f.size > 5 * 1024 * 1024) {
+      return `"${f.name}" is larger than 5MB. Please choose a smaller file.`;
+    }
+  }
+  return null;
+}  const [busy,   setBusy]   = useState(false);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [error,  setError]  = useState<string | null>(null);
 
@@ -161,14 +208,41 @@ export default function AdForm({
       setBusy(false); return;
     }
 
+    // Client-side contract checks with field-level messages — every one of
+    // these used to surface as a bare backend 422 after a full round-trip.
+    if (mode === 'public' && !readToken()) {
+      if (form.guestName.trim().length < 2) {
+        setError('Please enter your name.'); setBusy(false); return;
+      }
+      if (!/^01[3-9]\d{8}$/.test(form.guestMobile.trim())) {
+        setErrors({ guestMobile: ['Enter an 11-digit Bangladeshi mobile number, e.g. 01712345678.'] });
+        setError('Please fix the highlighted fields.'); setBusy(false); return;
+      }
+      if (form.guestPassword.length < 8) {
+        setError('Password must be at least 8 characters.'); setBusy(false); return;
+      }
+      if (form.guestPassword !== form.guestPasswordConfirm) {
+        setErrors({ guestPasswordConfirm: ['Passwords do not match.'] });
+        setError('Please fix the highlighted fields.'); setBusy(false); return;
+      }
+    }
+    if (!form.category) {
+      setErrors({ category: ['Please choose a category.'] });
+      setError('Please fix the highlighted fields.'); setBusy(false); return;
+    }
+    const imgErr = validateImages(featuredImage ? [featuredImage, ...galleryImages] : galleryImages);
+    if (imgErr) {
+      setError(imgErr); setBusy(false); return;
+    }
+
     // Multipart body — images travel with the record so the whole listing
     // is created in one round-trip.
     const fd = new FormData();
-    fd.append('title',       form.title);
-    fd.append('description', form.description);
+    fd.append('title',       form.title.trim());
+    fd.append('description', form.description.trim());
     fd.append('category',    String(Number(form.category) || ''));
     if (form.sub_category) fd.append('sub_category', String(Number(form.sub_category)));
-    fd.append('price',       String(Number(form.price) || 0));
+    fd.append('price',       String(Math.max(0, Math.trunc(Number(form.price) || 0))));
     fd.append('negotiable',  form.negotiable ? '1' : '0');
     if (form.phone)   fd.append('phone', form.phone);
     if (form.whatsapp) fd.append('whatsapp', form.whatsapp);
@@ -204,14 +278,36 @@ export default function AdForm({
       let token = readToken();
       if (!token) {
         if (mode === 'public' && form.guestName && form.guestMobile && form.guestPassword) {
-          const { data } = await api<{ user: User; token: string }>('/auth/guest-register', {
-            method: 'POST',
-            body:   { name: form.guestName, mobile: form.guestMobile, password: form.guestPassword },
-          });
-          saveToken(data.token);
-          token = data.token;
+          try {
+            const { data } = await api<{ user: User; token: string }>('/auth/guest-register', {
+              method: 'POST',
+              body:   { name: form.guestName.trim(), mobile: form.guestMobile.trim(), password: form.guestPassword },
+            });
+            saveToken(data.token);
+            token = data.token;
+          } catch (err) {
+            // Returning guest (phone already registered → 409 after the
+            // takeover fix): log in with the just-typed password and carry
+            // on posting instead of stranding them on an error.
+            const taken = err instanceof ApiError && err.status === 409;
+            if (!taken) throw err;
+            try {
+              const { data } = await api<{ user: User; token: string }>('/auth/login', {
+                method: 'POST',
+                body:   { identifier: form.guestMobile.trim(), password: form.guestPassword },
+              });
+              saveToken(data.token);
+              token = data.token;
+            } catch {
+              throw err;
+            }
+          }
         } else {
-          router.push('/login?redirect=/post/product' as Route);
+          setError(mode === 'public'
+            ? 'Please complete the account section (name, mobile, password) first.'
+            : 'Your session expired — please log in again. Your draft is saved below.');
+          if (mode !== 'public') router.push('/login?redirect=/shop/ads/new' as Route);
+          setBusy(false);
           return;
         }
       }
@@ -225,6 +321,7 @@ export default function AdForm({
         if (!/(^|\.)(sslcommerz\.com)$/i.test(hostname)) {
           throw new Error('Unsafe payment redirect blocked.');
         }
+        clearDraft();
         window.location.assign(payment.gateway_url);
         return;
       }
@@ -246,6 +343,7 @@ export default function AdForm({
             `/checkout/ad-upgrade/${ad.id}`,
             { method: 'POST', token, body: upgrades },
           );
+          clearDraft();
           window.location.href = pay.gateway_url;
           return;
         }
@@ -254,6 +352,7 @@ export default function AdForm({
       // Free listing (or premium without paid upgrades): done. Shop users go
       // to the seller dashboard; public-page guests land on /dashboard where
       // the pending ad is listed "under review".
+      clearDraft();
       router.push((mode === 'public' ? '/dashboard' : '/shop/ads/pending') as Route);
     } catch (err) {
       if (err instanceof ApiError) {
@@ -264,8 +363,22 @@ export default function AdForm({
           return;
         }
         setError(err.message);
-        if (err.fields) setErrors(err.fields);
-        if (err.status === 401) router.push('/login' as Route);
+        if (err.fields) {
+          // Backend keys → the Row keys this form actually renders, so the
+          // message lands under the right input instead of nowhere.
+          const mapped: Record<string, string[]> = {};
+          for (const [k, v] of Object.entries(err.fields)) {
+            const target =
+              k === 'username' ? 'guestName'
+              : k === 'password' ? 'guestPassword'
+              : k;
+            mapped[target] = v;
+            if (k === 'phone' && mode === 'public' && !readToken()) mapped['guestMobile'] = v;
+          }
+          setErrors(mapped);
+        }
+        // Draft is autosaved — tell them instead of throwing the form away.
+        if (err.status === 401) setError('Session expired — please log in again. Your draft is saved and will still be here.');
       } else {
         setError('Unexpected error. Please try again.');
       }
@@ -321,9 +434,14 @@ export default function AdForm({
                   </Row>
                   <Row label="Phone Number *" error={errors.guestMobile?.[0]}>
                     <input
-                      required type="tel" maxLength={30}
-                      placeholder="+880 17xx xxx xxx"
-                      value={form.guestMobile} onChange={set('guestMobile')}
+                      required type="tel" maxLength={11}
+                      inputMode="numeric" autoComplete="tel"
+                      placeholder="01XXXXXXXXX"
+                      value={form.guestMobile}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, '').slice(0, 11);
+                        setForm((s) => ({ ...s, guestMobile: v, ...(s.phone ? {} : { phone: v }) }));
+                      }}
                       className={inp}
                     />
                   </Row>
@@ -335,18 +453,36 @@ export default function AdForm({
                       className={inp}
                     />
                   </Row>
+                  <Row label="Confirm password *" error={errors.guestPasswordConfirm?.[0]}>
+                    <PasswordInput
+                      required minLength={8}
+                      placeholder="Re-type password"
+                      value={form.guestPasswordConfirm} onChange={set('guestPasswordConfirm')}
+                      className={inp}
+                    />
+                    {form.guestPasswordConfirm.length > 0 && (
+                      <p className={`mt-1 text-xs font-medium ${form.guestPassword === form.guestPasswordConfirm ? 'text-green-700' : 'text-red-600'}`}>
+                        {form.guestPassword === form.guestPasswordConfirm ? '✓ Passwords match' : '✕ Passwords do not match'}
+                      </p>
+                    )}
+                  </Row>
                 </div>
               </Card>
             )}
 
             {/* Listing Details ────────────────────────────────────── */}
             <Card icon="🛒" title="Listing Details">
+              {mode === 'public' && (
+                <p className="text-sm leading-6 text-ink-muted">
+                  Do you want to sell your single old or new product? Then list your product details here.
+                </p>
+              )}
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <Row label="Category *" error={errors.category?.[0]}>
                   <select
                     id="cat-select" required
                     value={form.category}
-                    onChange={set('category')}
+                    onChange={(e) => setForm((s) => ({ ...s, category: e.target.value, sub_category: '' }))}
                     className={inp}
                   >
                     <option value="">Select Category</option>
@@ -417,7 +553,7 @@ export default function AdForm({
                   <input value={form.city} onChange={set('city')} className={inp} />
                 </Row>
                 <Row label="Country" error={errors.country?.[0]}>
-                  <input value={form.country} onChange={set('country')} className={inp} maxLength={2} />
+                  <input value={form.country} onChange={set('country')} className={inp} maxLength={50} />
                 </Row>
               </div>
             </Card>
@@ -427,9 +563,10 @@ export default function AdForm({
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <Row label="Price *" error={errors.price?.[0]}>
                   <input
-                    required type="number" min={0} step="0.01"
-                    placeholder="0.00"
-                    value={form.price} onChange={set('price')}
+                    required type="number" min={0} step={1}
+                    placeholder="0"
+                    value={form.price}
+                    onChange={(e) => setForm((s) => ({ ...s, price: e.target.value.replace(/[^\d]/g, '') }))}
                     className={inp}
                   />
                   <label className="mt-2 flex items-center gap-2 text-sm text-ink">
@@ -486,6 +623,7 @@ export default function AdForm({
                   <Radio name="authenticity" value="refurbished" checked={form.authenticity === 'refurbished'} onChange={set('authenticity')}>Refurbished</Radio>
                 </FieldSet>
               </div>
+              {errors.condition?.[0] && <p className="mt-1 text-xs text-danger">{errors.condition[0]}</p>}
 
               <Row label="Brand" error={errors.brand?.[0]}>
                 <input
@@ -502,7 +640,7 @@ export default function AdForm({
             <Card title="Images">
               <Uploader
                 label="Click to browse & Upload Featured Image"
-                hint="Image format: jpg,jpeg,png,gif,webp — recommended size 810×450"
+                hint="JPG, PNG or WebP up to 5MB — recommended size 810×450. iPhone HEIC photos are not accepted."
                 preview={featuredPreview}
                 onFilesPicked={(files) => setFeaturedImage(files[0] ?? null)}
                 inputRef={featuredInputRef}
@@ -510,7 +648,7 @@ export default function AdForm({
               />
               <Uploader
                 label="Click to Upload Gallery Images"
-                hint="Image format: jpg,jpeg,png,gif,webp — recommended size 810×450"
+                hint="JPG, PNG or WebP up to 5MB — recommended size 810×450. iPhone HEIC photos are not accepted."
                 multiple
                 previews={galleryPreviews}
                 onFilesPicked={(files) => setGalleryImages([...galleryImages, ...files].slice(0, 7))}
