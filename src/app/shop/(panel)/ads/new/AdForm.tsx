@@ -563,7 +563,7 @@ function validateImages(files: File[]): string | null {
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <Row label="Price *" error={errors.price?.[0]}>
                   <input
-                    required type="number" min={0} step={1}
+                    required type="number" min={0} step="any"
                     placeholder="0"
                     value={form.price}
                     onChange={(e) => {
