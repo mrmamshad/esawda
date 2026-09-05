@@ -566,7 +566,12 @@ function validateImages(files: File[]): string | null {
                     required type="number" min={0} step={1}
                     placeholder="0"
                     value={form.price}
-                    onChange={(e) => setForm((s) => ({ ...s, price: e.target.value.replace(/[^\d]/g, '') }))}
+                    onChange={(e) => {
+                      // Digits + one dot while typing (1500.50 stays readable);
+                      // submit truncates to whole Taka since the API is integer.
+                      const v = e.target.value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1');
+                      setForm((s) => ({ ...s, price: v }));
+                    }}
                     className={inp}
                   />
                   <label className="mt-2 flex items-center gap-2 text-sm text-ink">
