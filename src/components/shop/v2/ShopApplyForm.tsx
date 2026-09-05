@@ -1,15 +1,43 @@
 'use client';
 
-import { useState, type FormEvent, useRef } from 'react';
-import { Store, UploadCloud, CheckCircle2, ShieldCheck, UserPlus, ImageUp } from 'lucide-react';
+import { useState, useEffect, type FormEvent, useRef } from 'react';
+import { Store, UploadCloud, CheckCircle2, Check, ShieldCheck, UserPlus, ImageUp } from 'lucide-react';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { useRouter } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
+import { env } from '@/lib/env';
 import { saveToken } from '@/lib/auth';
 import { Button } from '@/components/ui/Button';
 import { PasswordInput } from '@/components/forms/PasswordInput';
 import type { User } from '@/types/api';
+
+/** Fallback when /settings is unreachable — the admin list wins when present. */
+const FALLBACK_SHOP_CATEGORIES = [
+  'Electronics', 'Fashion & Apparel', 'Groceries & Food', 'Health & Beauty',
+  'Home & Living', 'Mobiles & Gadgets', 'Vehicles & Parts', 'Baby & Kids',
+  'Sports & Outdoors', 'Books & Stationery', 'Services', 'Other',
+];
+
+/** Admins edit `shop_categories` in Settings as JSON array, CSV or newlines. */
+function parseCategories(raw: unknown): string[] {
+  if (Array.isArray(raw)) return raw.map(String).map((s) => s.trim()).filter(Boolean);
+  if (typeof raw !== 'string') return [];
+  const t = raw.trim();
+  if (!t) return [];
+  if (t.startsWith('[')) {
+    try {
+      const arr = JSON.parse(t) as unknown;
+      if (Array.isArray(arr)) return arr.map(String).map((s) => s.trim()).filter(Boolean);
+    } catch { /* fall through to delimiter split */ }
+  }
+  return t.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
+}
+
+/** Bangladeshi mobile: 11 digits starting 013-019. */
+export function isValidBdMobile(v: string): boolean {
+  return /^01[3-9]\d{8}$/.test(v);
+}
 
 /**
  * Bikroy-style shop opening application. Buyer provides owner identity +
@@ -41,6 +69,7 @@ export function ShopApplyForm({
   const [avatar, setAvatar] = useState<File | null>(null);
   const [cover, setCover] = useState<File | null>(null);
   const [banner, setBanner] = useState<File | null>(null);
+  const [shopCategories, setShopCategories] = useState<string[]>(FALLBACK_SHOP_CATEGORIES);
   const nidRef = useRef<HTMLInputElement>(null);
   const tradeLicenceRef = useRef<HTMLInputElement>(null);
   const avatarRef = useRef<HTMLInputElement>(null);
@@ -49,20 +78,57 @@ export function ShopApplyForm({
   const [accountCreated, setAccountCreated] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [done, setDone] = useState(false);
+
+  // Admin-driven category list (cached 5 min server-side).
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${env.api.base}/settings`, { headers: { Accept: 'application/json' } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((payload) => {
+        if (cancelled) return;
+        const list = parseCategories(payload?.data?.settings?.shop_categories);
+        if (list.length > 0) setShopCategories(list);
+      })
+      .catch(() => { /* fallback list stays */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Live password-match state (guest signup only).
+  const pwTouched = passwordConfirmation.length > 0;
+  const pwLongEnough = password.length >= 8;
+  const pwMismatch = isGuest && !accountCreated && pwTouched && password !== passwordConfirmation;
+  const pwMatch = isGuest && !accountCreated && pwLongEnough && pwTouched && password === passwordConfirmation;
+  const mobileInvalid = ownerPhone.length > 0 && !isValidBdMobile(ownerPhone);
+  // Submit stays disabled until the guest credentials are valid — this is
+  // the #1 repeated-submit failure (register 422 after typing mismatch).
+  const credentialsOk = !isGuest || accountCreated || pwMatch;
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    setFieldErrors({});
 
-    if (isGuest && password !== passwordConfirmation) {
-      setError('Password confirmation does not match.');
-      return;
+    const fail = (message: string, fields?: Record<string, string[]>) => {
+      setError(message);
+      if (fields) setFieldErrors(fields);
+    };
+
+    if (isGuest && !accountCreated) {
+      if (!pwLongEnough) return fail('Password must be at least 8 characters.');
+      if (password !== passwordConfirmation) return fail('Password confirmation does not match.');
+      if (!/^[A-Za-z0-9_.-]+$/.test(username.trim())) {
+        return fail('Username may only contain letters, digits, dot, dash and underscore (no spaces).');
+      }
+    }
+
+    if (!isValidBdMobile(ownerPhone.trim())) {
+      return fail('Owner mobile must be an 11-digit Bangladeshi number, e.g. 01712345678.');
     }
 
     if (!nidFile || !tradeLicenceFile) {
-      setError('Please attach both your NID and trade licence.');
-      return;
+      return fail('Please attach both your NID and trade licence.');
     }
 
     if ([nidFile, tradeLicenceFile].some(file => file.size > 5 * 1024 * 1024)) {
@@ -73,18 +139,37 @@ export function ShopApplyForm({
     setSubmitting(true);
     try {
       if (isGuest && !accountCreated) {
-        const { data } = await api<{ user: User; token: string }>('/auth/register', {
-          method: 'POST',
-          body: {
-            username: username.trim(),
-            email: email.trim(),
-            name: ownerName.trim(),
-            phone: ownerPhone.trim(),
-            password,
-            password_confirmation: passwordConfirmation,
-          },
-        });
-        saveToken(data.token);
+        const payload = {
+          username: username.trim(),
+          email: email.trim(),
+          name: ownerName.trim(),
+          phone: ownerPhone.trim(),
+          password,
+          password_confirmation: passwordConfirmation,
+        };
+        try {
+          const { data } = await api<{ user: User; token: string }>('/auth/register', {
+            method: 'POST',
+            body: payload,
+          });
+          saveToken(data.token);
+        } catch (err) {
+          // Retry-after-partial-success: the account was created by an
+          // earlier attempt (or the user already owns it) — log straight in
+          // with the same credentials instead of dying on "already taken".
+          const taken = err instanceof ApiError && err.status === 422
+            && !!err.fields && Object.keys(err.fields).some((k) => k === 'email' || k === 'username');
+          if (!taken) throw err;
+          try {
+            const { data } = await api<{ user: User; token: string }>('/auth/login', {
+              method: 'POST',
+              body: { identifier: email.trim(), password },
+            });
+            saveToken(data.token);
+          } catch {
+            throw err; // login failed too — surface the original taken error
+          }
+        }
         setAccountCreated(true);
       }
 
@@ -104,7 +189,11 @@ export function ShopApplyForm({
       await api('/me/shop/apply', { method: 'POST', body: fd });
       setDone(true);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not open the shop. Please try again.');
+      if (err instanceof ApiError) {
+        fail(err.message, err.fields);
+      } else {
+        fail('Could not open the shop. Please try again.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -157,9 +246,11 @@ export function ShopApplyForm({
               <input
                 className={field}
                 value={username}
-                onChange={e => setUsername(e.target.value)}
+                onChange={e => setUsername(e.target.value.replace(/\s/g, ''))}
                 minLength={3}
                 maxLength={40}
+                pattern="[A-Za-z0-9_.-]+"
+                title="Letters, digits, dot, dash and underscore only — no spaces."
                 autoComplete="username"
                 required
               />
@@ -196,6 +287,18 @@ export function ShopApplyForm({
                 autoComplete="new-password"
                 required
               />
+              {pwTouched && (
+                <p className={`mt-1.5 flex items-center gap-1 text-xs font-medium ${pwMismatch ? 'text-red-600' : 'text-green-700'}`}>
+                  {pwMismatch ? (
+                    <>✕ Passwords do not match</>
+                  ) : (
+                    <><Check size={13} /> Passwords match</>
+                  )}
+                </p>
+              )}
+              {!pwTouched && (
+                <p className="mt-1.5 text-xs text-ink-faint">Re-type the same password for confirmation.</p>
+              )}
             </div>
           </div>
           <p className="mt-4 text-xs text-ink-muted">
@@ -214,7 +317,21 @@ export function ShopApplyForm({
         </div>
         <div>
           <label className={label}>Owner mobile *</label>
-          <input className={field} value={ownerPhone} onChange={e => setOwnerPhone(e.target.value)} required />
+          <input
+            className={field}
+            value={ownerPhone}
+            onChange={e => setOwnerPhone(e.target.value.replace(/\D/g, '').slice(0, 11))}
+            inputMode="numeric"
+            autoComplete="tel"
+            placeholder="01XXXXXXXXX"
+            maxLength={11}
+            required
+          />
+          {mobileInvalid ? (
+            <p className="mt-1.5 text-xs font-medium text-red-600">Enter an 11-digit Bangladeshi mobile number.</p>
+          ) : (
+            <p className="mt-1.5 text-xs text-ink-faint">11 digits, starts with 013–019.</p>
+          )}
         </div>
         <div>
           <label className={label}>Shop name *</label>
@@ -222,7 +339,16 @@ export function ShopApplyForm({
         </div>
         <div>
           <label className={label}>Shop category</label>
-          <input className={field} value={shopCategory} onChange={e => setShopCategory(e.target.value)} placeholder="e.g. Electronics" />
+          <select
+            className={field}
+            value={shopCategory}
+            onChange={e => setShopCategory(e.target.value)}
+          >
+            <option value="">Select a category…</option>
+            {shopCategories.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
         </div>
         <div className="sm:col-span-2">
           <label className={label}>Shop address *</label>
@@ -300,13 +426,24 @@ export function ShopApplyForm({
         </div>
       </div>
 
-      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+      {error && (
+        <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-3">
+          <p className="text-sm font-medium text-red-700">{error}</p>
+          {Object.keys(fieldErrors).length > 0 && (
+            <ul className="mt-1.5 list-disc space-y-0.5 pl-5 text-xs text-red-600">
+              {Object.entries(fieldErrors).map(([f, msgs]) => (
+                <li key={f}><span className="font-semibold">{f}:</span> {msgs.join(' ')}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       <div className="mt-6 flex items-center justify-between">
         <p className="flex items-center gap-1.5 text-xs text-ink-muted">
           <ShieldCheck size={14} /> Documents are stored securely for verification.
         </p>
-        <Button type="submit" variant="filled" disabled={submitting}>
+        <Button type="submit" variant="filled" disabled={submitting || !credentialsOk}>
           {submitting ? 'Creating your shop…' : isGuest ? 'Create account & open shop' : 'Open my shop'}
         </Button>
       </div>
