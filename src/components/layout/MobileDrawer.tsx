@@ -5,6 +5,8 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Menu, X, ChevronRight, LogOut, LogIn, UserPlus } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
+import { Logo } from './Logo';
+import { startPageScroll, stopPageScroll } from '@/components/interactive/SmoothScroll';
 import { useAuthGate } from '@/components/interactive/AuthGate';
 import { cn } from '@/lib/cn';
 
@@ -38,9 +40,10 @@ export function MobileDrawer({ onDark = false }: { onDark?: boolean }) {
 
   useEffect(() => {
     if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prev; };
+    // Lenis keeps gliding the page on wheel even with body overflow hidden,
+    // which is exactly the "drawer overlaps while scrolling" bug.
+    stopPageScroll();
+    return () => { startPageScroll(); };
   }, [open]);
 
   return (
@@ -60,11 +63,10 @@ export function MobileDrawer({ onDark = false }: { onDark?: boolean }) {
       {open && (
         <div className="fixed inset-0 z-50">
           <div className="absolute inset-0 bg-brand-950/50" onClick={() => setOpen(false)} />
-          <aside className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-white shadow-popover flex flex-col">
+          <aside role="dialog" aria-modal="true" aria-label="Menu" className="absolute top-0 right-0 flex h-full max-w-[85vw] flex-col bg-white shadow-popover w-80">
             <div className="flex items-center justify-between border-b border-line p-4">
-              <span className="text-lg font-bold">
-                <span className="text-brand-500">e</span>
-                <span className="text-brand-900">Shauda</span>
+              <span onClick={() => setOpen(false)}>
+                <Logo height={34} />
               </span>
               <button
                 type="button"
@@ -87,7 +89,7 @@ export function MobileDrawer({ onDark = false }: { onDark?: boolean }) {
               </div>
             )}
 
-            <nav className="flex-1 overflow-y-auto p-2">
+            <nav className="flex-1 overscroll-contain overflow-y-auto p-2">
               {LINKS.map((l) => (
                 <Link
                   key={l.href}

@@ -20,6 +20,27 @@ import Lenis from 'lenis';
  * layout. Because everything lives client-side, SSR HTML still renders the
  * final resting state — reveal is progressive-enhancement only.
  */
+declare global {
+  interface Window {
+    __lenis?: Lenis | null;
+  }
+}
+
+/**
+ * Freeze page scroll (modals, drawers). Lenis hijacks the wheel at the
+ * rAF level, so `body { overflow: hidden }` alone does NOT stop it — the
+ * page keeps gliding behind fixed overlays. Always use this pair.
+ */
+export function stopPageScroll() {
+  window.__lenis?.stop();
+  document.body.style.overflow = 'hidden';
+}
+
+export function startPageScroll() {
+  document.body.style.overflow = '';
+  window.__lenis?.start();
+}
+
 export function SmoothScroll() {
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -35,6 +56,7 @@ export function SmoothScroll() {
         smoothWheel: true,
         touchMultiplier: 1.6,
       });
+      window.__lenis = lenis;
       const loop = (time: number) => {
         lenis?.raf(time);
         raf = requestAnimationFrame(loop);
@@ -69,6 +91,7 @@ export function SmoothScroll() {
 
     return () => {
       cancelAnimationFrame(raf);
+      if (window.__lenis === lenis) window.__lenis = null;
       lenis?.destroy();
       io.disconnect();
       mo.disconnect();

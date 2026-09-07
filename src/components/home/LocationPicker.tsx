@@ -8,6 +8,7 @@ import {
   type District,
   type Upazila,
 } from '@/lib/bangladesh-districts';
+import { startPageScroll, stopPageScroll } from '@/components/interactive/SmoothScroll';
 
 const BRAND_RED = '#FF003F';
 
@@ -46,11 +47,10 @@ export function LocationPicker({ open, onClose, onSelect, currentSlug }: Locatio
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && (drill ? setDrill(null) : onClose());
     document.addEventListener('keydown', onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    stopPageScroll();
     return () => {
       document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = prev;
+      startPageScroll();
     };
   }, [open, drill, onClose]);
 

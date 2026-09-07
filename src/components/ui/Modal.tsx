@@ -3,6 +3,7 @@
 import { useEffect, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { startPageScroll, stopPageScroll } from '@/components/interactive/SmoothScroll';
 
 export function Modal({
   open,
@@ -23,11 +24,10 @@ export function Modal({
     if (!open) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    stopPageScroll();
     return () => {
       document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = prev;
+      startPageScroll();
     };
   }, [open, onClose]);
 

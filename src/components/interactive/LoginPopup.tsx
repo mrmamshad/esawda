@@ -6,6 +6,7 @@ import { PasswordInput } from '@/components/forms/PasswordInput';
 import { api, ApiError } from '@/lib/api';
 import { saveToken } from '@/lib/auth';
 import type { User } from '@/types/api';
+import { startPageScroll, stopPageScroll } from '@/components/interactive/SmoothScroll';
 
 /**
  * Bikroy-style login popup.
@@ -55,11 +56,10 @@ export function LoginPopup({ open, onClose, onSuccess, reason }: LoginPopupProps
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     document.addEventListener('keydown', onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    stopPageScroll();
     return () => {
       document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = prev;
+      startPageScroll();
     };
   }, [open, onClose]);
 
