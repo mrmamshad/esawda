@@ -16,7 +16,7 @@ function stripTestAds<T extends { title?: string | null }>(ads: T[]): T[] {
   return ads.filter((a) => !/playwright|test\s*ad/i.test(a.title ?? ''));
 }
 
-const GRID = 'grid gap-6 sm:grid-cols-2 lg:grid-cols-4';
+const GRID = 'grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4';
 
 /** A product section that has one list per condition (used/new). */
 type ConditionedSection = { used: Ad[]; new: Ad[] };
@@ -99,7 +99,7 @@ export function HomeSections({
                   <span className="inline-block h-1.5 w-6 rounded-full bg-brand-700" />
                   Featured
                 </p>
-                <h2 className="mt-3 max-w-xl text-[40px] leading-[1.05] font-bold tracking-[-0.02em] text-ink md:text-[48px]">
+                <h2 className="mt-3 max-w-xl text-[32px] leading-[1.08] font-bold tracking-[-0.02em] text-balance text-ink sm:text-4xl md:text-[48px] md:leading-[1.05]">
                   Featured <span className="text-brand-700">products.</span>
                 </h2>
                 <p className="mt-3 max-w-lg text-body-md text-ink-muted">

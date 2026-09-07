@@ -173,7 +173,7 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
             {similar.data.length > 0 && (
               <section className="space-y-4 pt-2">
                 <SectionHeading title="Related products" />
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
                   {similar.data.map((s) => <ListingCard key={s.id} ad={s} variant="featured" />)}
                 </div>
               </section>

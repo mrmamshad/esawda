@@ -43,7 +43,7 @@ html       { scrollbar-gutter: stable; }
 
 /* One-shot utilities that don't quite deserve component status. */
 @layer components {
-  .container-page { @apply mx-auto w-full max-w-container px-6; }
+  .container-page { @apply mx-auto w-full max-w-container px-4 sm:px-6; }
   .surface-card   { @apply bg-white rounded-card shadow-card ring-1 ring-line; }
   .pill           { @apply rounded-pill; }
   .btn-focus      { @apply focus-visible:outline-none focus-visible:ring-2

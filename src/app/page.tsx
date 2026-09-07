@@ -185,7 +185,7 @@ async function loadLegacy(): Promise<HomeData> {
                 <span className="inline-block h-1.5 w-6 rounded-full bg-brand-700" />
                 Loved by sellers
               </p>
-              <h2 className="mt-3 text-[40px] leading-[1.05] font-bold tracking-[-0.02em] text-ink md:text-[48px]">
+              <h2 className="mt-3 text-[32px] leading-[1.08] font-bold tracking-[-0.02em] text-balance sm:text-4xl md:text-[48px] md:leading-[1.05] text-ink md:text-[48px]">
                 What our community <span className="text-brand-700">says.</span>
               </h2>
               <p className="mt-4 text-body-md text-ink-muted">
@@ -237,7 +237,7 @@ async function loadLegacy(): Promise<HomeData> {
                 <span className="inline-block h-1.5 w-6 rounded-full bg-brand-700" />
                 Ready when you are
               </p>
-              <h2 className="mt-3 text-[40px] leading-[1.05] font-bold tracking-[-0.02em] text-white md:text-[48px]">
+              <h2 className="mt-3 text-[32px] leading-[1.08] font-bold tracking-[-0.02em] text-balance sm:text-4xl md:text-[48px] md:leading-[1.05] text-white md:text-[48px]">
                 Post your first ad in <span className="text-brand-500">under 2 minutes.</span>
               </h2>
               <p className="mt-4 text-body-lg text-white/70">

@@ -7,6 +7,7 @@ import { HeaderScrollAdapter } from '@/components/layout/HeaderScrollAdapter';
 import { PageSurface } from '@/components/layout/PageSurface';
 import { HeroBanner } from '@/components/layout/HeroBanner';
 import { CategorySidebar } from '@/components/filter/CategorySidebar';
+import { MobileFilterToggle } from '@/components/filter/MobileFilterToggle';
 import { PriceRangeFilter } from '@/components/filter/PriceRangeFilter';
 import { ListingCard } from '@/components/listing/ListingCard';
 import { IconButton } from '@/components/ui/IconButton';
@@ -54,6 +55,9 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
   const activeCat = sp['filter[category]'] ? Number(sp['filter[category]']) : undefined;
   const activeSub = sp['filter[sub_category]'] ? Number(sp['filter[sub_category]']) : undefined;
   const activeCondition = typeof sp.condition === 'string' ? sp.condition : '';
+  const activeFilterCount = [activeCat, activeSub, activeCondition, sp.q].filter(
+    (v) => v !== undefined && v !== '',
+  ).length;
   const buildHref = (c: string) => {
     const p = new URLSearchParams();
     Object.entries(sp).forEach(([k, v]) => { if (typeof v === 'string' && k !== 'condition') p.set(k, v); });
@@ -80,9 +84,14 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
         />
       </div>
 
-      {/* Body: 2 col layout — sidebar 288 / main 1fr */}
-      <div className="grid grid-cols-1 gap-6 p-6 md:p-8 lg:grid-cols-[288px_1fr]">
-        <aside className="space-y-6">
+      {/* Body: sidebar + main. On phones filters collapse into a toggle
+          so products own the first screen; desktop keeps the rail. */}
+      <div className="grid grid-cols-1 gap-6 p-4 sm:p-6 md:p-8 lg:grid-cols-[288px_1fr]">
+        <MobileFilterToggle activeCount={activeFilterCount}>
+          <CategorySidebar categories={cats.data} activeCategoryId={activeCat} activeSubId={activeSub} />
+          <PriceRangeFilter />
+        </MobileFilterToggle>
+        <aside className="hidden space-y-6 lg:block">
           <CategorySidebar categories={cats.data} activeCategoryId={activeCat} activeSubId={activeSub} />
           <PriceRangeFilter />
         </aside>
@@ -154,7 +163,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
               No products match the current filters. <Button variant="ghost" size="sm">Reset</Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
               {ads.data.map((ad, i) => (
                 <Fragment key={ad.id}>
                   <ListingCard ad={ad} variant="featured" />

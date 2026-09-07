@@ -129,11 +129,20 @@ export function ListingCard({
         <FavouriteButton adId={ad.id} className="absolute right-3 top-3" />
       </Link>
 
-      <div className="flex-1 p-4">
+      <div className="flex-1 p-3 sm:p-4">
         <p className="text-xs text-ink-muted">{ad.category?.name ?? 'Product'}</p>
-        <Link href={url} className="mt-1 block truncate text-lg font-bold text-ink hover:text-brand-700">
+        <Link href={url} className="mt-1 block truncate text-base font-bold text-ink hover:text-brand-700 sm:text-lg">
           {ad.title}
         </Link>
+        <div className="mt-1.5 flex items-center justify-between gap-2">
+          <span className="text-sm font-bold text-ink sm:text-base">৳{Number(ad.price).toLocaleString('en-US')}</span>
+          {ad.location.city && (
+            <span className="inline-flex min-w-0 items-center gap-1 truncate text-[11px] text-ink-muted sm:text-xs">
+              <MapPin size={12} className="shrink-0" />
+              <span className="truncate">{ad.location.city}</span>
+            </span>
+          )}
+        </div>
 
         {variant === 'contact' && (
           <>

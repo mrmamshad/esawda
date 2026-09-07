@@ -64,7 +64,7 @@ export function HomeHero({ siteName = 'eSawda' }: HomeHeroProps = {}) {
       className="relative w-full overflow-x-clip"
       style={{ backgroundColor: CANVAS_CREAM }}
     >
-      <div className="mx-auto flex max-w-[1440px] flex-col gap-8 px-6 pt-[160px] pb-14 md:px-12 md:pt-[180px] lg:flex-row lg:items-start lg:gap-6 lg:px-16">
+      <div className="mx-auto flex max-w-[1440px] flex-col gap-8 px-4 pt-32 pb-14 sm:px-6 md:px-12 md:pt-[180px] lg:flex-row lg:items-start lg:gap-6 lg:px-16">
 
         {/* ── LEFT COLUMN ─────────────────────────────────────── */}
         <div className="flex w-full max-w-[680px] flex-col items-start lg:flex-1">
@@ -81,9 +81,9 @@ export function HomeHero({ siteName = 'eSawda' }: HomeHeroProps = {}) {
           </p>
 
           {/* Headline */}
-          <h1 className="mt-6 whitespace-nowrap text-[52px] leading-[1.02] font-extrabold tracking-[-0.03em] text-[#0F1524] md:text-[68px]">
-            Shop Smarter. <br />
-            <span style={{ color: BRAND_RED }}>Live Better.</span>
+          <h1 className="mt-6 text-[40px] leading-[1.02] font-extrabold tracking-[-0.03em] text-balance text-[#0F1524] sm:text-[52px] md:text-[68px]">
+            <span className="block">Shop Smarter.</span>
+            <span className="block" style={{ color: BRAND_RED }}>Live Better.</span>
           </h1>
 
           {/* Sub-copy */}
@@ -95,13 +95,13 @@ export function HomeHero({ siteName = 'eSawda' }: HomeHeroProps = {}) {
           {/* Search bar with district picker */}
           <HeroSearchBar />
 
-          {/* Category quick-links */}
-          <div className="mt-8 flex w-full max-w-[600px] flex-wrap items-start justify-between gap-y-4">
+          {/* Category quick-links — tidy 4-col grid on phones, free row on desktop */}
+          <div className="mt-8 grid w-full max-w-[600px] grid-cols-4 gap-y-4 lg:flex lg:flex-wrap lg:items-start lg:justify-between">
             {CATEGORIES.map((c) => (
               <Link
                 key={c.label}
                 href={c.href}
-                className="group flex w-[68px] flex-col items-center gap-2 text-center"
+                className="group flex w-full flex-col items-center gap-2 text-center lg:w-[68px]"
               >
                 <span
                   className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#0F1524] shadow-[0_10px_20px_-12px_rgba(15,20,40,0.25)] transition group-hover:-translate-y-0.5"
@@ -120,10 +120,7 @@ export function HomeHero({ siteName = 'eSawda' }: HomeHeroProps = {}) {
         {/* ── RIGHT VISUAL COLUMN ─────────────────────────────
             Contains the PNG composition only. No absolute badges
             inside → no chance of overlapping the phone / red bag. */}
-        <div
-          className="relative shrink-0 lg:w-[560px]"
-          style={{ height: 400 }}
-        >
+        <div className="relative h-[300px] w-full shrink-0 sm:h-[360px] lg:h-[400px] lg:w-[560px]">
           <Image
             src="/postar-01.webp"
             alt="eSawda mobile app preview"
@@ -131,16 +128,15 @@ export function HomeHero({ siteName = 'eSawda' }: HomeHeroProps = {}) {
             height={1600}
             priority
             sizes="(max-width: 1024px) 100vw, 780px"
-            className="pointer-events-none absolute z-0 object-contain"
-            style={{
-              width: 780,
-              height: 780,
-              top: -380,
-              left: '65%',
-              transform: 'translateX(-50%)',
-              maxWidth: 'none',
-            }}
+            className="pointer-events-none absolute top-1/2 left-1/2 z-0 w-[560px] max-w-none -translate-x-1/2 -translate-y-1/2 object-contain lg:top-[-380px] lg:left-[65%] lg:w-[780px] lg:translate-x-[-50%] lg:translate-y-0"
           />
+        </div>
+
+        {/* ── Mobile trust strip — the floating badges are desktop-only ── */}
+        <div className="flex flex-wrap items-center gap-2 lg:hidden">
+          <MobileTrust icon={<ShieldCheck size={13} />} label="Secure Payment" />
+          <MobileTrust icon={<Truck size={13} />} label="Fast Delivery" />
+          <MobileTrust icon={<Award size={13} />} label="Best Quality" />
         </div>
 
         {/* ── TRUST BADGES COLUMN ─────────────────────────────
@@ -153,6 +149,17 @@ export function HomeHero({ siteName = 'eSawda' }: HomeHeroProps = {}) {
         </div>
       </div>
     </section>
+  );
+}
+
+function MobileTrust({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[11px] font-semibold text-[#0F1524] shadow-[0_8px_18px_-12px_rgba(15,20,40,0.35)]">
+      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full text-white" style={{ backgroundColor: BRAND_RED }}>
+        {icon}
+      </span>
+      {label}
+    </span>
   );
 }
 
