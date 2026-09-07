@@ -99,7 +99,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
         <main className="space-y-6">
           {/* Toolbar */}
           <div className="flex flex-wrap items-center gap-3 border-b border-line pb-4">
-            <button className="btn-focus inline-flex items-center gap-3 rounded-pill bg-brand-100 pl-2 pr-4 py-2 text-sm font-medium text-brand-800 transition hover:bg-brand-200">
+            <button className="btn-focus hidden items-center gap-3 rounded-pill bg-brand-100 pl-2 pr-4 py-2 text-sm font-medium text-brand-800 transition hover:bg-brand-200 lg:inline-flex">
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-pill bg-white">
                 <span className="text-xs">⚙</span>
               </span>
