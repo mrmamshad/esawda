@@ -83,11 +83,14 @@ function getPlacement(p: string): Promise<PlacementAd | null> {
 }
 
 const SIZE_SPEC: Record<AdSlotSize, { h: string; label: string }> = {
-  leaderboard: { h: 'aspect-[4042/375]',  label: '728 × 90',  },
-  large:       { h: 'aspect-[2425/625]',  label: '970 × 250', },
+  // Landscape banners collapse into unreadable slivers on phones
+  // (970×90 at 350px wide = 32px tall), so every wide format carries a
+  // mobile min-height; object-cover center-crops instead of squishing.
+  leaderboard: { h: 'aspect-[4042/375] min-h-[90px] sm:min-h-0',  label: '728 × 90',  },
+  large:       { h: 'aspect-[2425/625] min-h-[110px] sm:min-h-0', label: '970 × 250', },
   mpu:         { h: 'aspect-[1250/1042] w-full max-w-[320px] mx-auto', label: '300 × 250' },
   infeed:      { h: 'aspect-[1250/1042] w-full max-w-[320px] mx-auto', label: 'In-feed native' },
-  wide:        { h: 'aspect-[4042/375]',  label: '970 × 90',  },
+  wide:        { h: 'aspect-[4042/375] min-h-[96px] sm:min-h-0',  label: '970 × 90',  },
   skyscraper:  { h: 'aspect-[160/600] w-full max-w-[160px] mx-auto', label: '160 × 600' },
 };
 

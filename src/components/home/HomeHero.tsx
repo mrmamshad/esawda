@@ -117,10 +117,10 @@ export function HomeHero({ siteName = 'eSawda' }: HomeHeroProps = {}) {
           </div>
         </div>
 
-        {/* ── RIGHT VISUAL COLUMN ─────────────────────────────
-            Contains the PNG composition only. No absolute badges
-            inside → no chance of overlapping the phone / red bag. */}
-        <div className="relative h-[300px] w-full shrink-0 sm:h-[360px] lg:h-[400px] lg:w-[560px]">
+        {/* ── RIGHT VISUAL COLUMN (desktop only — the phone mockup eats
+            a full screen on phones with zero function, so it stays hidden
+            below lg and the trust strip below covers the social proof) ── */}
+        <div className="relative hidden h-[300px] w-full shrink-0 sm:h-[360px] lg:block lg:h-[400px] lg:w-[560px]">
           <Image
             src="/postar-01.webp"
             alt="eSawda mobile app preview"
