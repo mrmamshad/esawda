@@ -2,8 +2,11 @@
 
 import { useMemo, useState } from 'react';
 import { ArrowUpRight, Check, ShieldCheck, Sparkles, Zap } from 'lucide-react';
+import { useAuthGate } from '@/components/interactive/AuthGate';
+import { PaymentConsent, type PaymentConsentFormData } from '@/components/checkout/PaymentConsent';
 import { api, ApiError } from '@/lib/api';
 import { readToken } from '@/lib/auth';
+import { generateIdempotencyKey } from '@/lib/idempotency';
 import { formatMoney } from '@/lib/format';
 import type { Plan } from '@/types/api';
 
@@ -40,22 +43,40 @@ export function ShopPlansClient({
   plans: Plan[];
   currentPlanId: string | number | null;
 }) {
+  const { user } = useAuthGate();
   const [cadence, setCadence] = useState<Cadence>('monthly');
   const [processingPlanId, setProcessingPlanId] = useState<number | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [showConsent, setShowConsent] = useState<number | null>(null);
   const highestSaving = useMemo(() => Math.max(0, ...plans.map(savingFor)), [plans]);
 
-  const startCheckout = async (planId: number, billingCadence: Cadence) => {
+  const startCheckout = async (consent: PaymentConsentFormData, planId: number, billingCadence: Cadence) => {
     setProcessingPlanId(planId);
     setCheckoutError(null);
     try {
+      const idempotencyKey = generateIdempotencyKey(user?.id);
       const { data } = await api<{ transaction_id: number; gateway_url: string }>(
         `/checkout/plan/${planId}`,
-        { method: 'POST', token: readToken(), body: { cadence: billingCadence } },
+        {
+          method: 'POST',
+          token: readToken(),
+          body: {
+            cadence: billingCadence,
+            policies_accepted: true,
+            payment_phone: consent.paymentPhone,
+          },
+          idempotencyKey,
+        },
       );
       const url = data.gateway_url;
-      const hostname = new URL(url).hostname;
-      if (!/(^|\.)(sslcommerz\.com)$/i.test(hostname)) {
+      const allowed = (u: string) => {
+        if (u.startsWith('/')) return true;
+        try {
+          const h = new URL(u).hostname;
+          return /(^|\.)(dgepay\.net|sslcommerz\.com|esawda\.com|eshauda\.com)$/i.test(h) && new URL(u).protocol === 'https:';
+        } catch { return false; }
+      };
+      if (!allowed(url)) {
         throw new Error('Unsafe payment redirect blocked.');
       }
       window.location.assign(url);
@@ -102,7 +123,7 @@ export function ShopPlansClient({
         </div>
       )}
       <p className="mt-4 flex items-center gap-2 text-xs text-[color:var(--shp-fg-muted)]">
-        <ShieldCheck size={14} className="text-emerald-600" /> One click opens SSLCommerz secure checkout. Your plan activates automatically after payment.
+        <ShieldCheck size={14} className="text-emerald-600" /> Secure checkout opens after consent. Your plan activates automatically after payment.
       </p>
 
       <div className="mt-6 grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
@@ -163,8 +184,8 @@ export function ShopPlansClient({
                 ) : (
                   <button
                     type="button"
-                    onClick={() => startCheckout(plan.id, effectiveCadence)}
-                    disabled={processingPlanId !== null}
+                    onClick={() => setShowConsent(plan.id)}
+                    disabled={processingPlanId !== null || showConsent !== null}
                     className={`flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold transition disabled:cursor-wait disabled:opacity-70 ${
                       featured
                         ? 'bg-[color:var(--shp-accent)] text-white hover:brightness-110'
@@ -176,6 +197,19 @@ export function ShopPlansClient({
                     {processingPlanId === plan.id ? 'Opening secure payment…' : `Subscribe to ${plan.name}`}
                     {processingPlanId !== plan.id && <ArrowUpRight size={15} />}
                   </button>
+                )}
+                {showConsent === plan.id && (
+                  <div className="mt-4 border-t border-[color:var(--shp-border)] pt-4">
+                    <PaymentConsent
+                      onConsent={(consent) => {
+                        setShowConsent(null);
+                        void startCheckout(consent, plan.id, effectiveCadence);
+                      }}
+                      compact
+                      initialPhone={user?.phone ?? ''}
+                      className="text-sm"
+                    />
+                  </div>
                 )}
               </div>
             </article>

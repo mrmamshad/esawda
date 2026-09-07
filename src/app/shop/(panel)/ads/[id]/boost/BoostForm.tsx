@@ -1,8 +1,11 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useAuthGate } from '@/components/interactive/AuthGate';
+import { PaymentConsent, type PaymentConsentFormData } from '@/components/checkout/PaymentConsent';
 import { api, ApiError } from '@/lib/api';
 import { readToken } from '@/lib/auth';
+import { generateIdempotencyKey } from '@/lib/idempotency';
 import { Button } from '@/components/ui/Button';
 import type { AdDetail } from '@/types/api';
 
@@ -13,23 +16,46 @@ const OPTIONS: { key: 'featured' | 'urgent' | 'highlight'; label: string; descri
 ];
 
 export function BoostForm({ ad }: { ad: AdDetail }) {
+  const { user } = useAuthGate();
   const [picked, setPicked] = useState<Record<string, boolean>>({});
   const [busy,  setBusy]    = useState(false);
   const [err,   setErr]     = useState<string | null>(null);
+  const [showConsent, setShowConsent] = useState(false);
 
   const total = useMemo(
     () => OPTIONS.filter((o) => picked[o.key]).reduce((sum, o) => sum + o.price, 0),
     [picked],
   );
 
-  const submit = async () => {
+  const submit = async (consent: PaymentConsentFormData) => {
     setBusy(true); setErr(null);
     try {
+      const idempotencyKey = generateIdempotencyKey(user?.id);
       const { data } = await api<{ transaction_id: number; gateway_url: string }>(
         `/checkout/ad-upgrade/${ad.id}`,
-        { method: 'POST', token: readToken(), body: picked },
+        {
+          method: 'POST',
+          token: readToken(),
+          body: {
+            ...picked,
+            policies_accepted: true,
+            payment_phone: consent.paymentPhone,
+          },
+          idempotencyKey,
+        },
       );
-      window.location.href = data.gateway_url;
+      const url = data.gateway_url;
+      const allowed = (u: string) => {
+        if (u.startsWith('/')) return true;
+        try {
+          const h = new URL(u).hostname;
+          return /(^|\.)(dgepay\.net|sslcommerz\.com|esawda\.com|eshauda\.com)$/i.test(h) && new URL(u).protocol === 'https:';
+        } catch { return false; }
+      };
+      if (!allowed(url)) {
+        throw new Error('Unsafe payment redirect blocked.');
+      }
+      window.location.href = url;
     } catch (e) {
       setErr(e instanceof ApiError ? e.message : 'Could not start payment.');
       setBusy(false);
@@ -69,10 +95,22 @@ export function BoostForm({ ad }: { ad: AdDetail }) {
           <span className="text-lg font-bold text-ink">৳{total}</span>
         </div>
         {err && <p className="text-xs text-rose-700">{err}</p>}
-        <Button fullWidth variant="filled" onClick={submit} disabled={busy || total === 0}>
-          {busy ? 'Redirecting…' : 'Pay with SSLCommerz'}
-        </Button>
-        <p className="text-center text-xs text-ink-faint">🔒 Secure hosted checkout.</p>
+
+        {!showConsent ? (
+          <Button fullWidth variant="filled" onClick={() => setShowConsent(true)} disabled={busy || total === 0}>
+            {busy ? 'Processing…' : 'Proceed to Payment'}
+          </Button>
+        ) : (
+          <PaymentConsent
+            onConsent={(consent) => {
+              setShowConsent(false);
+              void submit(consent);
+            }}
+            compact
+            initialPhone={user?.phone ?? ''}
+          />
+        )}
+        <p className="text-center text-xs text-ink-faint">🔒 Secure checkout.</p>
       </aside>
     </div>
   );

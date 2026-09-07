@@ -42,6 +42,7 @@ export function Footer({ siteName = 'eSawda' }: { siteName?: string }) {
       links: [
         { label: 'Terms & Conditions', href: '/terms' as Route },
         { label: 'Privacy policy', href: '/privacy' as Route },
+        { label: 'Refund & Cancellation', href: '/refund-policy' as Route },
         { label: 'Safety tips', href: '/safety-tips' as Route },
       ],
     },
@@ -98,15 +99,20 @@ export function Footer({ siteName = 'eSawda' }: { siteName?: string }) {
         </div>
 
         {/* ── Legal hairline row ── */}
-        <div className="mt-10 flex flex-col-reverse items-start gap-4 border-t border-white/10 pt-6 md:flex-row md:items-center md:justify-between">
-          <p className="text-xs text-white/50">
-            © {year} {siteName}. All rights reserved.
-          </p>
-          <div className="flex items-center gap-5 text-xs text-white/50">
-            <Link href={'/privacy' as Route} className="hover:text-white/80">Privacy policy</Link>
-            <Link href={'/terms' as Route} className="hover:text-white/80">Terms and conditions</Link>
-            <Link href={'/contact' as Route} className="hover:text-white/80">Support</Link>
+        <div className="mt-10 space-y-4 border-t border-white/10 pt-6">
+          <div className="flex flex-col-reverse items-start gap-4 md:flex-row md:items-center md:justify-between">
+            <p className="text-xs text-white/50">
+              © {year} {siteName}. All rights reserved.
+            </p>
+            <div className="flex items-center gap-5 text-xs text-white/50">
+              <Link href={'/privacy' as Route} className="hover:text-white/80">Privacy policy</Link>
+              <Link href={'/terms' as Route} className="hover:text-white/80">Terms and conditions</Link>
+              <Link href={'/contact' as Route} className="hover:text-white/80">Support</Link>
+            </div>
           </div>
+          <p className="text-xs text-white/40">
+            🔒 Payments securely processed by DGePay
+          </p>
         </div>
       </div>
     </footer>

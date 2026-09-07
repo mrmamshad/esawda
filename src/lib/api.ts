@@ -43,6 +43,7 @@ type FetchOpts = {
   revalidate?: number | false;
   tags?:      string[];
   cache?:     RequestCache;
+  idempotencyKey?: string;
 };
 
 export async function api<T>(path: string, opts: FetchOpts = {}): Promise<ApiEnvelope<T>> {
@@ -56,6 +57,7 @@ export async function api<T>(path: string, opts: FetchOpts = {}): Promise<ApiEnv
     Accept: 'application/json',
     ...(opts.body && !(opts.body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(opts.idempotencyKey ? { 'Idempotency-Key': opts.idempotencyKey } : {}),
     ...opts.headers,
   };
 

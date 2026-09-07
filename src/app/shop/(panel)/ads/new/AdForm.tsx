@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { generateIdempotencyKey } from '@/lib/idempotency';
 import { RichTextEditor } from '@/components/shop/v2/RichTextEditor';
 import { PasswordInput } from '@/components/forms/PasswordInput';
 import { GeocodeAddress } from '@/components/interactive/GeocodeAddress';
@@ -164,6 +165,7 @@ function validateImages(files: File[]): string | null {
 }  const [busy,   setBusy]   = useState(false);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [error,  setError]  = useState<string | null>(null);
+  const [paymentPhone, setPaymentPhone] = useState<string>('');
 
   const [featuredImage, setFeaturedImage] = useState<File | null>(null);
   const [galleryImages, setGalleryImages] = useState<File[]>([]);
@@ -205,7 +207,15 @@ function validateImages(files: File[]): string | null {
     setBusy(true); setErrors({}); setError(null);
 
     if (!form.agree) {
-      setError('Please accept the Terms & Conditions to continue.');
+      setError('Please accept the Terms & Conditions, Refund & Cancellation Policy, and Privacy Policy to continue.');
+      setBusy(false); return;
+    }
+
+    // Determine if payment is required: postingMode paid OR premium plan with upgrades
+    const hasUpgrades = form.plan === 'premium' && (form.featured || form.urgent || form.highlight);
+    const paymentRequired = postingMode === 'paid' || hasUpgrades;
+    if (paymentRequired && (!paymentPhone.trim() || !isValidBdMobile(paymentPhone.trim()))) {
+      setError('Payment phone number is required and must be a valid Bangladeshi mobile number.');
       setBusy(false); return;
     }
 
@@ -323,16 +333,32 @@ function validateImages(files: File[]): string | null {
       }
 
       if (postingMode === 'paid') {
+        // Paid listing requires consent — append policies_accepted and payment_phone to FormData
+        fd.append('policies_accepted', '1');
+        fd.append('payment_phone', normalizeBdMobile(paymentPhone.trim()));
+        const idempotencyKey = generateIdempotencyKey();
         const { data: payment } = await api<{ transaction_id: number; post_id: number; gateway_url: string }>(
           '/checkout/paid-listing',
-          { method: 'POST', token, body: fd },
+          {
+            method: 'POST',
+            token,
+            body: fd,
+            idempotencyKey,
+          },
         );
-        const hostname = new URL(payment.gateway_url).hostname;
-        if (!/(^|\.)(sslcommerz\.com)$/i.test(hostname)) {
+        const url = payment.gateway_url;
+        const allowed = (u: string) => {
+          if (u.startsWith('/')) return true;
+          try {
+            const h = new URL(u).hostname;
+            return /(^|\\.)(dgepay\\.net|sslcommerz\\.com|esawda\\.com|eshauda\\.com)$/i.test(h) && new URL(u).protocol === 'https:';
+          } catch { return false; }
+        };
+        if (!allowed(url)) {
           throw new Error('Unsafe payment redirect blocked.');
         }
         clearDraft();
-        window.location.assign(payment.gateway_url);
+        window.location.assign(url);
         return;
       }
 
@@ -349,12 +375,33 @@ function validateImages(files: File[]): string | null {
         };
         const hasUpgrades = Object.values(upgrades).some(Boolean);
         if (hasUpgrades) {
+          const idempotencyKey = generateIdempotencyKey();
           const { data: pay } = await api<{ transaction_id: number; gateway_url: string }>(
             `/checkout/ad-upgrade/${ad.id}`,
-            { method: 'POST', token, body: upgrades },
+            {
+              method: 'POST',
+              token,
+              body: {
+                ...upgrades,
+                policies_accepted: true,
+                payment_phone: normalizeBdMobile(paymentPhone.trim()),
+              },
+              idempotencyKey,
+            },
           );
+          const url = pay.gateway_url;
+          const allowed = (u: string) => {
+            if (u.startsWith('/')) return true;
+            try {
+              const h = new URL(u).hostname;
+              return /(^|\\.)(dgepay\\.net|sslcommerz\\.com|esawda\\.com|eshauda\\.com)$/i.test(h) && new URL(u).protocol === 'https:';
+            } catch { return false; }
+          };
+          if (!allowed(url)) {
+            throw new Error('Unsafe payment redirect blocked.');
+          }
           clearDraft();
-          window.location.href = pay.gateway_url;
+          window.location.href = url;
           return;
         }
       }
@@ -641,6 +688,24 @@ function validateImages(files: File[]): string | null {
                   <option value="90">90 days</option>
                 </select>
               </Row>
+
+              {/* Payment phone — shown when payment is required */}
+              {(postingMode === 'paid' || (form.plan === 'premium' && (form.featured || form.urgent || form.highlight))) && (
+                <Row label="Payment Phone Number *" error={errors.paymentPhone?.[0]}>
+                  <input
+                    type="tel"
+                    inputMode="numeric" autoComplete="tel"
+                    placeholder="01XXXXXXXXX"
+                    maxLength={11}
+                    value={paymentPhone}
+                    onChange={(e) => setPaymentPhone(normalizeBdMobile(e.target.value))}
+                    className={inp}
+                  />
+                  {paymentPhone.length > 0 && !isValidBdMobile(paymentPhone) && (
+                    <p className="mt-1 text-xs font-medium text-red-600">11 digits, starts with 013–019.</p>
+                  )}
+                </Row>
+              )}
             </Card>
 
             {/* About Item ──────────────────────────────────────────── */}
@@ -732,7 +797,7 @@ function validateImages(files: File[]): string | null {
 
             <label className="flex items-center gap-2 text-sm text-ink">
               <input type="checkbox" checked={form.agree} onChange={set('agree')} required />
-              I have read and agree to the <Link href={'/terms' as Route} className="text-brand-700 underline">Terms &amp; Conditions</Link>
+              I have read and agree to the <Link href={'/terms' as Route} className="text-brand-700 underline">Terms &amp; Conditions</Link>, <Link href={'/refund-policy' as Route} className="text-brand-700 underline">Refund &amp; Cancellation Policy</Link>, and <Link href={'/privacy' as Route} className="text-brand-700 underline">Privacy Policy</Link>
             </label>
 
             <div className="flex justify-end gap-3">

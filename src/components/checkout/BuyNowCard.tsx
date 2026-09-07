@@ -6,7 +6,9 @@ import { useRouter } from 'next/navigation';
 import type { Route } from 'next';
 import { api, ApiError } from '@/lib/api';
 import { saveToken, readToken } from '@/lib/auth';
+import { generateIdempotencyKey } from '@/lib/idempotency';
 import { useAuthGate } from '@/components/interactive/AuthGate';
+import { PaymentConsent, type PaymentConsentFormData } from '@/components/checkout/PaymentConsent';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import type { User } from '@/types/api';
@@ -40,7 +42,7 @@ export function BuyNowCard({
   const router = useRouter();
 
   const [open,   setOpen]   = useState(false);
-  const [mode,   setMode]   = useState<'pick' | 'guest' | 'processing' | 'done' | 'error'>('pick');
+  const [mode,   setMode]   = useState<'pick' | 'guest' | 'processing' | 'consent' | 'done' | 'error'>('pick');
   const [intent, setIntent] = useState<'payment' | 'message'>('payment');
   const [name,   setName]   = useState(user?.name ?? '');
   const [mobile, setMobile] = useState('');
@@ -98,14 +100,44 @@ export function BuyNowCard({
         return;
       }
 
+      // Payment intent: show consent form first, then process checkout
+      setMode('consent');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not start the payment. Please try again.');
+      setMode('pick');
+    }
+  };
+
+  const handlePaymentConsent = async (consent: PaymentConsentFormData) => {
+    setError(null);
+    setMode('processing');
+    try {
+      const idempotencyKey = generateIdempotencyKey(user?.id);
       const { data } = await api<{ transaction_id: number; order_id: number; gateway_url: string }>(
         `/checkout/product-purchase/${productId}`,
-        { method: 'POST', token: readToken() },
+        {
+          method: 'POST',
+          token: readToken(),
+          body: {
+            policies_accepted: true,
+            payment_phone: consent.paymentPhone,
+          },
+          idempotencyKey,
+        },
       );
       setTxId(data.transaction_id);
-      // Gateway runs in the same tab; the callback redirects back to the
-      // success page, so the buyer never gets stuck behind an extra tab.
-      window.location.href = data.gateway_url;
+      const url = data.gateway_url;
+      const allowed = (u: string) => {
+        if (u.startsWith('/')) return true;
+        try {
+          const h = new URL(u).hostname;
+          return /(^|\.)(dgepay\.net|sslcommerz\.com|esawda\.com|eshauda\.com)$/i.test(h) && new URL(u).protocol === 'https:';
+        } catch { return false; }
+      };
+      if (!allowed(url)) {
+        throw new Error('Unsafe payment redirect blocked.');
+      }
+      window.location.href = url;
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not start the payment. Please try again.');
       setMode('pick');
@@ -142,12 +174,20 @@ export function BuyNowCard({
               <span className="font-semibold">{productTitle}</span> — ৳{Number(price || 0).toLocaleString('en-US')}
             </p>
             {error && <div className="rounded-md bg-red-50 px-3 py-2 text-center text-xs text-danger">{error}</div>}
+            <button type="button" onClick={() => choose('payment')}
+                    className="flex w-full items-center gap-3 rounded-md border border-line bg-white p-3 text-left hover:bg-surface-muted">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-green-50 text-green-600"><CreditCard size={16} /></span>
+              <span>
+                <span className="block text-sm font-semibold text-ink">Pay securely</span>
+                <span className="block text-xs text-ink-muted">Complete the purchase with secure checkout.</span>
+              </span>
+            </button>
             <button type="button" onClick={() => choose('message')}
                     className="flex w-full items-center gap-3 rounded-md border border-line bg-white p-3 text-left hover:bg-surface-muted">
               <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-ink-soft text-ink"><MessageCircle size={16} /></span>
               <span>
-                <span className="block text-sm font-semibold text-ink">Message seller to get the product</span>
-                <span className="block text-xs text-ink-muted">Contact the seller and buy directly.</span>
+                <span className="block text-sm font-semibold text-ink">Message seller</span>
+                <span className="block text-xs text-ink-muted">Contact the seller directly for the product.</span>
               </span>
             </button>
             <div className="flex items-center gap-3">
@@ -184,6 +224,16 @@ export function BuyNowCard({
               </button>
             </div>
           </form>
+        )}
+
+        {mode === 'consent' && (
+          <div className="space-y-4">
+            <PaymentConsent
+              onConsent={handlePaymentConsent}
+              compact
+              initialPhone={mobile || (user?.phone ?? '')}
+            />
+          </div>
         )}
 
         {mode === 'processing' && (

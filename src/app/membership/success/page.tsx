@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: 'Payment successful' };
 export const dynamic = 'force-dynamic';
 
 /**
- * Landing page after SSLCommerz redirects the buyer back. The `tx` query
+ * Landing page after payment gateway redirects the buyer back. The `tx` query
  * param carries the local transaction id — we hit /checkout/transactions/{id}
  * to confirm the definitive status (the IPN has usually already ratified
  * things by the time the browser gets here).
@@ -48,9 +48,9 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
         ? 'Your product upgrades (featured/urgent/highlight) are now active. Your listing stays hidden until an admin approves it.'
        : purpose === 'ad_post' || purpose === 'paid_listing'
         ? 'Your paid listing is saved and now pending admin approval. It will appear publicly only after a reviewer approves it.'
-       : `Payment of ৳${amount} confirmed via SSLCommerz. Your membership is now active.`)
+       : `Payment of ৳${amount} confirmed. Your membership is now active.`)
     : isPending
-      ? 'SSLCommerz is still processing your payment. It usually settles within a minute — refresh this page to check again.'
+      ? 'Your payment is still being processed. It usually settles within a minute — refresh this page to check again.'
       : `Current status: ${tx_status}`;
 
   return (
