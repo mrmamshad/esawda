@@ -72,7 +72,7 @@ export function ShopSidebar({
     <aside
       style={{ background: 'var(--shp-surface)', borderColor: 'var(--shp-border)' }}
       className={cn(
-        'fixed inset-y-0 left-0 z-40 hidden shrink-0 flex-col border-r transition-[width] duration-200 md:flex',
+        'fixed inset-y-0 left-0 z-40 hidden h-screen shrink-0 flex-col overflow-hidden border-r transition-[width] duration-200 md:flex',
         collapsed ? 'w-16' : 'w-64',
       )}
     >
@@ -88,7 +88,7 @@ export function ShopSidebar({
         </button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-2.5 pb-4">
+      <nav data-lenis-prevent className="flex-1 overflow-y-auto overscroll-contain px-2.5 pb-4">
         {groups.map((group) => (
           <div key={group.title} className="mt-4 first:mt-1">
             {!collapsed && (

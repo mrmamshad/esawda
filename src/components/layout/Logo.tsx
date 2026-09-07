@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Route } from 'next';
@@ -6,9 +9,10 @@ import { cn } from '@/lib/cn';
 /**
  * eSawda brand logo. Transparent PNG shipped in /public/logo.png.
  *
- * The image already has enough weight to hold on both light and coral
- * surfaces — we deliberately do NOT wrap it in a background pill, per
- * the client brief. `variant` is kept for API compatibility.
+ * Some environments intermittently fail the optimized image request for
+ * tiny static assets; we keep the logo resilient by:
+ *  - serving it unoptimized (direct /public file)
+ *  - falling back to /logo.jpeg on image error.
  */
 export function Logo({
   variant = 'default',
@@ -19,7 +23,9 @@ export function Logo({
   className?: string;
   height?: number;
 }) {
-  const width = Math.round(height * 2.7);   // native aspect (2180×808 ≈ 2.7)
+  const [src, setSrc] = useState('/logo.png');
+  const width = Math.round(height * 2.7); // native aspect (2180×808 ≈ 2.7)
+
   return (
     <Link
       href={'/' as Route}
@@ -31,14 +37,18 @@ export function Logo({
       data-variant={variant}
     >
       <Image
-        src="/logo.png"
+        src={src}
         alt="eSawda"
         width={width}
         height={height}
         priority
+        unoptimized
         sizes={`${width}px`}
         className="select-none"
         style={{ height, width: 'auto' }}
+        onError={() => {
+          if (src !== '/logo.jpeg') setSrc('/logo.jpeg');
+        }}
       />
     </Link>
   );

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/lib/session';
-import { apiFromServer, ApiError } from '@/lib/api';
+import { apiFromServer } from '@/lib/api';
 import { ShopShellV2, type ShopCounts } from '@/components/shop/v2/ShopShellV2';
 
 export const dynamic = 'force-dynamic';
@@ -39,8 +39,8 @@ export default async function ShopPanelLayout({ children }: { children: ReactNod
       expired:    res.data.ads?.expire,
       wishlisted: res.data.wishlist_count,
     };
-  } catch (e) {
-    if (!(e instanceof ApiError)) throw e;
+  } catch {
+    // Keep rendering the shell with empty sidebar counts if stats fail.
   }
 
   return <ShopShellV2 user={user} counts={counts}>{children}</ShopShellV2>;

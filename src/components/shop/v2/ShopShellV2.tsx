@@ -37,11 +37,14 @@ export function ShopShellV2({
   const groups = buildShopGroups(counts);
 
   return (
-    <div className="shop-scope min-h-[100dvh]" style={{ background: 'var(--shp-bg)', color: 'var(--shp-fg)' }}>
+    <div
+      className="shop-scope flex min-h-[100dvh]"
+      style={{ background: 'var(--shp-bg)', color: 'var(--shp-fg)' }}
+    >
       <ShopSidebar user={user} collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} groups={groups} />
       <div
         className={
-          'flex min-h-[100dvh] flex-col transition-[padding] duration-200 ' +
+          'flex min-h-[100dvh] min-w-0 flex-1 flex-col transition-[padding] duration-200 ' +
           (collapsed ? 'md:pl-16' : 'md:pl-64')
         }
       >
