@@ -35,6 +35,7 @@ type NavItem = { label: string; href: Route };
 const NAV: NavItem[] = [
   { label: 'Home',      href: '/' as Route },
   { label: 'Products',  href: '/ads' as Route },
+  { label: 'Shops',     href: '/shops' as Route },
   { label: 'About Us',  href: '/about' as Route },
   { label: 'Contact',   href: '/contact' as Route },
 ];
@@ -96,7 +97,7 @@ export function Header({
             <SearchAutocomplete />
           </div>
         ) : (
-          <nav className="hidden lg:flex flex-1 items-center justify-center gap-8">
+          <nav className="hidden lg:flex flex-1 items-center justify-center gap-6 xl:gap-8">
             {NAV.map((item) => (
               <Link
                 key={item.label}

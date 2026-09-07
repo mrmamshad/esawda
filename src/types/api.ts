@@ -30,6 +30,30 @@ export type SubCategory = {
   ads_count?: number;
 };
 
+export type ShopCategory = {
+  name: string;
+  slug: string;
+  shops_count: number;
+};
+
+export type Shop = {
+  id: number;
+  username: string;
+  name: string;
+  shop_name: string;
+  shop_category: string | null;
+  shop_category_slug: string | null;
+  shop_description: string | null;
+  shop_verified: boolean;
+  avatar_url: string;
+  cover_url: string | null;
+  shop_banner_url: string | null;
+  online: boolean;
+  location: { address: string | null; city: string | null; country: string | null };
+  stats: { active_products: number; total_products: number };
+  member_since: string | null;
+};
+
 export type Country  = { id: number; code: string; iso3: string; name: string; currency_code: string | null; active: boolean };
 export type City     = { id: number; country_code: string; name: string; lat: number | null; lng: number | null; active: boolean };
 export type Currency = { id: number; code: string; name: string; symbol: string; in_left: boolean; decimal_places: number };
@@ -82,6 +106,7 @@ export type SellerMini = {
   name: string;
   is_shop?: boolean;
   shop_name?: string | null;
+  shop_category?: string | null;
   shop_banner_url?: string | null;
   shop_verified?: boolean;
   shop_verified_at?: string | null;
@@ -100,6 +125,7 @@ export type Seller = {
   name: string;
   is_shop?: boolean;
   shop_name?: string | null;
+  shop_category?: string | null;
   shop_banner_url?: string | null;
   shop_verified?: boolean;
   shop_verified_at?: string | null;

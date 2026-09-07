@@ -31,6 +31,7 @@ type CategoryLink = { href: Route; label: string; icon: ReactNode };
 const GUEST_PRIMARY: NavLink[] = [
   { href: '/' as Route,            label: 'Home' },
   { href: '/ads' as Route,         label: 'Browse ads' },
+  { href: '/shops' as Route,       label: 'Browse shops' },
   { href: '/post/product' as Route, label: 'Post ad' },
 ];
 
@@ -54,6 +55,7 @@ function getAuthLinks(isSeller: boolean): NavLink[] {
   if (isSeller) {
     return [
       { href: '/ads' as Route,               label: 'Browse ads' },
+      { href: '/shops' as Route,             label: 'Browse shops' },
       { href: '/shop' as Route,              label: 'Dashboard' },
       { href: '/shop/ads' as Route,          label: 'My products' },
       { href: '/shop/orders' as Route,       label: 'Orders' },
@@ -65,6 +67,7 @@ function getAuthLinks(isSeller: boolean): NavLink[] {
 
   return [
     { href: '/ads' as Route,          label: 'Browse ads' },
+    { href: '/shops' as Route,        label: 'Browse shops' },
     { href: '/dashboard' as Route,    label: 'Dashboard' },
     { href: '/messages' as Route,     label: 'Messages' },
     { href: '/post/product' as Route, label: 'Post ad' },
