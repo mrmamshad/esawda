@@ -12,7 +12,7 @@ import type { Route } from 'next';
  * - Bangladesh phone input with validation
  * - Accessible, collapsible policy summaries
  *
- * Parent components (CheckoutForm, ShopPlansClient, BoostForm, BuyNowCard, AdForm)
+ * Parent components (CheckoutForm, ShopPlansClient, BoostForm, AdForm)
  * use this to collect consent before calling checkout endpoints with:
  *   body: { policies_accepted: true, payment_phone: "+880..." }
  *   headers: { "Idempotency-Key": "user_id-timestamp-random" }

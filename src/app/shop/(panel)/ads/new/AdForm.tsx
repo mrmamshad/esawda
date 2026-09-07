@@ -202,20 +202,33 @@ function validateImages(files: File[]): string | null {
     [galleryImages],
   );
 
+  // Payment is required for pay-per-listing, or premium plan with boosts.
+  // The number defaults to the contact numbers already on the form
+  // (guest mobile → listing phone → WhatsApp), so users who already gave a
+  // Bangladeshi number are never asked twice — the field stays as an
+  // editable override for the rare case none exists.
+  const paymentRequired = postingMode === 'paid' || (form.plan === 'premium' && (form.featured || form.urgent || form.highlight));
+  const bestContactPhone =
+    [form.guestMobile, form.phone, form.whatsapp].map((s) => s.trim()).find((v) => isValidBdMobile(v)) ?? '';
+  const effectivePaymentPhone = paymentPhone.trim() || bestContactPhone;
+
+  // Prefill once when payment becomes required (never clobber a manual edit).
+  const wasPaymentRequired = useRef(false);
+  useEffect(() => {
+    if (paymentRequired && !wasPaymentRequired.current) {
+      wasPaymentRequired.current = true;
+      if (!paymentPhone.trim() && bestContactPhone) setPaymentPhone(bestContactPhone);
+    } else if (!paymentRequired) {
+      wasPaymentRequired.current = false;
+    }
+  }, [paymentRequired, paymentPhone, bestContactPhone]);
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setBusy(true); setErrors({}); setError(null);
 
     if (!form.agree) {
       setError('Please accept the Terms & Conditions, Refund & Cancellation Policy, and Privacy Policy to continue.');
-      setBusy(false); return;
-    }
-
-    // Determine if payment is required: postingMode paid OR premium plan with upgrades
-    const hasUpgrades = form.plan === 'premium' && (form.featured || form.urgent || form.highlight);
-    const paymentRequired = postingMode === 'paid' || hasUpgrades;
-    if (paymentRequired && (!paymentPhone.trim() || !isValidBdMobile(paymentPhone.trim()))) {
-      setError('Payment phone number is required and must be a valid Bangladeshi mobile number.');
       setBusy(false); return;
     }
 
@@ -253,6 +266,12 @@ function validateImages(files: File[]): string | null {
     const imgErr = validateImages(featuredImage ? [featuredImage, ...galleryImages] : galleryImages);
     if (imgErr) {
       setError(imgErr); setBusy(false); return;
+    }
+    // Payment number last: it usually autofills from the contact numbers
+    // above, so only users with no valid number anywhere see this.
+    if (paymentRequired && !isValidBdMobile(effectivePaymentPhone)) {
+      setErrors({ paymentPhone: ['Enter the mobile number you will pay from — 11 digits, starts with 013–019.'] });
+      setError('Please fix the highlighted fields.'); setBusy(false); return;
     }
 
     // Multipart body — images travel with the record so the whole listing
@@ -335,7 +354,7 @@ function validateImages(files: File[]): string | null {
       if (postingMode === 'paid') {
         // Paid listing requires consent — append policies_accepted and payment_phone to FormData
         fd.append('policies_accepted', '1');
-        fd.append('payment_phone', normalizeBdMobile(paymentPhone.trim()));
+        fd.append('payment_phone', normalizeBdMobile(effectivePaymentPhone));
         const idempotencyKey = generateIdempotencyKey();
         const { data: payment } = await api<{ transaction_id: number; post_id: number; gateway_url: string }>(
           '/checkout/paid-listing',
@@ -384,7 +403,7 @@ function validateImages(files: File[]): string | null {
               body: {
                 ...upgrades,
                 policies_accepted: true,
-                payment_phone: normalizeBdMobile(paymentPhone.trim()),
+                payment_phone: normalizeBdMobile(effectivePaymentPhone),
               },
               idempotencyKey,
             },
@@ -689,9 +708,12 @@ function validateImages(files: File[]): string | null {
                 </select>
               </Row>
 
-              {/* Payment phone — shown when payment is required */}
-              {(postingMode === 'paid' || (form.plan === 'premium' && (form.featured || form.urgent || form.highlight))) && (
-                <Row label="Payment Phone Number *" error={errors.paymentPhone?.[0]}>
+              {/* Payment phone — shown when payment is required. Prefilled
+                  from your contact numbers above; edit only to pay from
+                  a different number. */}
+              {paymentRequired && (
+                <Row label="Payment Phone Number *" error={errors.paymentPhone?.[0]}
+                     hint="Taken from your contact number above — change it only if you pay from a different mobile.">
                   <input
                     type="tel"
                     inputMode="numeric" autoComplete="tel"

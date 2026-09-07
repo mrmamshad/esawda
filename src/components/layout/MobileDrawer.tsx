@@ -86,12 +86,19 @@ function getAuthLinks(isSeller: boolean): NavLink[] {
  */
 export function MobileDrawer({ onDark = false }: { onDark?: boolean }) {
   const [open, setOpen] = useState(false);
-  const [categoriesOpen, setCategoriesOpen] = useState(true);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [othersOpen, setOthersOpen] = useState(false);
   const { user } = useAuthGate();
 
   const isSeller = Boolean(user?.is_shop || user?.user_type === 'seller');
   const authLinks = getAuthLinks(isSeller);
+
+  // When opening after page scroll, always start the drawer from a clean state.
+  useEffect(() => {
+    if (!open) return;
+    setCategoriesOpen(false);
+    setOthersOpen(false);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -101,7 +108,7 @@ export function MobileDrawer({ onDark = false }: { onDark?: boolean }) {
 
   useEffect(() => {
     if (!open) {
-      setCategoriesOpen(true);
+      setCategoriesOpen(false);
       setOthersOpen(false);
     }
   }, [open]);

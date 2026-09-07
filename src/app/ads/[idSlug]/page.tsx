@@ -9,7 +9,6 @@ import { ScrollToTopOnMount } from '@/components/layout/ScrollToTopOnMount';
 import { AdGallery } from '@/components/listing/AdGallery';
 import { ListingCard } from '@/components/listing/ListingCard';
 import { SellerCard } from '@/components/seller/SellerCard';
-import { BuyNowCard } from '@/components/checkout/BuyNowCard';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { PriceTag } from '@/components/ui/PriceTag';
 import { Badge } from '@/components/ui/Badge';
@@ -183,16 +182,10 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
           {/* Sidebar — sticky top so it stays aligned with the gallery */}
           <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
             {ad.seller && <SellerCard seller={ad.seller} productId={ad.id} productTitle={ad.title} adWhatsapp={ad.whatsapp} />}
-            <BuyNowCard
-              productId={ad.id}
-              productTitle={ad.title}
-              price={ad.price}
-              sellerId={ad.seller?.id ?? 0}
-              sellerName={ad.seller?.name ?? 'the seller'}
-              sellerUsername={ad.seller?.username}
-              sellerAvatar={ad.seller?.avatar_url}
-              sellerOnline={ad.seller?.online}
-            />
+
+            {/* NOTE: no Buy Now card — products are never sold online.
+                Payment happens only for shop subscriptions and ad boosts
+                (post-a-product / shop panel). Buyers contact the seller. */}
 
             {/* AD SLOT — sidebar MPU (300×250), high-CPM inventory. */}
             <AdSlot placement={`ad.${ad.id}.sidebar_mpu`} size="mpu" />
