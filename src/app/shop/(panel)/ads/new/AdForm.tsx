@@ -370,7 +370,7 @@ function validateImages(files: File[]): string | null {
           if (u.startsWith('/')) return true;
           try {
             const h = new URL(u).hostname;
-            return /(^|\\.)(dgepay\\.net|sslcommerz\\.com|esawda\\.com|eshauda\\.com)$/i.test(h) && new URL(u).protocol === 'https:';
+            return /(^|\.)(dgepay\.net|sslcommerz\.com|esawda\.com|eshauda\.com)$/i.test(h) && new URL(u).protocol === 'https:';
           } catch { return false; }
         };
         if (!allowed(url)) {
@@ -413,7 +413,7 @@ function validateImages(files: File[]): string | null {
             if (u.startsWith('/')) return true;
             try {
               const h = new URL(u).hostname;
-              return /(^|\\.)(dgepay\\.net|sslcommerz\\.com|esawda\\.com|eshauda\\.com)$/i.test(h) && new URL(u).protocol === 'https:';
+              return /(^|\.)(dgepay\.net|sslcommerz\.com|esawda\.com|eshauda\.com)$/i.test(h) && new URL(u).protocol === 'https:';
             } catch { return false; }
           };
           if (!allowed(url)) {
