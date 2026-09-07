@@ -34,10 +34,12 @@ declare global {
 export function stopPageScroll() {
   window.__lenis?.stop();
   document.body.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
 }
 
 export function startPageScroll() {
   document.body.style.overflow = '';
+  document.documentElement.style.overflow = '';
   window.__lenis?.start();
 }
 
