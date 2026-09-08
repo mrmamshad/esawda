@@ -113,11 +113,11 @@ export function Header({
           </nav>
         )}
 
-        {/* Right cluster — user chip / Get Started + optional Post Product */}
+        {/* Right cluster — CTAs first, then profile/Login as the last
+            (right-most) element: avatar when signed in, Login otherwise. */}
         <div className="ml-auto flex items-center gap-2 md:gap-3">
           {user ? (
             <>
-              <UserMenu user={user} onDark={onDark} />
               {!(user.is_shop || user.user_type === 'seller') && (
                 <Link href={'/shop/apply' as Route} className="hidden sm:inline-flex">
                   <Button variant="outline" size="sm">Create a Shop</Button>
@@ -126,20 +126,10 @@ export function Header({
               <Link href={(user.is_shop || user.user_type === 'seller' ? '/shop/ads/new' : '/post/product') as Route} className="hidden sm:inline-flex">
                 <Button variant="filled" size="sm" leftIcon={<Plus size={16} />}>Post Product</Button>
               </Link>
+              <UserMenu user={user} onDark={onDark} />
             </>
           ) : (
             <>
-              <Link
-                href={'/login' as Route}
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-[14px] font-semibold transition active:translate-y-[1px] hover:brightness-95 sm:px-5',
-                  onDark
-                    ? 'border-white/40 text-white hover:bg-white/10'
-                    : 'border-ink/20 text-[#0F1524] hover:border-ink/40',
-                )}
-              >
-                Login
-              </Link>
               <Link href={'/shop/apply' as Route} className="hidden sm:inline-flex">
                 <button
                   type="button"
@@ -164,6 +154,17 @@ export function Header({
                 >
                   Post a Product
                 </button>
+              </Link>
+              <Link
+                href={'/login' as Route}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-[14px] font-semibold transition active:translate-y-[1px] hover:brightness-95 sm:px-5',
+                  onDark
+                    ? 'border-white/40 text-white hover:bg-white/10'
+                    : 'border-ink/20 text-[#0F1524] hover:border-ink/40',
+                )}
+              >
+                Login
               </Link>
             </>
           )}
