@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { apiFromServer, ApiError } from '@/lib/api';
 import { PageHeader } from '@/components/admin/v2/PageHeader';
-import { CategoriesTableClient, type AdminCategoryRow } from './CategoriesTableClient';
+import { CategoriesTableClient } from './CategoriesTableClient';
+import type { AdminCategoryRow } from './types';
 
 export const metadata: Metadata = { title: 'Categories' };
 export const dynamic = 'force-dynamic';
@@ -17,7 +18,7 @@ export default async function AdminCategoriesPage() {
   );
   return (
     <>
-      <PageHeader title="Categories" description="Add, rename, or remove product categories." />
+      <PageHeader title="Categories" description="Manage product categories, icons, images, URLs, and display order." />
       <CategoriesTableClient initialRows={res.data} />
     </>
   );
