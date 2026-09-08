@@ -18,7 +18,7 @@ export default function RefundPolicyPage() {
       <main className="container-page py-12">
         <article className="prose prose-sm mx-auto max-w-2xl">
           <h1 className="text-3xl font-bold text-ink">Refund & Cancellation Policy</h1>
-          <p className="text-sm text-ink-muted">Draft for review — last updated September 2026</p>
+          <p className="text-sm text-ink-muted">Last updated: September 2026</p>
 
           <section>
             <h2 className="mt-8 text-2xl font-semibold text-ink">Overview</h2>
@@ -31,8 +31,8 @@ export default function RefundPolicyPage() {
           <section>
             <h2 className="mt-8 text-2xl font-semibold text-ink">1. Membership & Plan Refunds</h2>
             <p className="text-ink-muted">
-              Membership subscriptions and seller plans are non-refundable once activated. Cancellation will prevent future
-              billing but will not trigger a refund of fees already charged.
+              Membership subscriptions and seller plans are generally non-refundable once activated. Access remains available
+              until the recorded expiry date; renewal occurs only when the seller starts another purchase.
             </p>
             <ul className="mt-4 space-y-2 text-ink-muted">
               <li>
@@ -45,72 +45,41 @@ export default function RefundPolicyPage() {
               </li>
               <li>
                 <strong>Service Errors:</strong> If you are charged in error (duplicate charge, system failure), contact support
-                within 7 days for review and potential correction.
+                promptly with the transaction reference for review and potential correction.
               </li>
             </ul>
           </section>
 
           <section>
-            <h2 className="mt-8 text-2xl font-semibold text-ink">2. Buyer Protections</h2>
+            <h2 className="mt-8 text-2xl font-semibold text-ink">2. Marketplace Product Transactions</h2>
             <p className="text-ink-muted">
-              eSawda provides dispute resolution tools to protect buyer interests in transactions between private parties:
+              eSawda is a classified marketplace. Buyers contact sellers directly, and eSawda does not collect online payment for
+              the advertised product itself. Delivery, inspection, cancellation, return, and product-price refunds must be agreed
+              directly between the buyer and seller.
             </p>
             <ul className="mt-4 space-y-2 text-ink-muted">
-              <li>
-                <strong>Item Not Received:</strong> Buyers can file a dispute within 14 days of transaction if goods are not
-                delivered.
-              </li>
-              <li>
-                <strong>Item Not As Described:</strong> If received goods materially differ from the listing, buyers may initiate
-                a return request.
-              </li>
-              <li>
-                <strong>Return & Refund:</strong> Returns are coordinated directly between buyer and seller. eSawda recommends
-                using a courier that provides tracking.
-              </li>
-              <li>
-                <strong>Escalation:</strong> If buyer–seller negotiation fails, disputes can be escalated to eSawda support for
-                mediation.
-              </li>
+              <li>Do not send advance product payment to an unknown seller.</li>
+              <li>Inspect the item and verify ownership before completing a transaction.</li>
+              <li>Report suspicious listings or messages through the Contact page.</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="mt-8 text-2xl font-semibold text-ink">3. Seller Cancellations</h2>
-            <p className="text-ink-muted">Sellers may cancel a transaction in the following cases:</p>
-            <ul className="mt-4 space-y-2 text-ink-muted">
-              <li>
-                <strong>Pre-Agreement Cancel:</strong> Cancel before the buyer confirms they have received the item. Proof of
-                delivery may be required.
-              </li>
-              <li>
-                <strong>Item Out of Stock:</strong> If an item becomes unavailable, notify the buyer immediately and issue a
-                refund.
-              </li>
-              <li>
-                <strong>Buyer Violation:</strong> If a buyer's conduct violates our community guidelines, sellers may cancel and
-                refund without penalty.
-              </li>
-            </ul>
+            <h2 className="mt-8 text-2xl font-semibold text-ink">3. Technical Payment Errors</h2>
+            <p className="text-ink-muted">
+              DGePay checkout is used only for eSawda seller services such as plans, paid listings, and listing boosts. If a charge
+              succeeds but the service is not activated, eSawda will verify the gateway transaction and either activate the
+              purchased service or arrange an appropriate correction.
+            </p>
           </section>
 
           <section>
-            <h2 className="mt-8 text-2xl font-semibold text-ink">4. Dispute Resolution Process</h2>
+            <h2 className="mt-8 text-2xl font-semibold text-ink">4. Requesting a Review</h2>
             <ol className="mt-4 space-y-3 text-ink-muted">
-              <li>
-                <strong>1. Direct Communication (Days 1–7):</strong> Buyer and seller communicate to resolve the issue.
-              </li>
-              <li>
-                <strong>2. Return Request (Days 8–14):</strong> If unresolved, buyer can file a return request with evidence
-                (photos, messages, tracking).
-              </li>
-              <li>
-                <strong>3. eSawda Mediation (Days 15–21):</strong> eSawda support reviews the case and makes a determination.
-              </li>
-              <li>
-                <strong>4. Payment Reversal:</strong> If the dispute is resolved in the buyer's favor, refund is issued to the
-                original payment method within 5–7 business days.
-              </li>
+              <li>Contact eSawda through the Contact page.</li>
+              <li>Provide the eSawda transaction reference and a description of the problem.</li>
+              <li>eSawda verifies the payment status and service activation record.</li>
+              <li>If a refund is approved, it is returned through the original payment method. Timing depends on DGePay and the issuing provider.</li>
             </ol>
           </section>
 
@@ -130,7 +99,7 @@ export default function RefundPolicyPage() {
             <h2 className="mt-8 text-2xl font-semibold text-ink">6. Non-Refundable Items</h2>
             <p className="text-ink-muted">The following are explicitly non-refundable:</p>
             <ul className="mt-4 space-y-2 text-ink-muted">
-              <li>Seller membership & plan fees (except duplicate charges within 7 days)</li>
+              <li>Seller membership and plan fees after successful activation</li>
               <li>Paid listing upgrades after activation</li>
               <li>Admin moderation or content removal fees</li>
               <li>Transactions completed outside the eSawda platform (in-person cash)</li>

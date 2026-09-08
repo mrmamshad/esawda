@@ -6,6 +6,7 @@ import { PaymentConsent, type PaymentConsentFormData } from '@/components/checko
 import { api, ApiError } from '@/lib/api';
 import { readToken } from '@/lib/auth';
 import { generateIdempotencyKey } from '@/lib/idempotency';
+import { isSafePaymentRedirect } from '@/lib/paymentRedirect';
 import { Button } from '@/components/ui/Button';
 import type { AdDetail } from '@/types/api';
 
@@ -45,14 +46,7 @@ export function BoostForm({ ad }: { ad: AdDetail }) {
         },
       );
       const url = data.gateway_url;
-      const allowed = (u: string) => {
-        if (u.startsWith('/')) return true;
-        try {
-          const h = new URL(u).hostname;
-          return /(^|\.)(dgepay\.net|sslcommerz\.com|esawda\.com|eshauda\.com)$/i.test(h) && new URL(u).protocol === 'https:';
-        } catch { return false; }
-      };
-      if (!allowed(url)) {
+      if (!isSafePaymentRedirect(url)) {
         throw new Error('Unsafe payment redirect blocked.');
       }
       window.location.href = url;

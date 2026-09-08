@@ -93,13 +93,6 @@ export function MobileDrawer({ onDark = false }: { onDark?: boolean }) {
   const isSeller = Boolean(user?.is_shop || user?.user_type === 'seller');
   const authLinks = getAuthLinks(isSeller);
 
-  // When opening after page scroll, always start the drawer from a clean state.
-  useEffect(() => {
-    if (!open) return;
-    setCategoriesOpen(false);
-    setOthersOpen(false);
-  }, [open]);
-
   useEffect(() => {
     if (!open) return;
     stopPageScroll();
@@ -120,7 +113,7 @@ export function MobileDrawer({ onDark = false }: { onDark?: boolean }) {
         onClick={() => setOpen(true)}
         aria-label="Open menu"
         className={cn(
-          'inline-flex h-10 w-10 items-center justify-center rounded-pill btn-focus md:hidden',
+          'inline-flex h-10 w-10 items-center justify-center rounded-pill btn-focus lg:hidden',
           onDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-brand-50 text-brand-700 hover:bg-brand-100',
         )}
       >
@@ -128,7 +121,7 @@ export function MobileDrawer({ onDark = false }: { onDark?: boolean }) {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[120] md:hidden">
+        <div className="fixed inset-0 z-[120] lg:hidden">
           <button
             type="button"
             aria-label="Close menu"

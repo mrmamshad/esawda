@@ -10,7 +10,9 @@
  */
 export function normalizeBdMobile(raw: string): string {
   let d = raw.replace(/\D/g, '');
-  if (/^8801[3-9]\d{8}$/.test(d)) d = '0' + d.slice(3);
+  // Convert the Bangladesh country prefix as soon as it is recognisable so
+  // typing +880... cannot be truncated at 11 international-format digits.
+  if (d.startsWith('880')) d = '0' + d.slice(3);
   return d.slice(0, 11);
 }
 

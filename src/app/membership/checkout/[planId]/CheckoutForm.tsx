@@ -9,6 +9,7 @@ import { PaymentConsent, type PaymentConsentFormData } from '@/components/checko
 import { api, ApiError } from '@/lib/api';
 import { readToken } from '@/lib/auth';
 import { generateIdempotencyKey } from '@/lib/idempotency';
+import { isSafePaymentRedirect } from '@/lib/paymentRedirect';
 
 /**
  * DGePay/secure checkout for membership plans. Hits POST /api/v1/checkout/plan/{planId}
@@ -46,16 +47,8 @@ export function CheckoutForm({ planId, cadence }: { planId: number; cadence: str
         setBusy(false);
         return;
       }
-      // Open redirect guard: allow same-origin or DGePay HTTPS subdomains + legacy gateways
       const url = data.gateway_url;
-      const allowed = (u: string) => {
-        if (u.startsWith('/')) return true;
-        try {
-          const h = new URL(u).hostname;
-          return /(^|\.)(dgepay\.net|sslcommerz\.com|esawda\.com|eshauda\.com)$/i.test(h) && new URL(u).protocol === 'https:';
-        } catch { return false; }
-      };
-      if (!allowed(url)) {
+      if (!isSafePaymentRedirect(url)) {
         notify('danger', 'Payment gateway returned an unsafe redirect URL.');
         setBusy(false);
         return;

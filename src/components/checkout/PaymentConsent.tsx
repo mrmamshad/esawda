@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown, ChevronUp, Phone } from 'lucide-react';
 import type { Route } from 'next';
+import { isValidBdMobile as isValidBdPhone, normalizeBdMobile as normalizeBdPhone } from '@/lib/phone';
 
 /**
  * Reusable DGePay/secure checkout consent component.
@@ -32,17 +33,6 @@ export interface PaymentConsentProps {
   className?: string;
 }
 
-function isValidBdPhone(phone: string): boolean {
-  return /^880\d{10}$/.test(phone.replace(/\D/g, ''));
-}
-
-function normalizeBdPhone(input: string): string {
-  const digits = input.replace(/\D/g, '');
-  if (digits.startsWith('88')) return digits;
-  if (digits.startsWith('0')) return '88' + digits.slice(1);
-  return digits;
-}
-
 export function PaymentConsent({
   onConsent,
   onPhoneChange,
@@ -52,7 +42,7 @@ export function PaymentConsent({
 }: PaymentConsentProps) {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [refundAccepted, setRefundAccepted] = useState(false);
-  const [paymentPhone, setPaymentPhone] = useState(initialPhone);
+  const [paymentPhone, setPaymentPhone] = useState(() => normalizeBdPhone(initialPhone));
   const [termsExpanded, setTermsExpanded] = useState(false);
   const [refundExpanded, setRefundExpanded] = useState(false);
 
@@ -79,32 +69,36 @@ export function PaymentConsent({
     <div className={`space-y-4 ${className}`}>
       {/* Terms & Conditions */}
       <div className={`rounded-lg border border-line bg-surface-card p-3 ${compact ? 'text-sm' : ''}`}>
-        <button
-          type="button"
-          onClick={() => setTermsExpanded(!termsExpanded)}
-          className="flex w-full items-start gap-3 text-left"
-        >
-          <input
-            type="checkbox"
-            checked={termsAccepted}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTermsAccepted(e.target.checked)}
-            className="mt-1.5 h-4 w-4 flex-shrink-0 accent-brand-700"
-            aria-label="Accept Terms & Conditions"
-          />
-          <div className="flex-1 min-w-0">
-            <p className="font-medium text-ink">
-              I accept the <Link href={'/terms' as Route} className="text-brand-700 underline" onClick={(e) => e.stopPropagation()}>Terms & Conditions</Link>
-            </p>
-            {compact && (
-              <p className="text-xs text-ink-muted mt-1">
-                You agree to our terms of service and payment policies.
-              </p>
-            )}
-          </div>
-          <span className="flex-shrink-0 text-ink-faint">
+        <div className="flex items-start gap-2">
+          <label className="flex min-h-11 min-w-0 flex-1 cursor-pointer items-start gap-3 rounded-md py-2 text-left">
+            <input
+              type="checkbox"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              className="mt-0.5 h-5 w-5 flex-shrink-0 accent-brand-700"
+            />
+            <span className="min-w-0 flex-1">
+              <span className="font-medium text-ink">
+                I accept the <Link href={'/terms' as Route} className="text-brand-700 underline" onClick={(e) => e.stopPropagation()}>Terms & Conditions</Link>{' '}
+                and <Link href={'/privacy' as Route} className="text-brand-700 underline" onClick={(e) => e.stopPropagation()}>Privacy Policy</Link>
+              </span>
+              {compact && (
+                <span className="mt-1 block text-xs text-ink-muted">
+                  You agree to our service, privacy, and payment terms.
+                </span>
+              )}
+            </span>
+          </label>
+          <button
+            type="button"
+            aria-label={termsExpanded ? 'Hide terms summary' : 'Show terms summary'}
+            aria-expanded={termsExpanded}
+            onClick={() => setTermsExpanded(!termsExpanded)}
+            className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-md text-ink-faint hover:bg-brand-50"
+          >
             {termsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </span>
-        </button>
+          </button>
+        </div>
 
         {termsExpanded && (
           <div className="mt-3 border-t border-line pt-3 text-xs text-ink-muted space-y-2">
@@ -120,40 +114,43 @@ export function PaymentConsent({
 
       {/* Refund Policy */}
       <div className={`rounded-lg border border-line bg-surface-card p-3 ${compact ? 'text-sm' : ''}`}>
-        <button
-          type="button"
-          onClick={() => setRefundExpanded(!refundExpanded)}
-          className="flex w-full items-start gap-3 text-left"
-        >
-          <input
-            type="checkbox"
-            checked={refundAccepted}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRefundAccepted(e.target.checked)}
-            className="mt-1.5 h-4 w-4 flex-shrink-0 accent-brand-700"
-            aria-label="Accept Refund Policy"
-          />
-          <div className="flex-1 min-w-0">
-            <p className="font-medium text-ink">
-              I acknowledge the <Link href={'/refund-policy' as Route} className="text-brand-700 underline" onClick={(e) => e.stopPropagation()}>Refund Policy</Link>
-            </p>
-            {compact && (
-              <p className="text-xs text-ink-muted mt-1">
-                Refunds are processed per our stated policy.
-              </p>
-            )}
-          </div>
-          <span className="flex-shrink-0 text-ink-faint">
+        <div className="flex items-start gap-2">
+          <label className="flex min-h-11 min-w-0 flex-1 cursor-pointer items-start gap-3 rounded-md py-2 text-left">
+            <input
+              type="checkbox"
+              checked={refundAccepted}
+              onChange={(e) => setRefundAccepted(e.target.checked)}
+              className="mt-0.5 h-5 w-5 flex-shrink-0 accent-brand-700"
+            />
+            <span className="min-w-0 flex-1">
+              <span className="font-medium text-ink">
+                I acknowledge the <Link href={'/refund-policy' as Route} className="text-brand-700 underline" onClick={(e) => e.stopPropagation()}>Refund & Cancellation Policy</Link>
+              </span>
+              {compact && (
+                <span className="mt-1 block text-xs text-ink-muted">
+                  Eligibility and processing follow the published policy.
+                </span>
+              )}
+            </span>
+          </label>
+          <button
+            type="button"
+            aria-label={refundExpanded ? 'Hide refund summary' : 'Show refund summary'}
+            aria-expanded={refundExpanded}
+            onClick={() => setRefundExpanded(!refundExpanded)}
+            className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-md text-ink-faint hover:bg-brand-50"
+          >
             {refundExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </span>
-        </button>
+          </button>
+        </div>
 
         {refundExpanded && (
           <div className="mt-3 border-t border-line pt-3 text-xs text-ink-muted space-y-2">
             <p>Under our refund policy:</p>
             <ul className="list-inside list-disc space-y-1 ml-1">
-              <li>Refunds are processed within 5–7 business days</li>
-              <li>Conditions and exclusions apply per transaction type</li>
-              <li>Disputes are handled per payment gateway rules</li>
+              <li>Approved refunds return to the original payment method</li>
+              <li>Processing time depends on DGePay and the issuing provider</li>
+              <li>Eligibility and exclusions follow the full published policy</li>
             </ul>
           </div>
         )}
@@ -170,10 +167,10 @@ export function PaymentConsent({
           <input
             type="tel"
             inputMode="numeric"
-            placeholder="01XXXXXXXXX or +880..."
+            placeholder="01XXXXXXXXX"
             value={paymentPhone}
             onChange={(e) => handlePhoneChange(e.target.value)}
-            maxLength={15}
+            maxLength={11}
             className={`w-full rounded-md border px-3 py-2 text-sm outline-none transition ${
               !isPhoneValid && paymentPhone.trim()
                 ? 'border-danger focus:border-danger focus:ring-2 focus:ring-danger/20'
@@ -184,7 +181,7 @@ export function PaymentConsent({
           />
           {!isPhoneValid && paymentPhone.trim() && (
             <p className="mt-1 text-xs text-danger">
-              Please enter a valid Bangladeshi phone (11 digits, e.g. 01712345678 or +8801712345678)
+              Please enter a valid 11-digit Bangladeshi phone, e.g. 01712345678
             </p>
           )}
           {isPhoneValid && paymentPhone.trim() && (

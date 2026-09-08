@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 import { clearToken } from '@/lib/auth';
 
 // Lazy-load the popup + Google one-tap card — they're only needed on the rare
@@ -58,10 +58,14 @@ export function AuthGate({ children }: { children: ReactNode }) {
         // `readToken()` truthy — so flows like the post-a-product guest
         // auto-login skip registration and fail with 401 "log in" errors
         // even though the user never actually logged in.
-        .catch(() => {
+        .catch((error) => {
           if (!alive) return;
-          setUser(null);
-          clearToken({ silent: true });
+          // Only an authoritative 401 proves the token is stale. Preserve the
+          // current session during transient network/5xx failures.
+          if (error instanceof ApiError && error.status === 401) {
+            setUser(null);
+            clearToken({ silent: true });
+          }
         });
     };
     resolve();
