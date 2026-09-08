@@ -129,6 +129,17 @@ export function Header({
             </>
           ) : (
             <>
+              <Link
+                href={'/login' as Route}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-[14px] font-semibold transition active:translate-y-[1px] hover:brightness-95 sm:px-5',
+                  onDark
+                    ? 'border-white/40 text-white hover:bg-white/10'
+                    : 'border-ink/20 text-[#0F1524] hover:border-ink/40',
+                )}
+              >
+                Login
+              </Link>
               <Link href={'/shop/apply' as Route} className="hidden sm:inline-flex">
                 <button
                   type="button"
