@@ -55,7 +55,7 @@ export default function PaymentResultPage() {
       case 'paid_listing':
         return (status === 'success' ? '/shop/ads/pending' : '/shop/ads/new') as Route;
       case 'ad_upgrade':
-        return (status === 'success' ? '/shop/ads/pending' : '/shop/ads') as Route;
+        return (status === 'success' ? '/shop/ads/pending' : '/shop/ads/drafts') as Route;
       case 'plan':
         return (status === 'success' ? '/shop' : '/membership') as Route;
       case 'membership':
@@ -120,6 +120,9 @@ export default function PaymentResultPage() {
       return 'Your payment is still being processed. This typically takes 1–2 minutes. Please do not close this page.';
     }
     if (state === 'failed') {
+      if (purpose === 'ad_upgrade') {
+        return 'Payment did not go through, so your listing was not submitted for review. It is saved in Dashboard → Drafts — try again when ready.';
+      }
       return 'Your payment was not processed. Please try again.';
     }
     if (state === 'error') {

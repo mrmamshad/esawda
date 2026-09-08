@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { generateIdempotencyKey } from '@/lib/idempotency';
+import { isSafePaymentRedirect } from '@/lib/paymentRedirect';
 import { RichTextEditor } from '@/components/shop/v2/RichTextEditor';
 import { PasswordInput } from '@/components/forms/PasswordInput';
 import { GeocodeAddress } from '@/components/interactive/GeocodeAddress';
@@ -322,9 +323,13 @@ function validateImages(files: File[]): string | null {
       if (token) {
         try {
           await api('/auth/me', { token, cache: 'no-store' });
-        } catch {
-          clearToken();
-          token = null;
+        } catch (error) {
+          if (error instanceof ApiError && error.status === 401) {
+            clearToken();
+            token = null;
+          } else {
+            throw error;
+          }
         }
       }
       if (!token) {
@@ -378,14 +383,7 @@ function validateImages(files: File[]): string | null {
           },
         );
         const url = payment.gateway_url;
-        const allowed = (u: string) => {
-          if (u.startsWith('/')) return true;
-          try {
-            const h = new URL(u).hostname;
-            return /(^|\.)(dgepay\.net|sslcommerz\.com|esawda\.com|eshauda\.com)$/i.test(h) && new URL(u).protocol === 'https:';
-          } catch { return false; }
-        };
-        if (!allowed(url)) {
+        if (!isSafePaymentRedirect(url)) {
           throw new Error('Unsafe payment redirect blocked.');
         }
         clearDraft();
@@ -416,19 +414,13 @@ function validateImages(files: File[]): string | null {
                 ...upgrades,
                 policies_accepted: true,
                 payment_phone: normalizeBdMobile(effectivePaymentPhone),
+                hold_for_payment: true,
               },
               idempotencyKey,
             },
           );
           const url = pay.gateway_url;
-          const allowed = (u: string) => {
-            if (u.startsWith('/')) return true;
-            try {
-              const h = new URL(u).hostname;
-              return /(^|\.)(dgepay\.net|sslcommerz\.com|esawda\.com|eshauda\.com)$/i.test(h) && new URL(u).protocol === 'https:';
-            } catch { return false; }
-          };
-          if (!allowed(url)) {
+          if (!isSafePaymentRedirect(url)) {
             throw new Error('Unsafe payment redirect blocked.');
           }
           clearDraft();
