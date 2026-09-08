@@ -71,7 +71,7 @@ export default async function HomePage() {
 async function loadLegacy(): Promise<HomeData> {
   const [lSettings, lCats, lSections, lPlans, lTestimonials, lBlogs] = await Promise.all([
     api<{ settings: Record<string, string> }>('/settings', { revalidate: 300, tags: ['settings'] }),
-    safe(api<Category[]>('/categories?with_counts=true', { revalidate: 300 }),                                  { data: [] as Category[] }),
+    safe(      api<Category[]>('/categories?with_counts=true', { revalidate: 300, tags: ['categories'] }),                                  { data: [] as Category[] }),
     safe(Promise.all([
       api<Ad[]>('/ads?per_page=6&filter[featured]=1&sort=-created_at&filter[condition]=used', { revalidate: 120, tags: ['ads'] }),
       api<Ad[]>('/ads?per_page=6&filter[featured]=1&sort=-created_at&filter[condition]=new', { revalidate: 120, tags: ['ads'] }),

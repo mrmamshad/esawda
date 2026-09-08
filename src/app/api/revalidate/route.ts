@@ -27,9 +27,11 @@ export async function POST(request: NextRequest) {
   }
 
   // Regenerate the homepage route and purge every data-fetch tagged
-  // "ads" (featured / urgent / last-24h / highlights / pre-owned).
+  // "ads" (featured / urgent / last-24h / highlights / pre-owned) or
+  // "categories" (admin-added categories must show up right away).
   revalidatePath('/', 'layout');
   revalidateTag('ads');
+  revalidateTag('categories');
 
   return NextResponse.json({ revalidated: true });
 }
