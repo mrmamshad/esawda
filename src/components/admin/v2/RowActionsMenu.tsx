@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { MoreHorizontal } from 'lucide-react';
 import { useClickOutside } from './useClickOutside';
@@ -25,22 +25,48 @@ export function RowActionsMenu({ actions }: { actions: RowAction[] }) {
   const btnRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const ref = useClickOutside<HTMLDivElement>(open, () => setOpen(false), [menuRef]);
-  if (!actions.length) return null;
+
+  const placeMenu = useCallback(() => {
+    if (!btnRef.current) return;
+    const rect = btnRef.current.getBoundingClientRect();
+    const menuWidth = 160;
+    const estimatedHeight = actions.length * 37 + 8;
+    const canOpenBelow = window.innerHeight - rect.bottom >= estimatedHeight + 6;
+    const top = canOpenBelow
+      ? rect.bottom + 6
+      : Math.max(4, rect.top - estimatedHeight - 6);
+    const left = Math.min(
+      Math.max(4, rect.right - menuWidth),
+      Math.max(4, window.innerWidth - menuWidth - 4),
+    );
+    setPos({ top, left });
+  }, [actions.length]);
 
   const toggle = () => {
-    if (!open && btnRef.current) {
-      const r = btnRef.current.getBoundingClientRect();
-      // Width matches the w-40 below; keep the menu within the viewport.
-      setPos({ top: r.bottom + 6, left: Math.max(4, r.right - 160) });
-    }
-    setOpen((v) => !v);
+    if (!open) placeMenu();
+    setOpen((value) => !value);
   };
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    placeMenu();
+    window.addEventListener('resize', placeMenu);
+    window.addEventListener('scroll', placeMenu, true);
+    return () => {
+      window.removeEventListener('resize', placeMenu);
+      window.removeEventListener('scroll', placeMenu, true);
+    };
+  }, [open, placeMenu]);
+
+  if (!actions.length) return null;
 
   return (
     <div className="inline-block" ref={ref}>
@@ -68,7 +94,7 @@ export function RowActionsMenu({ actions }: { actions: RowAction[] }) {
             borderColor: '#E4E4E7',
             boxShadow: '0 12px 32px -8px rgba(24, 24, 27, 0.15)',
           }}
-          className="fixed z-[100] w-40 overflow-hidden rounded-lg border p-1"
+          className="fixed z-[300] max-h-[calc(100dvh-8px)] w-40 overflow-y-auto rounded-lg border p-1"
         >
           {actions.map((a) => (
             <button

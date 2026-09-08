@@ -30,14 +30,26 @@ export function CategoryCard({
     <Link href={href} className={cn('group block', className)}>
       <div className="relative mb-4 aspect-square overflow-hidden rounded-2xl bg-brand-50">
         {category.picture_url ? (
-          <Image
-            src={category.picture_url}
-            alt={category.name}
-            fill
-            sizes="(min-width:1024px) 16vw, (min-width:640px) 33vw, 50vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
-            unoptimized
-          />
+          <>
+            <Image
+              src={category.picture_url}
+              alt=""
+              aria-hidden="true"
+              fill
+              sizes="(min-width:1024px) 16vw, (min-width:640px) 33vw, 50vw"
+              className="scale-110 object-cover opacity-30 blur-lg"
+              unoptimized
+            />
+            <span className="absolute inset-0 bg-white/25" aria-hidden="true" />
+            <Image
+              src={category.picture_url}
+              alt={category.name}
+              fill
+              sizes="(min-width:1024px) 16vw, (min-width:640px) 33vw, 50vw"
+              className="object-contain transition-transform duration-500 group-hover:scale-[1.03]"
+              unoptimized
+            />
+          </>
         ) : (
           <div className="flex h-full items-center justify-center text-primary text-4xl font-black">
             {category.name.charAt(0).toUpperCase()}
