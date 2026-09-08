@@ -63,6 +63,8 @@ type FormState = {
   guestPasswordConfirm: string;
 };
 
+const MAX_PRODUCT_IMAGES = 4;
+
 const INITIAL: FormState = {
   title: '', description: '', category: '', sub_category: '', child_category: '',
   price: '', negotiable: false, phone: '', whatsapp: '', hide_phone: false, duration_days: '30',
@@ -146,9 +148,9 @@ export default function AdForm({
     const paidListingPrice = price('paid_listing_price', 500);
   const sym = settings.currency_symbol || '৳';
 
-/** Mirrors StoreAdRequest images.* — JPG/PNG/WebP ≤5MB. Returns a human message or null. */
+/** Mirrors StoreAdRequest images.* — up to 4 optional JPG/PNG/WebP files, each ≤5MB. */
 function validateImages(files: File[]): string | null {
-  if (files.length > 8) return 'Maximum 8 images allowed.';
+  if (files.length > MAX_PRODUCT_IMAGES) return 'A product can have a maximum of 4 images.';
   const okTypes = ['image/jpeg', 'image/png', 'image/webp'];
   for (const f of files) {
     const ext = f.name.split('.').pop()?.toLowerCase();
@@ -170,6 +172,8 @@ function validateImages(files: File[]): string | null {
 
   const [featuredImage, setFeaturedImage] = useState<File | null>(null);
   const [galleryImages, setGalleryImages] = useState<File[]>([]);
+  const selectedImageCount = (featuredImage ? 1 : 0) + galleryImages.length;
+  const remainingImageSlots = MAX_PRODUCT_IMAGES - selectedImageCount;
 
   const featuredInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef  = useRef<HTMLInputElement>(null);
@@ -309,7 +313,9 @@ function validateImages(files: File[]): string | null {
     }
 
     if (featuredImage) fd.append('images[]', featuredImage);
-    galleryImages.slice(0, 7).forEach((f) => fd.append('images[]', f));
+    galleryImages
+      .slice(0, MAX_PRODUCT_IMAGES - (featuredImage ? 1 : 0))
+      .forEach((file) => fd.append('images[]', file));
 
     try {
       // Signed-out visitor on the public page: auto-register with
@@ -760,22 +766,46 @@ function validateImages(files: File[]): string | null {
             </Card>
 
             {/* Images ──────────────────────────────────────────────── */}
-            <Card title="Images">
+            <Card title="Images" iconRight={`${selectedImageCount} / ${MAX_PRODUCT_IMAGES}`}>
+              <p className="text-sm text-ink-muted">
+                Upload up to 4 product images. All images are optional, so you may post with none, one, two, three, or four.
+              </p>
               {errors.images?.[0] && <p className="text-xs font-medium text-danger">{errors.images[0]}</p>}
               <Uploader
-                label="Click to browse & Upload Featured Image"
-                hint="JPG, PNG or WebP up to 5MB — recommended size 810×450. iPhone HEIC photos are not accepted."
+                label="Upload Main Image"
+                hint="Recommended: 810×450 JPG, PNG, or WebP up to 5MB. You may leave this blank if you upload gallery images."
                 preview={featuredPreview}
-                onFilesPicked={(files) => setFeaturedImage(files[0] ?? null)}
+                disabled={!featuredImage && galleryImages.length >= MAX_PRODUCT_IMAGES}
+                onFilesPicked={(files) => {
+                  const next = files[0] ?? null;
+                  const nextFiles = next ? [next, ...galleryImages] : galleryImages;
+                  const imageError = validateImages(nextFiles);
+                  if (imageError) { setError(imageError); return; }
+                  setFeaturedImage(next);
+                  setError(null);
+                }}
                 inputRef={featuredInputRef}
                 onClearFeatured={() => setFeaturedImage(null)}
               />
               <Uploader
-                label="Click to Upload Gallery Images"
-                hint="JPG, PNG or WebP up to 5MB — recommended size 810×450. iPhone HEIC photos are not accepted."
+                label="Upload Additional Images"
+                hint={`${remainingImageSlots} slot${remainingImageSlots === 1 ? '' : 's'} remaining. Extra images are optional.`}
                 multiple
+                disabled={remainingImageSlots === 0}
                 previews={galleryPreviews}
-                onFilesPicked={(files) => setGalleryImages([...galleryImages, ...files].slice(0, 7))}
+                onFilesPicked={(files) => {
+                  if (remainingImageSlots === 0) {
+                    setError('A product can have a maximum of 4 images.');
+                    return;
+                  }
+                  const additions = files.slice(0, remainingImageSlots);
+                  const nextGallery = [...galleryImages, ...additions];
+                  const allImages = featuredImage ? [featuredImage, ...nextGallery] : nextGallery;
+                  const imageError = validateImages(allImages);
+                  if (imageError) { setError(imageError); return; }
+                  setGalleryImages(nextGallery);
+                  setError(files.length > remainingImageSlots ? 'Only the first available image slots were added (maximum 4).' : null);
+                }}
                 inputRef={galleryInputRef}
                 onRemove={(i) => setGalleryImages(galleryImages.filter((_, idx) => idx !== i))}
               />
@@ -1012,19 +1042,22 @@ function Tip({ children }: { children: React.ReactNode }) {
  * changing the surrounding markup.
  */
 function Uploader({
-  label, hint, multiple, preview, previews, onFilesPicked, inputRef, onRemove, onClearFeatured,
+  label, hint, multiple, disabled, preview, previews, onFilesPicked, inputRef, onRemove, onClearFeatured,
 }: {
   label: string;
-  hint:  string;
+  hint: string;
   multiple?: boolean;
-  preview?:  string | null;
+  disabled?: boolean;
+  preview?: string | null;
   previews?: string[];
   onFilesPicked: (files: File[]) => void;
   inputRef: React.RefObject<HTMLInputElement | null>;
   onRemove?: (index: number) => void;
   onClearFeatured?: () => void;
 }) {
-  const pick = () => inputRef.current?.click();
+  const pick = () => {
+    if (!disabled) inputRef.current?.click();
+  };
   const handle = (e: ChangeEvent<HTMLInputElement>) => {
     onFilesPicked(Array.from(e.target.files ?? []));
     // Reset so re-uploading the same file re-triggers onChange
@@ -1034,16 +1067,23 @@ function Uploader({
   return (
     <div>
       <button
-        type="button" onClick={pick}
-        className="grid w-full place-items-center gap-2 rounded-lg border-2 border-dashed border-brand-200 bg-brand-50/40 px-4 py-10 text-center transition hover:bg-brand-50"
+        type="button"
+        onClick={pick}
+        disabled={disabled}
+        className="grid w-full place-items-center gap-2 rounded-lg border-2 border-dashed border-brand-200 bg-brand-50/40 px-4 py-10 text-center transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <span className="text-2xl text-brand-700">🖼️</span>
         <span className="font-medium text-brand-700">{label}</span>
         <span className="text-xs text-ink-muted">{hint}</span>
       </button>
       <input
-        ref={inputRef} type="file" accept="image/*"
-        multiple={multiple} onChange={handle} className="hidden"
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        multiple={multiple}
+        disabled={disabled}
+        onChange={handle}
+        className="hidden"
       />
 
       {preview && (
