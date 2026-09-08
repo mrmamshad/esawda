@@ -772,7 +772,7 @@ function validateImages(files: File[]): string | null {
               </p>
               {errors.images?.[0] && <p className="text-xs font-medium text-danger">{errors.images[0]}</p>}
               <Uploader
-                label="Upload Main Image"
+                label={featuredImage ? 'Replace Main Image' : 'Upload Main Image'}
                 hint="Recommended: 810×450 JPG, PNG, or WebP up to 5MB. You may leave this blank if you upload gallery images."
                 preview={featuredPreview}
                 disabled={!featuredImage && galleryImages.length >= MAX_PRODUCT_IMAGES}
@@ -788,8 +788,14 @@ function validateImages(files: File[]): string | null {
                 onClearFeatured={() => setFeaturedImage(null)}
               />
               <Uploader
-                label="Upload Additional Images"
-                hint={`${remainingImageSlots} slot${remainingImageSlots === 1 ? '' : 's'} remaining. Extra images are optional.`}
+                label={remainingImageSlots === 0
+                  ? 'All 4 Images Selected'
+                  : selectedImageCount > 0
+                    ? `+ Add ${remainingImageSlots} More Image${remainingImageSlots === 1 ? '' : 's'}`
+                    : 'Upload Additional Images'}
+                hint={remainingImageSlots === 0
+                  ? 'Remove an image to add a different one.'
+                  : `${remainingImageSlots} slot${remainingImageSlots === 1 ? '' : 's'} remaining — click here to add more.`}
                 multiple
                 disabled={remainingImageSlots === 0}
                 previews={galleryPreviews}
@@ -1066,28 +1072,8 @@ function Uploader({
 
   return (
     <div>
-      <button
-        type="button"
-        onClick={pick}
-        disabled={disabled}
-        className="grid w-full place-items-center gap-2 rounded-lg border-2 border-dashed border-brand-200 bg-brand-50/40 px-4 py-10 text-center transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        <span className="text-2xl text-brand-700">🖼️</span>
-        <span className="font-medium text-brand-700">{label}</span>
-        <span className="text-xs text-ink-muted">{hint}</span>
-      </button>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        multiple={multiple}
-        disabled={disabled}
-        onChange={handle}
-        className="hidden"
-      />
-
       {preview && (
-        <div className="mt-3 relative h-32 w-48 overflow-hidden rounded-lg border border-line">
+        <div className="relative mb-3 h-32 w-48 overflow-hidden rounded-lg border border-line">
           <Image src={preview} alt="preview" fill className="object-cover" unoptimized />
           {onClearFeatured && (
             <button
@@ -1101,7 +1087,7 @@ function Uploader({
       )}
 
       {previews && previews.length > 0 && (
-        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+        <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
           {previews.map((src, i) => (
             <div key={src} className="relative h-24 overflow-hidden rounded-lg border border-line">
               <Image src={src} alt={`gallery ${i + 1}`} fill className="object-cover" unoptimized />
@@ -1109,13 +1095,33 @@ function Uploader({
                 <button
                   type="button" onClick={() => onRemove(i)}
                   className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/70 text-xs text-white transition hover:bg-black"
-                  aria-label="remove"
+                  aria-label={`Remove image ${i + 1}`}
                 >×</button>
               )}
             </div>
           ))}
         </div>
       )}
+
+      <button
+        type="button"
+        onClick={pick}
+        disabled={disabled}
+        className="grid w-full place-items-center gap-2 rounded-lg border-2 border-dashed border-brand-200 bg-brand-50/40 px-4 py-8 text-center transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <span className="text-2xl text-brand-700">🖼️</span>
+        <span className="font-semibold text-brand-700">{label}</span>
+        <span className="text-xs text-ink-muted">{hint}</span>
+      </button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        multiple={multiple}
+        disabled={disabled}
+        onChange={handle}
+        className="hidden"
+      />
     </div>
   );
 }

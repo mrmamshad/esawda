@@ -16,8 +16,11 @@ test('main and optional image uploads share the four-slot budget', () => {
   assert.match(source, /Upload Main Image/);
   assert.match(source, /Upload Additional Images/);
   assert.match(source, /remainingImageSlots === 0/);
+  assert.match(source, /`\+ Add \$\{remainingImageSlots\} More Image/);
+  assert.match(source, /All 4 Images Selected/);
   assert.match(source, /files\.slice\(0, remainingImageSlots\)/);
   assert.match(source, /MAX_PRODUCT_IMAGES - \(featuredImage \? 1 : 0\)/);
+  assert.ok(source.indexOf('className="mb-3 grid') < source.indexOf('disabled={disabled}'));
 });
 
 test('image picker exposes only backend-supported formats', () => {
