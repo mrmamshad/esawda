@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import { api } from '@/lib/api';
+import { clearToken } from '@/lib/auth';
 
 // Lazy-load the popup + Google one-tap card — they're only needed on the rare
 // action that actually triggers login, not on every route paint. Keeping them
@@ -52,9 +53,16 @@ export function AuthGate({ children }: { children: ReactNode }) {
     const resolve = () => {
       api<{ user: User | null }>('/auth/me')
         .then((res) => { if (alive && res.data?.user) setUser(res.data.user); })
-        // 401 → guest: also dust the stale user so a logout on another tab
-        // clears the header chip.
-        .catch(() => { if (alive) setUser(null); });
+        // 401 → guest. CRITICAL: also drop the token itself. The FE cookie
+        // outlives the backend token (7d vs 24h), and a stale token makes
+        // `readToken()` truthy — so flows like the post-a-product guest
+        // auto-login skip registration and fail with 401 "log in" errors
+        // even though the user never actually logged in.
+        .catch(() => {
+          if (!alive) return;
+          setUser(null);
+          clearToken({ silent: true });
+        });
     };
     resolve();
     window.addEventListener('eshauda:authchange', resolve);

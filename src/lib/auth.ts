@@ -43,12 +43,12 @@ export function saveToken(token: string) {
   notifyAuthChanged();
 }
 
-export function clearToken() {
+export function clearToken(opts: { silent?: boolean } = {}) {
   memoryToken = null;
   if (typeof document === 'undefined') return;
   // Best-effort expire of the cookie (cleared server-side on logout too).
   document.cookie = `${COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
-  notifyAuthChanged();
+  if (!opts.silent) notifyAuthChanged();
 }
 
 export function readToken(): string | null {

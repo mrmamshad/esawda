@@ -12,7 +12,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { api, ApiError } from '@/lib/api';
 import { isValidBdMobile, normalizeBdMobile } from '@/lib/phone';
-import { readToken, saveToken } from '@/lib/auth';
+import { clearToken, readToken, saveToken } from '@/lib/auth';
 import type { User } from '@/types/api';
 import { Button } from '@/components/ui/Button';
 import { ArrowRight, Crown, LockKeyhole, Sparkles } from 'lucide-react';
@@ -315,6 +315,18 @@ function validateImages(files: File[]): string | null {
       // name/phone/password, then continue posting. Signed-in users skip
       // this entirely (token already present).
       let token = readToken();
+      // A stored token can be stale (backend tokens expire after 24h while
+      // our cookie lives 7 days). Verify it before trusting it — an invalid
+      // token here would make the whole submit 401 with "log in" errors.
+      // Invalid → drop it and fall through to the guest auto-register flow.
+      if (token) {
+        try {
+          await api('/auth/me', { token, cache: 'no-store' });
+        } catch {
+          clearToken();
+          token = null;
+        }
+      }
       if (!token) {
         if (mode === 'public' && form.guestName && form.guestMobile && form.guestPassword) {
           try {
