@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { ColumnDef } from '@tanstack/react-table';
-import { CheckCircle2, RotateCcw } from 'lucide-react';
+import { CheckCircle2, Copy, RotateCcw } from 'lucide-react';
 import { AdminTable } from '@/components/admin/v2/AdminTable';
 import { StatusBadge } from '@/components/admin/v2/StatusBadge';
 import { RowActionsMenu, type RowAction } from '@/components/admin/v2/RowActionsMenu';
@@ -42,6 +42,23 @@ function friendlyMethod(raw: string | null, gateway: string): string {
 }
 
 type MetaBag = Record<string, unknown>;
+
+/** Copy with a legacy fallback — clipboard API needs a secure context. */
+async function copyText(v: string) {
+  try {
+    await navigator.clipboard.writeText(v);
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = v;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+  toast.success('Transaction ID copied');
+}
 
 /** Decode the transaction.meta JSON blob (already a raw JSON string from the API). */
 function parseMeta(raw?: string | null): MetaBag {
@@ -160,13 +177,28 @@ export function TxTableClient({ initialRows }: { initialRows: AdminTxRow[] }) {
       accessorFn: (r) => r.gateway_transaction_id || r.gateway_transaction_number || '—',
       cell: (info) => {
         const v = info.getValue() as string;
+        if (v === '—') {
+          return <span style={{ color: 'var(--adm-fg-faint)' }}>—</span>;
+        }
         return (
-          <span title={v} className="block max-w-[150px] truncate font-mono text-[11px]" style={{ color: 'var(--adm-fg-muted)' }}>
-            {v}
+          <span className="flex max-w-[170px] items-center gap-1">
+            <span title={v} className="min-w-0 flex-1 truncate font-mono text-[11px]" style={{ color: 'var(--adm-fg-muted)' }}>
+              {v}
+            </span>
+            <button
+              type="button"
+              title="Copy transaction ID"
+              aria-label={`Copy gateway transaction ID ${v}`}
+              onClick={() => copyText(v)}
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-md hover:bg-black/5"
+              style={{ color: 'var(--adm-fg-muted)' }}
+            >
+              <Copy size={13} />
+            </button>
           </span>
         );
       },
-      size: 160,
+      size: 180,
     },
     {
       id: 'amount', accessorKey: 'amount', header: 'Amount',

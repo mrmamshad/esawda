@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import type { Route } from 'next';
 import {
   ShieldCheck,
@@ -20,6 +19,7 @@ import {
   Tag,
 } from 'lucide-react';
 import { HeroSearchBar } from './HeroSearchBar';
+import { QuickLinksRow, type QuickLink } from './QuickLinksRow';
 
 /**
  * eSawda Hero — reference-matched marketplace layout (2026-08-01).
@@ -71,12 +71,6 @@ function iconForCategory(name: string, slug: string | null): React.ReactNode {
   return <Tag size={18} />;
 }
 
-type QuickLink = {
-  label: string;
-  href: Route;
-  icon: React.ReactNode;
-};
-
 const MAX_QUICK_LINKS = 8;
 
 export function HomeHero({ siteName = 'eSawda', categories = [] }: HomeHeroProps = {}) {
@@ -121,32 +115,7 @@ export function HomeHero({ siteName = 'eSawda', categories = [] }: HomeHeroProps
           {/* Search bar with district picker */}
           <HeroSearchBar />
 
-          {/* Category quick-links — one scrollable row: icon + first word
-              only, so long names never wrap or overlap. Swipe/scroll
-              sideways to reach the rest. Scrollbar hidden on all engines. */}
-          <div
-            className="mt-8 flex w-full max-w-[600px] gap-1 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {quickLinks.map((c) => (
-              <Link
-                key={c.label}
-                href={c.href}
-                title={c.label}
-                className="group flex w-20 shrink-0 flex-col items-center gap-2 text-center"
-              >
-                <span
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#0F1524] shadow-[0_10px_20px_-12px_rgba(15,20,40,0.25)] transition group-hover:-translate-y-0.5"
-                  style={{ color: BRAND_RED }}
-                >
-                  {c.icon}
-                </span>
-                <span className="max-w-full truncate text-[10px] font-bold uppercase tracking-[0.08em] text-[#4C5B78]">
-                  {c.label.split(' ')[0]}
-                </span>
-              </Link>
-            ))}
-          </div>
+          <QuickLinksRow links={quickLinks} />
         </div>
 
         {/* ── RIGHT VISUAL COLUMN (desktop only — the phone mockup eats
