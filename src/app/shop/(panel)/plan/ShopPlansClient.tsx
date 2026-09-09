@@ -80,6 +80,29 @@ export function ShopPlansClient({
     }
   };
 
+  /** Zero-price plans (Early Bird) activate instantly — no payment step. */
+  const activateFree = async (planId: number) => {
+    setProcessingPlanId(planId);
+    setCheckoutError(null);
+    try {
+      const { data } = await api<{ free_activation?: boolean }>(`/checkout/plan/${planId}`, {
+        method: 'POST',
+        token: readToken(),
+        body: { policies_accepted: true },
+      });
+      if (data.free_activation) {
+        window.location.assign('/shop?activated=early-bird');
+        return;
+      }
+      // Server disagreed — treat as normal (shouldn't happen).
+      setCheckoutError('This plan must be purchased through secure checkout.');
+      setProcessingPlanId(null);
+    } catch (error) {
+      setCheckoutError(error instanceof ApiError ? error.message : 'Could not activate this plan. Please try again.');
+      setProcessingPlanId(null);
+    }
+  };
+
   return (
     <section aria-labelledby="available-plans">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -127,6 +150,7 @@ export function ShopPlansClient({
           const effectiveCadence: Cadence = cadence === 'annual' && plan.annual_price > 0 ? 'annual' : 'monthly';
           const price = effectiveCadence === 'annual' ? plan.annual_price : plan.monthly_price;
           const saving = savingFor(plan);
+          const isFree = plan.is_free === true || price <= 0;
 
           return (
             <article
@@ -156,6 +180,9 @@ export function ShopPlansClient({
                 <span className="text-4xl font-black tracking-tight text-[color:var(--shp-fg)]">{price > 0 ? formatMoney(price) : 'Free'}</span>
                 {price > 0 && <span className="pb-1 text-xs text-[color:var(--shp-fg-muted)]">/{effectiveCadence === 'annual' ? 'year' : 'month'}</span>}
               </div>
+              {isFree && (
+                <p className="mt-2 text-xs font-semibold text-emerald-700">Limited launch offer — activates instantly, no payment needed.</p>
+              )}
               {effectiveCadence === 'annual' && saving > 0 && (
                 <p className="mt-2 text-xs font-semibold text-emerald-700">You save {saving}% compared with monthly billing</p>
               )}
@@ -175,6 +202,17 @@ export function ShopPlansClient({
                   <div className="flex min-h-11 items-center justify-center gap-2 rounded-xl border text-sm font-bold text-emerald-700" style={{ borderColor: 'var(--shp-border)' }}>
                     <ShieldCheck size={16} /> Active membership
                   </div>
+                ) : isFree ? (
+                  <button
+                    type="button"
+                    onClick={() => void activateFree(plan.id)}
+                    disabled={processingPlanId !== null}
+                    className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold transition disabled:cursor-wait disabled:opacity-70"
+                    style={{ background: 'var(--shp-accent)', color: 'var(--shp-accent-fg, #fff)' }}
+                  >
+                    <Zap size={16} />
+                    {processingPlanId === plan.id ? 'Activating…' : 'Activate Early Bird'}
+                  </button>
                 ) : (
                   <button
                     type="button"

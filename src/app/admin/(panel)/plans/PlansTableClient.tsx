@@ -18,13 +18,14 @@ export type AdminPlanRow = {
   annual_price: number | null;
   badge: string | null;
   recommended: boolean | number;
+  is_free: boolean | number | null;
   status: string | null;
 };
 
 export function PlansTableClient({ initialRows }: { initialRows: AdminPlanRow[] }) {
   const router = useRouter();
   const [rows, setRows] = useState<AdminPlanRow[]>(initialRows);
-  const [form, setForm] = useState({ name: '', monthly_price: '', annual_price: '', badge: '' });
+  const [form, setForm] = useState({ name: '', monthly_price: '', annual_price: '', badge: '', is_free: false, ads_limit: '20', featured_ads: '5', duration_days: '30' });
   const [busyId, setBusyId] = useState<number | null>(null);
   const [creating, setCreating] = useState(false);
   const [pending, start] = useTransition();
@@ -47,10 +48,16 @@ export function PlansTableClient({ initialRows }: { initialRows: AdminPlanRow[] 
           monthly_price: parseFloat(form.monthly_price || '0'),
           annual_price:  parseFloat(form.annual_price  || '0'),
           badge: form.badge || null,
+          is_free: form.is_free,
+          ...(form.is_free ? {
+            ads_limit: parseInt(form.ads_limit || '20', 10),
+            featured_ads: parseInt(form.featured_ads || '0', 10),
+            duration_days: parseInt(form.duration_days || '30', 10),
+          } : {}),
         },
       });
       toast.success('Plan created');
-      setForm({ name: '', monthly_price: '', annual_price: '', badge: '' });
+      setForm({ name: '', monthly_price: '', annual_price: '', badge: '', is_free: false, ads_limit: '20', featured_ads: '5', duration_days: '30' });
       await refresh();
     } catch (e2) {
       toast.error(e2 instanceof Error ? e2.message : 'Create failed');
@@ -82,6 +89,14 @@ export function PlansTableClient({ initialRows }: { initialRows: AdminPlanRow[] 
         return (
           <div className="flex items-center gap-2">
             <span className="font-medium" style={{ color: 'var(--adm-fg)' }}>{r.name}</span>
+            {(r.is_free === true || Number(r.is_free) === 1) && (
+              <span
+                className="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest"
+                style={{ background: '#dcfce7', color: '#15803d' }}
+              >
+                Free
+              </span>
+            )}
             {r.badge && (
               <span
                 className="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest"
@@ -138,6 +153,26 @@ export function PlansTableClient({ initialRows }: { initialRows: AdminPlanRow[] 
           <label className="mb-1 block text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--adm-fg-faint)' }}>Annual</label>
           <input type="number" min={0} step="0.01" value={form.annual_price} onChange={(e) => setForm({ ...form, annual_price: e.target.value })} className={inp} style={{ background: 'var(--adm-bg)', borderColor: 'var(--adm-border)', color: 'var(--adm-fg)' }} />
         </div>
+        <label className="flex h-9 cursor-pointer items-center gap-2 text-[12.5px] font-semibold" style={{ color: 'var(--adm-fg)' }}>
+          <input type="checkbox" checked={form.is_free} onChange={(e) => setForm({ ...form, is_free: e.target.checked })} className="h-4 w-4 accent-green-600" />
+          Free plan (no payment)
+        </label>
+        {form.is_free && (
+          <>
+            <div>
+              <label className="mb-1 block text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--adm-fg-faint)' }}>Ads limit</label>
+              <input type="number" min={0} value={form.ads_limit} onChange={(e) => setForm({ ...form, ads_limit: e.target.value })} className={inp} style={{ background: 'var(--adm-bg)', borderColor: 'var(--adm-border)', color: 'var(--adm-fg)' }} />
+            </div>
+            <div>
+              <label className="mb-1 block text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--adm-fg-faint)' }}>Featured ads</label>
+              <input type="number" min={0} value={form.featured_ads} onChange={(e) => setForm({ ...form, featured_ads: e.target.value })} className={inp} style={{ background: 'var(--adm-bg)', borderColor: 'var(--adm-border)', color: 'var(--adm-fg)' }} />
+            </div>
+            <div>
+              <label className="mb-1 block text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--adm-fg-faint)' }}>Duration (days)</label>
+              <input type="number" min={1} value={form.duration_days} onChange={(e) => setForm({ ...form, duration_days: e.target.value })} className={inp} style={{ background: 'var(--adm-bg)', borderColor: 'var(--adm-border)', color: 'var(--adm-fg)' }} />
+            </div>
+          </>
+        )}
         <button
           type="submit" disabled={creating}
           className="inline-flex h-9 items-center justify-center rounded-md px-3 text-[12.5px] font-semibold text-white transition disabled:opacity-50 active:translate-y-[1px]"

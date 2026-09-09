@@ -224,7 +224,7 @@ export type Message = {
 };
 
 export type Testimonial = { id: number; name: string; designation: string | null; content: string; avatar_url: string | null };
-export type Plan = { id: number; name: string; badge: string | null; monthly_price: number; annual_price: number; lifetime_price: number; recommended: boolean; settings: unknown; active: boolean };
+export type Plan = { id: number; name: string; badge: string | null; monthly_price: number; annual_price: number; lifetime_price: number; recommended: boolean; is_free?: boolean; settings: unknown; active: boolean };
 export type Page = { id: number; slug: string; name: string; title: string; content: string; lang: string; active: boolean };
 export type Faq  = { id: number; title: string; content: string; weight: number; parent_id: number | null; lang: string; active: boolean };
 
