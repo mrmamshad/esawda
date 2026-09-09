@@ -5,7 +5,6 @@ import { useAuthGate } from '@/components/interactive/AuthGate';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
 import { Logo } from './Logo';
 import { MobileDrawer } from './MobileDrawer';
 import { SearchAutocomplete } from '@/components/interactive/SearchAutocomplete';
@@ -31,6 +30,29 @@ import type { User } from '@/types/api';
  *   compact   → same as default with tighter padding
  */
 type NavItem = { label: string; href: Route };
+
+/**
+ * Unified header CTA: outline red pill at rest (the "Create a Shop" look),
+ * fills solid red with white text on hover (the "Post a Product" look).
+ * Used for Login / Post a Product / Create a Shop so all three match.
+ */
+function HeaderCta({
+  href, children, compact,
+}: { href: Route; children: React.ReactNode; compact?: boolean }) {
+  return (
+    <Link href={href} className="hidden sm:inline-flex">
+      <button
+        type="button"
+        className={cn(
+          'inline-flex items-center gap-2 rounded-full border text-[14px] font-semibold transition active:translate-y-[1px] border-[#FF003F]/40 text-[#FF003F] hover:bg-[#FF003F] hover:border-[#FF003F] hover:text-white hover:shadow-[0_10px_22px_-10px_rgba(255,0,63,0.55)]',
+          compact ? 'px-4 sm:px-5 py-2' : 'px-6 py-2.5',
+        )}
+      >
+        {children}
+      </button>
+    </Link>
+  );
+}
 
 const NAV: NavItem[] = [
   { label: 'Home',      href: '/' as Route },
@@ -119,53 +141,18 @@ export function Header({
           {user ? (
             <>
               {!(user.is_shop || user.user_type === 'seller') && (
-                <Link href={'/shop/apply' as Route} className="hidden sm:inline-flex">
-                  <Button variant="outline" size="sm">Create a Shop</Button>
-                </Link>
+                <HeaderCta href={'/shop/apply' as Route}>Create a Shop</HeaderCta>
               )}
-              <Link href={(user.is_shop || user.user_type === 'seller' ? '/shop/ads/new' : '/post/product') as Route} className="hidden sm:inline-flex">
-                <Button variant="filled" size="sm" leftIcon={<Plus size={16} />}>Post Product</Button>
-              </Link>
+              <HeaderCta href={(user.is_shop || user.user_type === 'seller' ? '/shop/ads/new' : '/post/product') as Route}>
+                <Plus size={16} />Post Product
+              </HeaderCta>
               <UserMenu user={user} onDark={onDark} />
             </>
           ) : (
             <>
-              <Link href={'/shop/apply' as Route} className="hidden sm:inline-flex">
-                <button
-                  type="button"
-                  className={cn(
-                    'inline-flex items-center gap-2 rounded-full border px-6 py-2.5 text-[14px] font-semibold transition active:translate-y-[1px] hover:brightness-95',
-                    onDark
-                      ? 'border-white/40 text-white hover:bg-white/10'
-                      : 'border-[#FF003F]/40 text-[#FF003F] hover:bg-[#FF003F]/5',
-                  )}
-                >
-                  Create a Shop
-                </button>
-              </Link>
-              <Link href={'/post/product' as Route} className="hidden sm:inline-flex">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-[14px] font-semibold text-white transition active:translate-y-[1px] hover:brightness-95"
-                  style={{
-                    backgroundColor: '#FF003F',
-                    boxShadow: '0 10px 22px -10px rgba(255,0,63,0.55)',
-                  }}
-                >
-                  Post a Product
-                </button>
-              </Link>
-              <Link
-                href={'/login' as Route}
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-[14px] font-semibold transition active:translate-y-[1px] hover:brightness-95 sm:px-5',
-                  onDark
-                    ? 'border-white/40 text-white hover:bg-white/10'
-                    : 'border-ink/20 text-[#0F1524] hover:border-ink/40',
-                )}
-              >
-                Login
-              </Link>
+              <HeaderCta href={'/shop/apply' as Route}>Create a Shop</HeaderCta>
+              <HeaderCta href={'/post/product' as Route}>Post a Product</HeaderCta>
+              <HeaderCta href={'/login' as Route} compact>Login</HeaderCta>
             </>
           )}
 
