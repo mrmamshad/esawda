@@ -67,8 +67,7 @@ export function Header({
   user: userProp,
   showSearch = false,
   className,
-  hideCreateShop = false,
-}: { variant?: 'default' | 'onDark' | 'compact'; user?: User | null; showSearch?: boolean; className?: string; hideCreateShop?: boolean }) {
+}: { variant?: 'default' | 'onDark' | 'compact'; user?: User | null; showSearch?: boolean; className?: string }) {
   const onDark = variant === 'onDark';
   const compact = variant === 'compact';
 
@@ -141,9 +140,6 @@ export function Header({
         <div className="ml-auto flex items-center gap-2 md:gap-3">
           {user ? (
             <>
-              {!(user.is_shop || user.user_type === 'seller') && !hideCreateShop && (
-                <HeaderCta href={'/shop/apply' as Route}>Create a Shop</HeaderCta>
-              )}
               <HeaderCta href={(user.is_shop || user.user_type === 'seller' ? '/shop/ads/new' : '/post/product') as Route}>
                 <Plus size={16} />Post Product
               </HeaderCta>

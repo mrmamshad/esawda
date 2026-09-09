@@ -74,7 +74,7 @@ export default async function BuyerDashboardPage() {
 
   return (
     <>
-      <Header variant="default" user={user} hideCreateShop />
+      <Header variant="default" user={user} />
       <HeaderSpacer />
       <main className="container-page py-10">
         {/* Greeting */}
