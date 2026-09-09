@@ -150,21 +150,20 @@ export function ShopApplyForm({
           });
           saveToken(data.token);
         } catch (err) {
-          // Retry-after-partial-success: the account was created by an
-          // earlier attempt (or the user already owns it) — log straight in
-          // with the same credentials instead of dying on "already taken".
-          const taken = err instanceof ApiError && err.status === 422
-            && !!err.fields && Object.keys(err.fields).some((k) => k === 'email' || k === 'username');
-          if (!taken) throw err;
-          try {
-            const { data } = await api<{ user: User; token: string }>('/auth/login', {
-              method: 'POST',
-              body: { identifier: email.trim(), password },
-            });
-            saveToken(data.token);
-          } catch {
-            throw err; // login failed too — surface the original taken error
+          // Same email / mobile / username already owns an account — stop
+          // here and send the visitor to sign in instead of silently
+          // converting someone else's (or their old) account into a shop.
+          const taken = err instanceof ApiError && (
+            err.status === 409 || (err.status === 422 && !!err.fields
+              && Object.keys(err.fields).some((k) => k === 'email' || k === 'username' || k === 'phone'))
+          );
+          if (taken) {
+            return fail(
+              'An account with this email or mobile number already exists. Please sign in instead, then open your shop.',
+              err instanceof ApiError ? err.fields : undefined,
+            );
           }
+          throw err;
         }
         setAccountCreated(true);
       }
@@ -329,7 +328,7 @@ export function ShopApplyForm({
             <p className="mt-1.5 text-xs text-ink-faint">11 digits, starts with 013–019.</p>
           )}
           <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-800">
-            <TriangleAlert size={13} className="shrink-0" /> Use a unique number — one that isn&apos;t already registered.
+            <TriangleAlert size={13} className="shrink-0" /> Use a unique number, one that isn&apos;t already registered.
           </p>
         </div>
         <div>
