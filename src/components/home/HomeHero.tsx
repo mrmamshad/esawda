@@ -121,14 +121,19 @@ export function HomeHero({ siteName = 'eSawda', categories = [] }: HomeHeroProps
           {/* Search bar with district picker */}
           <HeroSearchBar />
 
-          {/* Category quick-links — always a 2-row × 4-col grid so long
-              labels get a full column each and never overlap. */}
-          <div className="mt-8 grid w-full max-w-[600px] grid-cols-4 gap-x-2 gap-y-6">
+          {/* Category quick-links — one scrollable row: icon + first word
+              only, so long names never wrap or overlap. Swipe/scroll
+              sideways to reach the rest. Scrollbar hidden on all engines. */}
+          <div
+            className="mt-8 flex w-full max-w-[600px] gap-1 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
             {quickLinks.map((c) => (
               <Link
                 key={c.label}
                 href={c.href}
-                className="group flex w-full flex-col items-center gap-2 text-center"
+                title={c.label}
+                className="group flex w-20 shrink-0 flex-col items-center gap-2 text-center"
               >
                 <span
                   className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#0F1524] shadow-[0_10px_20px_-12px_rgba(15,20,40,0.25)] transition group-hover:-translate-y-0.5"
@@ -136,8 +141,8 @@ export function HomeHero({ siteName = 'eSawda', categories = [] }: HomeHeroProps
                 >
                   {c.icon}
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#4C5B78]">
-                  {c.label}
+                <span className="max-w-full truncate text-[10px] font-bold uppercase tracking-[0.08em] text-[#4C5B78]">
+                  {c.label.split(' ')[0]}
                 </span>
               </Link>
             ))}
