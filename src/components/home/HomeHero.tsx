@@ -12,6 +12,12 @@ import {
   Cpu,
   Sofa,
   Bike,
+  Briefcase,
+  Shirt,
+  UtensilsCrossed,
+  Wrench,
+  Clapperboard,
+  Tag,
 } from 'lucide-react';
 import { HeroSearchBar } from './HeroSearchBar';
 
@@ -37,28 +43,48 @@ import { HeroSearchBar } from './HeroSearchBar';
 export type HomeHeroProps = {
   siteName?: string;
   bgImageUrl?: string;
+  categories?: { id: number; name: string; slug: string | null }[];
 };
 
 const BRAND_RED = '#FF003F';
 const CANVAS_CREAM = '#FFFFFF';
 
-type Category = {
+/**
+ * Pick a quick-link icon from the category name/slug. Unknown future
+ * categories get a neutral tag so the row never breaks when an admin
+ * adds something new.
+ */
+function iconForCategory(name: string, slug: string | null): React.ReactNode {
+  const hay = `${name} ${slug ?? ''}`.toLowerCase();
+  if (/\bbike|\bcycle|scooter/.test(hay)) return <Bike size={18} />;
+  if (/car|vehicle|auto|moto/.test(hay)) return <Car size={18} />;
+  if (/mobil|phone|tablet|smart/.test(hay)) return <Smartphone size={18} />;
+  if (/appliance|washing|fridge|refrigerator/.test(hay)) return <WashingMachine size={18} />;
+  if (/electronic|laptop|computer|cpu|gadget/.test(hay)) return <Cpu size={18} />;
+  if (/real|estate|house|home|property|apartment|land|plot/.test(hay)) return <Home size={18} />;
+  if (/furniture|sofa|lifestyle|decor/.test(hay)) return <Sofa size={18} />;
+  if (/job|career|hiring/.test(hay)) return <Briefcase size={18} />;
+  if (/fashion|cloth|shirt|wear|apparel/.test(hay)) return <Shirt size={18} />;
+  if (/food|restaurant|beverage|grocery/.test(hay)) return <UtensilsCrossed size={18} />;
+  if (/service|repair|plumb|electric/.test(hay)) return <Wrench size={18} />;
+  if (/entertain|movie|music|game|sport|film/.test(hay)) return <Clapperboard size={18} />;
+  return <Tag size={18} />;
+}
+
+type QuickLink = {
   label: string;
   href: Route;
   icon: React.ReactNode;
 };
 
-const CATEGORIES: Category[] = [
-  { label: 'Vehicles',    href: '/category/vehicles' as Route,    icon: <Car size={18} /> },
-  { label: 'Smartphones', href: '/category/smartphones' as Route, icon: <Smartphone size={18} /> },
-  { label: 'Appliances',  href: '/category/appliances' as Route,  icon: <WashingMachine size={18} /> },
-  { label: 'Houses',      href: '/category/houses' as Route,      icon: <Home size={18} /> },
-  { label: 'Electronics', href: '/category/electronics' as Route, icon: <Cpu size={18} /> },
-  { label: 'Furniture',   href: '/category/furniture' as Route,   icon: <Sofa size={18} /> },
-  { label: 'Bikes',       href: '/category/bikes' as Route,       icon: <Bike size={18} /> },
-];
+const MAX_QUICK_LINKS = 8;
 
-export function HomeHero({ siteName = 'eSawda' }: HomeHeroProps = {}) {
+export function HomeHero({ siteName = 'eSawda', categories = [] }: HomeHeroProps = {}) {
+  const quickLinks: QuickLink[] = categories.slice(0, MAX_QUICK_LINKS).map((c) => ({
+    label: c.name,
+    href: (c.slug ? `/category/${c.slug}` : `/ads?filter[category]=${c.id}`) as Route,
+    icon: iconForCategory(c.name, c.slug),
+  }));
   return (
     <section
       className="relative w-full overflow-x-clip"
@@ -95,9 +121,9 @@ export function HomeHero({ siteName = 'eSawda' }: HomeHeroProps = {}) {
           {/* Search bar with district picker */}
           <HeroSearchBar />
 
-          {/* Category quick-links — tidy 4-col grid on phones, free row on desktop */}
+          {/* Category quick-links — real catalogue from the API, tidy 4-col grid on phones, free row on desktop */}
           <div className="mt-8 grid w-full max-w-[600px] grid-cols-4 gap-y-4 lg:flex lg:flex-wrap lg:items-start lg:justify-between">
-            {CATEGORIES.map((c) => (
+            {quickLinks.map((c) => (
               <Link
                 key={c.label}
                 href={c.href}

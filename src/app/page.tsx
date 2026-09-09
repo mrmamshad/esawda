@@ -132,7 +132,7 @@ async function loadLegacy(): Promise<HomeData> {
       */}
       {/* Header is always light glass on the cream Eris hero — no scroll swap needed. */}
       <Header variant="default" />
-      <HomeHero siteName={siteName} bgImageUrl={heroBgUrl} />
+      <HomeHero siteName={siteName} bgImageUrl={heroBgUrl} categories={(cats.data ?? []) as Category[]} />
 
       <main className="bg-bg">
         {/* ═══ SECTION HEADER PATTERN ═══
