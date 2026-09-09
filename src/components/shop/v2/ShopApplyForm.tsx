@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, type FormEvent, useRef } from 'react';
-import { Store, UploadCloud, CheckCircle2, Check, ShieldCheck, UserPlus, ImageUp } from 'lucide-react';
+import { Store, UploadCloud, CheckCircle2, Check, ShieldCheck, UserPlus, ImageUp, TriangleAlert } from 'lucide-react';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { useRouter } from 'next/navigation';
@@ -328,6 +328,9 @@ export function ShopApplyForm({
           ) : (
             <p className="mt-1.5 text-xs text-ink-faint">11 digits, starts with 013–019.</p>
           )}
+          <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-800">
+            <TriangleAlert size={13} className="shrink-0" /> Use a unique number — one that isn&apos;t already registered.
+          </p>
         </div>
         <div>
           <label className={label}>Shop name *</label>
