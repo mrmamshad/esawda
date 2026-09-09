@@ -185,6 +185,8 @@ export type User = {
   plan_active?: boolean;
   plan_expires_at?: string | null;
   ads_remaining?: number;
+  post_policy?: 'inherit' | 'free' | 'blocked';
+  can_post_free?: boolean;
   shop_name?: string | null;
   shop_address?: string | null;
   shop_banner_url?: string | null;

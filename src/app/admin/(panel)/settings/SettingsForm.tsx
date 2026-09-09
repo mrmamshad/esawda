@@ -52,12 +52,60 @@ export function SettingsForm({ initial }: { initial: Record<string, string> }) {
   const curated = CURATED_KEYS.map(([k, label]) => ({ k, label, v: state[k] ?? '' }));
   const extras  = Object.entries(state).filter(([k]) => !CURATED_KEYS.some(([ck]) => ck === k));
 
+  const postingToggles = [
+    {
+      k: 'shop_subscription_required',
+      title: 'Shops need a subscription to post',
+      blurb: 'Off = every shop posts free (per-shop overrides still apply). On = shops need an active plan with quota.',
+      on: (state.shop_subscription_required ?? '') !== '0',
+    },
+    {
+      k: 'single_free_listings',
+      title: 'Single users post free',
+      blurb: 'Off = regular users also need a plan with quota, like shops.',
+      on: (state.single_free_listings ?? '') !== '0',
+    },
+  ];
+
   return (
     <form
       onSubmit={submit}
       className="space-y-6 rounded-xl border p-6"
       style={{ background: 'var(--adm-surface)', borderColor: 'var(--adm-border)', boxShadow: 'var(--adm-shadow-sm)' }}
     >
+      <section>
+        <h2 className="mb-4 text-[13px] font-semibold uppercase tracking-widest" style={{ color: 'var(--adm-fg-faint)' }}>
+          Posting rules
+        </h2>
+        <div className="grid gap-3 md:grid-cols-2">
+          {postingToggles.map(({ k, title, blurb, on }) => (
+            <button
+              key={k}
+              type="button"
+              role="switch"
+              aria-checked={on}
+              onClick={() => setState({ ...state, [k]: on ? '0' : '1' })}
+              className="flex items-start justify-between gap-3 rounded-xl border p-4 text-left"
+              style={{ borderColor: 'var(--adm-border)', background: 'var(--adm-bg)' }}
+            >
+              <span>
+                <span className="block text-[13px] font-semibold" style={{ color: 'var(--adm-fg)' }}>{title}</span>
+                <span className="mt-1 block text-xs leading-5" style={{ color: 'var(--adm-fg-muted)' }}>{blurb}</span>
+              </span>
+              <span
+                className="mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition"
+                style={{ background: on ? 'var(--adm-brand)' : '#CBD5E1', justifyContent: on ? 'flex-end' : 'flex-start' }}
+              >
+                <span className="h-5 w-5 rounded-full bg-white shadow" />
+              </span>
+            </button>
+          ))}
+        </div>
+        <p className="mt-2 text-xs" style={{ color: 'var(--adm-fg-faint)' }}>
+          Individual shops and users can still be set to Free posting or Blocked from the Shops / Users pages — those overrides always win.
+        </p>
+      </section>
+
       <section>
         <h2 className="mb-4 text-[13px] font-semibold uppercase tracking-widest" style={{ color: 'var(--adm-fg-faint)' }}>
           Site

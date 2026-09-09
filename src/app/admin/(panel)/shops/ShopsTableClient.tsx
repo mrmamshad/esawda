@@ -21,6 +21,16 @@ export type AdminShopRow = {
   shop_verified_at: string | null;
   status: string;
   created_at: string | null;
+  post_policy?: 'inherit' | 'free' | 'blocked' | string | null;
+  listings_total?: number;
+  listings_active?: number;
+  listings_pending?: number;
+};
+
+const POLICY_LABEL: Record<string, string> = {
+  inherit: 'Standard',
+  free: 'Free posting',
+  blocked: 'Blocked',
 };
 
 export function ShopsTableClient({ initialRows }: { initialRows: AdminShopRow[] }) {
@@ -52,6 +62,21 @@ export function ShopsTableClient({ initialRows }: { initialRows: AdminShopRow[] 
         body: { password },
       });
       toast.success('Password updated');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Action failed');
+    } finally { setBusyId(null); }
+  };
+
+  const setPolicy = async (r: AdminShopRow, post_policy: 'inherit' | 'free' | 'blocked') => {
+    setBusyId(r.id);
+    try {
+      await api(`/admin/users/${r.id}`, {
+        method: 'PATCH', token: readToken(),
+        body: { post_policy },
+      });
+      toast.success(`Posting: ${POLICY_LABEL[post_policy]}`);
+      setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, post_policy } : x)));
+      start(() => router.refresh());
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Action failed');
     } finally { setBusyId(null); }
@@ -94,6 +119,46 @@ export function ShopsTableClient({ initialRows }: { initialRows: AdminShopRow[] 
       id: 'status', accessorKey: 'status', header: 'Status',
       cell: (info) => <StatusBadge value={(info.getValue() as string) === '1' ? 'active' : 'expired'} />,
       size: 100,
+    },
+    {
+      id: 'listings', header: 'Listings',
+      cell: (info) => {
+        const r = info.row.original;
+        return (
+          <div className="text-xs tabular-nums" style={{ color: 'var(--adm-fg-muted)' }}>
+            <p><strong style={{ color: 'var(--adm-fg)' }}>{r.listings_total ?? 0}</strong> total</p>
+            <p>{r.listings_active ?? 0} active · {r.listings_pending ?? 0} pending</p>
+          </div>
+        );
+      },
+      size: 130,
+    },
+    {
+      id: 'posting', header: 'Posting',
+      cell: (info) => {
+        const r = info.row.original;
+        const policy = (r.post_policy as string) || 'inherit';
+        const tone = policy === 'blocked'
+          ? { background: '#FEE2E2', color: '#B91C1C' }
+          : policy === 'free'
+            ? { background: '#DCFCE7', color: '#15803D' }
+            : { background: 'var(--adm-brand-soft)', color: 'var(--adm-brand)' };
+        return (
+          <select
+            aria-label={`Posting policy for ${r.shop_name || r.username}`}
+            value={policy}
+            disabled={busyId === r.id}
+            onChange={(e) => void setPolicy(r, e.target.value as 'inherit' | 'free' | 'blocked')}
+            className="h-8 rounded-lg border px-1.5 text-xs font-semibold outline-none"
+            style={{ borderColor: 'var(--adm-border)', ...tone }}
+          >
+            <option value="inherit">Standard</option>
+            <option value="free">Free posting</option>
+            <option value="blocked">Blocked</option>
+          </select>
+        );
+      },
+      size: 140,
     },
     {
       id: 'joined', accessorKey: 'created_at', header: 'Joined',

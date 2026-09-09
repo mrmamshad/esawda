@@ -58,6 +58,7 @@ export default async function PublicPostPage() {
           adsRemaining={Number(user?.ads_remaining ?? 0)}
           planName={String(user?.group_id ?? 'free')}
           planExpiresAt={user?.plan_expires_at ?? null}
+          canPostFree={Boolean(user?.can_post_free)}
         />
       </main>
     </PageSurface>

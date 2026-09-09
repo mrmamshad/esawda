@@ -85,6 +85,7 @@ export default function AdForm({
   planExpiresAt,
   mode = 'shop',
   guest = false,
+  canPostFree = false,
 }: {
   categories: Category[];
   settings?: Record<string, string>;
@@ -96,15 +97,20 @@ export default function AdForm({
   mode?: 'shop' | 'public';
   /** Signed-out visitor on the public page — renders the name/mobile/password register card */
   guest?: boolean;
+  /** Server-computed: may this account publish without paying? (admin policy + global rules) */
+  canPostFree?: boolean;
 }) {
   const router = useRouter();
   const canUseSubscription = hasActivePlan && adsRemaining > 0;
-  const gateLocked = mode === 'shop' && !canUseSubscription;
+  // Free path = subscription quota OR an admin posting policy (free shop /
+  // globally-free singles). The server re-checks on submit either way.
+  const canPostFreePath = canUseSubscription || canPostFree;
+  const gateLocked = mode === 'shop' && !canPostFreePath;
   // Guests get a free listing quota when their account is created, so start
   // them on the subscription path even though the pre-auth server render
   // reports hasActivePlan=false.
   const [postingMode, setPostingMode] = useState<'subscription' | 'paid'>(
-    canUseSubscription || (mode === 'public' && guest) ? 'subscription' : 'paid',
+    canPostFreePath || (mode === 'public' && guest) ? 'subscription' : 'paid',
   );
   const [form,   setForm]   = useState<FormState>(INITIAL);
 
@@ -442,6 +448,11 @@ function validateImages(files: File[]): string | null {
       router.push((mode === 'public' ? '/dashboard' : '/shop/ads/pending') as Route);
     } catch (err) {
       if (err instanceof ApiError) {
+        if (err.status === 403 && err.code === 'POSTING_BLOCKED') {
+          setError('Posting is disabled for this account. Please contact support.');
+          setBusy(false);
+          return;
+        }
         if (err.status === 402 && err.code === 'SUBSCRIPTION_REQUIRED') {
           setPostingMode('paid');
           setError('Your subscription slots are finished. Pay per listing is selected so you can continue without using quota.');
@@ -864,11 +875,11 @@ function validateImages(files: File[]): string | null {
 
             <div className="flex justify-end gap-3">
               <Button type="button" variant="ghost" onClick={() => history.back()}>Cancel</Button>
-              <Button type="submit" disabled={busy} leftIcon={<span>＋</span>}>
-                {busy
-                  ? (postingMode === 'paid' ? 'Opening payment…' : 'Submitting…')
-                  : (postingMode === 'paid' ? `Pay ${sym}${paidListingPrice} & submit` : 'Use 1 slot & submit')}
-              </Button>
+                <Button type="submit" disabled={busy} leftIcon={<span>＋</span>}>
+                  {busy
+                    ? (postingMode === 'paid' ? 'Opening payment…' : 'Submitting…')
+                    : (postingMode === 'paid' ? `Pay ${sym}${paidListingPrice} & submit` : canUseSubscription ? 'Use 1 slot & submit' : 'Submit for review')}
+                </Button>
             </div>
           </div>
 
