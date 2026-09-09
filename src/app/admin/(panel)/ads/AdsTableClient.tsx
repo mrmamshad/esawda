@@ -24,7 +24,7 @@ export type AdminAdRow = {
   featured: string | null;
   condition?: string;
   created_at?: string | null;
-  user?: { id: number; username: string } | null;
+  user?: { id: number; username: string; name: string | null } | null;
 };
 
 /**
@@ -92,7 +92,7 @@ export function AdsTableClient({ initialRows }: { initialRows: AdminAdRow[] }) {
     },
     {
       id: 'seller',
-      accessorFn: (r) => r.user?.username ?? `#${r.user_id}`,
+      accessorFn: (r) => r.user?.name || r.user?.username || `#${r.user_id}`,
       header: 'Seller',
       cell: (info) => (
         <span className="text-[12.5px]" style={{ color: 'var(--adm-fg-muted)' }}>

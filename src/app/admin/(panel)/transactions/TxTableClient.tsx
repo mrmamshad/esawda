@@ -17,12 +17,29 @@ export type AdminTxRow = {
   amount: number;
   status: string;
   transaction_gatway: string;
+  transaction_method: string | null;
+  gateway_transaction_id: string | null;
+  gateway_transaction_number: string | null;
   purpose: string | null;
   product_name: string | null;
   meta?: string | null;
   created_at: string | null;
-  seller?: { username: string; email: string } | null;
+  seller?: { username: string; name: string | null; email: string } | null;
 };
+
+/** Human wallet/bank label: bKash, Nagad, Rocket, DBBL, Bank, Card… */
+function friendlyMethod(raw: string | null, gateway: string): string {
+  const hay = (raw ?? '').toLowerCase();
+  if (hay.includes('bkash')) return 'bKash';
+  if (hay.includes('nagad')) return 'Nagad';
+  if (hay.includes('rocket')) return 'Rocket';
+  if (hay.includes('upay')) return 'Upay';
+  if (hay.includes('dutch') || hay.includes('dbbl')) return 'DBBL Bank';
+  if (hay.includes('bank')) return 'Bank';
+  if (hay.includes('visa') || hay.includes('master') || hay.includes('card')) return 'Card';
+  if (raw && raw.trim() !== '') return raw;
+  return gateway ? gateway.charAt(0).toUpperCase() + gateway.slice(1) : '—';
+}
 
 type MetaBag = Record<string, unknown>;
 
@@ -109,7 +126,7 @@ export function TxTableClient({ initialRows }: { initialRows: AdminTxRow[] }) {
     },
     {
       id: 'seller',
-      accessorFn: (r) => r.seller?.username ?? `#${r.seller_id}`,
+      accessorFn: (r) => r.seller?.name || r.seller?.username || `#${r.seller_id}`,
       header: 'Seller',
       cell: (info) => <span style={{ color: 'var(--adm-fg)' }}>{info.getValue() as string}</span>,
     },
@@ -133,9 +150,23 @@ export function TxTableClient({ initialRows }: { initialRows: AdminTxRow[] }) {
       },
     },
     {
-      id: 'gateway', accessorKey: 'transaction_gatway', header: 'Gateway',
-      cell: (info) => <span className="text-[12.5px] capitalize" style={{ color: 'var(--adm-fg-muted)' }}>{info.getValue() as string}</span>,
+      id: 'gateway', header: 'Method',
+      accessorFn: (r) => friendlyMethod(r.transaction_method, r.transaction_gatway),
+      cell: (info) => <span className="text-[12.5px] font-medium" style={{ color: 'var(--adm-fg)' }}>{info.getValue() as string}</span>,
       size: 110,
+    },
+    {
+      id: 'gateway_txn', header: 'Gateway TXN ID',
+      accessorFn: (r) => r.gateway_transaction_id || r.gateway_transaction_number || '—',
+      cell: (info) => {
+        const v = info.getValue() as string;
+        return (
+          <span title={v} className="block max-w-[150px] truncate font-mono text-[11px]" style={{ color: 'var(--adm-fg-muted)' }}>
+            {v}
+          </span>
+        );
+      },
+      size: 160,
     },
     {
       id: 'amount', accessorKey: 'amount', header: 'Amount',
