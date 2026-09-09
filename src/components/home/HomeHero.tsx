@@ -121,13 +121,14 @@ export function HomeHero({ siteName = 'eSawda', categories = [] }: HomeHeroProps
           {/* Search bar with district picker */}
           <HeroSearchBar />
 
-          {/* Category quick-links — real catalogue from the API, tidy 4-col grid on phones, free row on desktop */}
-          <div className="mt-8 grid w-full max-w-[600px] grid-cols-4 gap-y-4 lg:flex lg:flex-wrap lg:items-start lg:justify-between">
+          {/* Category quick-links — always a 2-row × 4-col grid so long
+              labels get a full column each and never overlap. */}
+          <div className="mt-8 grid w-full max-w-[600px] grid-cols-4 gap-x-2 gap-y-6">
             {quickLinks.map((c) => (
               <Link
                 key={c.label}
                 href={c.href}
-                className="group flex w-full flex-col items-center gap-2 text-center lg:w-[68px]"
+                className="group flex w-full flex-col items-center gap-2 text-center"
               >
                 <span
                   className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#0F1524] shadow-[0_10px_20px_-12px_rgba(15,20,40,0.25)] transition group-hover:-translate-y-0.5"
