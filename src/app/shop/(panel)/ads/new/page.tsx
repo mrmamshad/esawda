@@ -19,6 +19,9 @@ export const dynamic = 'force-dynamic';
 export default async function PostAdPage() {
   const user = await requireUser('/shop/ads/new');
   if (!user.is_shop && user.user_type !== 'seller') redirect('/shop/apply');
+  // No active plan and no free-posting allowance → send the seller straight
+  // to the membership page instead of showing a locked form.
+  if (!user.plan_active && !user.can_post_free) redirect('/shop/plan?subscribe=1');
 
   let cats: Category[] = [];
   let settings: Record<string, string> = {};

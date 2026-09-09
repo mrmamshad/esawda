@@ -31,8 +31,13 @@ function readableDate(value?: string | null): string {
     : new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
 }
 
-export default async function SellerPlanPage() {
+export default async function SellerPlanPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ subscribe?: string }>;
+}) {
   const user = await requireUser('/shop/plan');
+  const showSubscribeNotice = (await searchParams)?.subscribe === '1';
   const plansRes = await safe(() => apiFromServer<Plan[]>('/plans', { revalidate: 300 }), { data: [] as Plan[] });
   const plans = (plansRes.data ?? []).filter(plan => plan.active !== false);
   const currentPlan = plans.find(plan => String(plan.id) === String(user.plan_id));
@@ -58,6 +63,23 @@ export default async function SellerPlanPage() {
           </Link>
         }
       />
+
+      {showSubscribeNotice && !active && (
+        <section
+          role="alert"
+          className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:items-center"
+        >
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber-500 text-white">
+            <Crown size={19} />
+          </span>
+          <div>
+            <h2 className="text-sm font-bold text-amber-900">Subscribe first — then you can post products.</h2>
+            <p className="mt-0.5 text-[13px] leading-5 text-amber-800">
+              Choose a plan below. Your product posting form unlocks automatically once your membership is active.
+            </p>
+          </div>
+        </section>
+      )}
 
       <section
         className="relative overflow-hidden rounded-2xl p-6 text-white shadow-xl sm:p-8"

@@ -942,13 +942,13 @@ function SubscriptionGate({
             </div>
             <h2 className="max-w-2xl text-xl font-bold tracking-tight text-ink md:text-2xl">
               {quotaExhausted
-                ? 'আপনার বর্তমান প্যাকেজের প্রোডাক্ট পোস্টিং লিমিট শেষ হয়েছে।'
-                : 'আগে সাবস্ক্রাইব করুন, তারপর আপনি একটি প্রোডাক্ট পোস্ট করতে পারবেন।'}
+                ? 'Your current package has run out of product listings.'
+                : 'Subscribe first — then you can post products.'}
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-muted">
               {quotaExhausted
-                ? 'আরও প্রোডাক্ট পোস্ট করতে আপনার প্যাকেজ renew বা upgrade করুন।'
-                : 'একটি seller package বেছে নিলে নিচের form unlock হবে এবং আপনি সঙ্গে সঙ্গে product listing তৈরি করতে পারবেন।'}
+                ? 'Renew or upgrade your package to keep posting more products.'
+                : 'Choose a seller package and the form below unlocks so you can create your product listing right away.'}
             </p>
 
             <div className="mt-4 flex flex-wrap gap-2 text-xs">
