@@ -18,15 +18,44 @@ import {
   Cpu,
   Sofa,
   Bike,
+  Briefcase,
+  Shirt,
+  UtensilsCrossed,
+  Wrench,
+  Clapperboard,
+  Tag,
 } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
 import { Logo } from './Logo';
 import { startPageScroll, stopPageScroll } from '@/components/interactive/SmoothScroll';
 import { useAuthGate } from '@/components/interactive/AuthGate';
+import { api } from '@/lib/api';
 import { cn } from '@/lib/cn';
+import type { Category } from '@/types/api';
 
 type NavLink = { href: Route; label: string };
-type CategoryLink = { href: Route; label: string; icon: ReactNode };
+
+/**
+ * Pick a drawer icon from the category name/slug — same keyword map as
+ * the homepage hero, so admin-added categories get a sensible icon and
+ * unknown ones fall back to a neutral tag.
+ */
+function iconForCategory(name: string, slug: string | null): ReactNode {
+  const hay = `${name} ${slug ?? ''}`.toLowerCase();
+  if (/\bbike|\bcycle|scooter/.test(hay)) return <Bike size={14} />;
+  if (/car|vehicle|auto|moto/.test(hay)) return <Car size={14} />;
+  if (/mobil|phone|tablet|smart/.test(hay)) return <Smartphone size={14} />;
+  if (/appliance|washing|fridge|refrigerator/.test(hay)) return <WashingMachine size={14} />;
+  if (/electronic|laptop|computer|cpu|gadget/.test(hay)) return <Cpu size={14} />;
+  if (/real|estate|house|home|property|apartment|land|plot/.test(hay)) return <Home size={14} />;
+  if (/furniture|sofa|lifestyle|decor/.test(hay)) return <Sofa size={14} />;
+  if (/job|career|hiring/.test(hay)) return <Briefcase size={14} />;
+  if (/fashion|cloth|shirt|wear|apparel/.test(hay)) return <Shirt size={14} />;
+  if (/food|restaurant|beverage|grocery/.test(hay)) return <UtensilsCrossed size={14} />;
+  if (/service|repair|plumb|electric/.test(hay)) return <Wrench size={14} />;
+  if (/entertain|movie|music|game|sport|film/.test(hay)) return <Clapperboard size={14} />;
+  return <Tag size={14} />;
+}
 
 const GUEST_PRIMARY: NavLink[] = [
   { href: '/' as Route,            label: 'Home' },
@@ -39,16 +68,6 @@ const GUEST_OTHERS: NavLink[] = [
   { href: '/about' as Route,   label: 'About us' },
   { href: '/blog' as Route,    label: 'Blog' },
   { href: '/contact' as Route, label: 'Contact' },
-];
-
-const CATEGORY_LINKS: CategoryLink[] = [
-  { href: '/category/vehicles' as Route,    label: 'Vehicles',    icon: <Car size={14} /> },
-  { href: '/category/smartphones' as Route, label: 'Smartphones', icon: <Smartphone size={14} /> },
-  { href: '/category/appliances' as Route,  label: 'Appliances',  icon: <WashingMachine size={14} /> },
-  { href: '/category/houses' as Route,      label: 'Houses',      icon: <Home size={14} /> },
-  { href: '/category/electronics' as Route, label: 'Electronics', icon: <Cpu size={14} /> },
-  { href: '/category/furniture' as Route,   label: 'Furniture',   icon: <Sofa size={14} /> },
-  { href: '/category/bikes' as Route,       label: 'Bikes',       icon: <Bike size={14} /> },
 ];
 
 function getAuthLinks(isSeller: boolean): NavLink[] {
@@ -88,7 +107,20 @@ export function MobileDrawer({ onDark = false }: { onDark?: boolean }) {
   const [open, setOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [othersOpen, setOthersOpen] = useState(false);
+  const [liveCategories, setLiveCategories] = useState<Category[] | null>(null);
   const { user } = useAuthGate();
+
+  // Live catalogue for the Categories accordion — fetched once, the first
+  // time the accordion opens, so the drawer never shows stale hardcoded
+  // links. Public endpoint, no auth needed.
+  useEffect(() => {
+    if (!categoriesOpen || liveCategories !== null) return;
+    let alive = true;
+    api<Category[]>('/categories?with_counts=false&with_subs=false', { cache: 'no-store' })
+      .then((res) => { if (alive) setLiveCategories(res.data ?? []); })
+      .catch(() => { if (alive) setLiveCategories([]); });
+    return () => { alive = false; };
+  }, [categoriesOpen, liveCategories]);
 
   const isSeller = Boolean(user?.is_shop || user?.user_type === 'seller');
   const authLinks = getAuthLinks(isSeller);
@@ -179,20 +211,39 @@ export function MobileDrawer({ onDark = false }: { onDark?: boolean }) {
                   />
                   {categoriesOpen && (
                     <div className="mb-2 mt-1 space-y-1 pl-2">
-                      {CATEGORY_LINKS.map((c) => (
+                      {liveCategories === null ? (
+                        <p className="px-3 py-2 text-[13px] text-ink-muted">Loading…</p>
+                      ) : liveCategories.length === 0 ? (
                         <Link
-                          key={c.href}
-                          href={c.href}
+                          href={'/ads' as Route}
                           onClick={() => setOpen(false)}
                           className="flex items-center justify-between rounded-field px-3 py-2.5 text-[13px] font-medium text-ink hover:bg-brand-50"
                         >
                           <span className="inline-flex items-center gap-2">
-                            <span className="text-brand-700">{c.icon}</span>
-                            {c.label}
+                            <span className="text-brand-700"><Tag size={14} /></span>
+                            Browse all ads
                           </span>
                           <ChevronRight size={15} className="text-ink-faint" />
                         </Link>
-                      ))}
+                      ) : (
+                        liveCategories.map((c) => {
+                          const href = (c.slug ? `/category/${c.slug}` : `/ads?filter[category]=${c.id}`) as Route;
+                          return (
+                            <Link
+                              key={c.id}
+                              href={href}
+                              onClick={() => setOpen(false)}
+                              className="flex items-center justify-between rounded-field px-3 py-2.5 text-[13px] font-medium text-ink hover:bg-brand-50"
+                            >
+                              <span className="inline-flex items-center gap-2">
+                                <span className="text-brand-700">{iconForCategory(c.name, c.slug)}</span>
+                                {c.name}
+                              </span>
+                              <ChevronRight size={15} className="text-ink-faint" />
+                            </Link>
+                          );
+                        })
+                      )}
                     </div>
                   )}
 
