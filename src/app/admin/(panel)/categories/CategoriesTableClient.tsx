@@ -4,12 +4,13 @@ import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { ColumnDef } from '@tanstack/react-table';
-import { ImageIcon, Pencil, Plus, Trash2 } from 'lucide-react';
+import { ImageIcon, ListTree, Pencil, Plus, Trash2 } from 'lucide-react';
 import { AdminTable } from '@/components/admin/v2/AdminTable';
 import { RowActionsMenu, type RowAction } from '@/components/admin/v2/RowActionsMenu';
 import { api } from '@/lib/api';
 import { readToken } from '@/lib/auth';
 import { CategoryEditor } from './CategoryEditor';
+import { SubcategoryManager } from './SubcategoryManager';
 import type { AdminCategoryRow } from './types';
 
 export type { AdminCategoryRow } from './types';
@@ -18,6 +19,7 @@ export function CategoriesTableClient({ initialRows }: { initialRows: AdminCateg
   const router = useRouter();
   const [rows, setRows] = useState<AdminCategoryRow[]>(initialRows);
   const [editing, setEditing] = useState<AdminCategoryRow | null | undefined>(undefined);
+  const [managingSubs, setManagingSubs] = useState<AdminCategoryRow | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [pending, start] = useTransition();
 
@@ -87,6 +89,7 @@ export function CategoriesTableClient({ initialRows }: { initialRows: AdminCateg
         const category = row.original;
         const actions: RowAction[] = [
           { label: 'Edit', icon: <Pencil size={13} />, onClick: () => setEditing(category) },
+          { label: 'Subcategories', icon: <ListTree size={13} />, onClick: () => setManagingSubs(category) },
           {
             label: 'Delete', icon: <Trash2 size={13} />, danger: true,
             disabled: busyId === category.cat_id || pending,
@@ -123,6 +126,10 @@ export function CategoriesTableClient({ initialRows }: { initialRows: AdminCateg
 
       {editing !== undefined && (
         <CategoryEditor category={editing} onClose={() => setEditing(undefined)} onSaved={refresh} />
+      )}
+
+      {managingSubs && (
+        <SubcategoryManager category={managingSubs} onClose={() => setManagingSubs(null)} onChanged={refresh} />
       )}
     </>
   );

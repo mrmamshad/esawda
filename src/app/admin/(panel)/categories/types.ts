@@ -9,3 +9,12 @@ export type AdminCategoryRow = {
   posts_count?: number;
   sub_categories_count?: number;
 };
+
+export type AdminSubcategoryRow = {
+  sub_cat_id: number;
+  main_cat_id: number;
+  sub_cat_name: string;
+  slug: string | null;
+  cat_order: number | null;
+  posts_count?: number;
+};
