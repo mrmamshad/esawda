@@ -33,21 +33,22 @@ export default async function ContactPage() {
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-field bg-brand-50 text-brand-500"><Mail size={16} /></span>
                   <div>
                     <p className="text-ink-muted">Email</p>
-                    <a href="mailto:hello@eshauda.com" className="font-medium text-ink hover:text-brand-700">hello@eshauda.com</a>
+                    <a href="mailto:info@esawda.com" className="font-medium text-ink hover:text-brand-700">Info@esawda.com</a>
+                    <a href="mailto:support@esawda.com" className="block font-medium text-ink hover:text-brand-700">support@esawda.com</a>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-field bg-brand-50 text-brand-500"><Phone size={16} /></span>
                   <div>
                     <p className="text-ink-muted">Phone</p>
-                    <p className="font-medium text-ink">+1 (555) 010-1234</p>
+                    <p className="font-medium text-ink">01************</p>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-field bg-brand-50 text-brand-500"><MapPin size={16} /></span>
                   <div>
                     <p className="text-ink-muted">Office</p>
-                    <p className="font-medium text-ink">123 Market Street, Suite 400<br />San Francisco, CA 94103</p>
+                    <p className="font-medium text-ink">*********************</p>
                   </div>
                 </li>
               </ul>
