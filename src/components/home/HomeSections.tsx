@@ -5,7 +5,7 @@ import type { Route } from 'next';
 import { Fragment, useState } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { SectionHeader } from './SectionHeader';
-import { CategoryConditionGrid, ConditionToggle, type Condition } from './CategoryConditionGrid';
+import { CategoryConditionGrid, CategorySectionHeader, ConditionToggle, type Condition } from './CategoryConditionGrid';
 import { ListingCard } from '@/components/listing/ListingCard';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -68,13 +68,7 @@ export function HomeSections({
 
       {/* ── 0. Popular categories ── */}
       <section className="reveal container-page pb-24 pt-6">
-        <SectionHeader
-          eyebrow="Browse by category"
-          title={<>Find exactly what you need, <span className="text-brand-700">faster.</span></>}
-          description="Twelve most-loved categories, ranked by weekly buyer activity."
-          actionLabel="View all"
-          actionHref={'/ads' as Route}
-        />
+        <CategorySectionHeader viewAllHref={'/ads' as Route} />
         {categories.length === 0 ? (
           <div className="mt-12">
             <EmptyState title="No categories yet" description="Categories will appear once seeded." />
