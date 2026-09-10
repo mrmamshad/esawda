@@ -97,19 +97,18 @@ export function HomeHero({ siteName = 'eSawda', categories = [] }: HomeHeroProps
               className="inline-block h-2 w-2 rounded-full"
               style={{ backgroundColor: BRAND_RED }}
             />
-            Smarter Shopping, Better Living
+            Buy, Sell & Grow.
           </p>
 
           {/* Headline */}
           <h1 className="mt-6 text-[40px] leading-[1.02] font-extrabold tracking-[-0.03em] text-balance text-[#0F1524] sm:text-[52px] md:text-[68px]">
-            <span className="block">Shop Smarter.</span>
-            <span className="block" style={{ color: BRAND_RED }}>Live Better.</span>
+            <span className="block">Shop Smart.</span>
+            <span className="block" style={{ color: BRAND_RED }}>Earn Extra.</span>
           </h1>
 
           {/* Sub-copy */}
           <p className="mt-5 max-w-md text-[16px] leading-[1.55] text-[#4C5B78]">
-            {siteName} brings you the best products at the best prices.
-            Fast delivery, secure payments, happy you.
+            Turn your unused items into instant cash or discover top-rated new products at unbeatable prices on eSawda.com.
           </p>
 
           {/* Search bar with district picker */}
