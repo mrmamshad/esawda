@@ -15,7 +15,7 @@ import { api, ApiError } from '@/lib/api';
 import type { Ad, Blog, Category, Plan, Testimonial } from '@/types/api';
 
 export const metadata: Metadata = {
-  title: 'eSawda — Buy, Sell, Browse Products',
+  title: 'eSawda — এক ক্লিকেই বেচা কেনা',
   description: 'Browse thousands of classified products across vehicles, mobiles, electronics, houses and more.',
   alternates: { canonical: '/' },
 };

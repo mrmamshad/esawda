@@ -18,7 +18,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(env.site.base),
   title: {
-    default: 'eSawda — Buy, Sell, Browse Products',
+    default: 'eSawda — এক ক্লিকেই বেচা কেনা',
     template: '%s · eSawda',
   },
   description:
