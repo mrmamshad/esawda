@@ -1,9 +1,9 @@
 import Image from 'next/image';
 import type { Route } from 'next';
 import {
-  ShieldCheck,
-  Truck,
-  Award,
+  ArrowLeftRight,
+  Wallet,
+  Percent,
   Car,
   Smartphone,
   WashingMachine,
@@ -33,8 +33,8 @@ import { QuickLinksRow, type QuickLink } from './QuickLinksRow';
  *     • Category quick-links row (icon + label buttons)
  *   RIGHT column
  *     • Fixed-height frame containing the phone-composition PNG
- *     • Three trust badges (Secure Payment / Fast Delivery /
- *       Best Quality) staggered around the phone on the right side.
+ *     • Three trust badges (Buy & Sell Anything /
+ *       Budget Friendly Deals / Zero Commission) staggered around the phone on the right side.
  *
  * Both columns are children of a flex row with `items-center`, so
  * their visual centres stay on the same horizontal line at all times.
@@ -134,18 +134,18 @@ export function HomeHero({ siteName = 'eSawda', categories = [] }: HomeHeroProps
 
         {/* ── Mobile trust strip — the floating badges are desktop-only ── */}
         <div className="flex flex-wrap items-center gap-2 lg:hidden">
-          <MobileTrust icon={<ShieldCheck size={13} />} label="Secure Payment" />
-          <MobileTrust icon={<Truck size={13} />} label="Fast Delivery" />
-          <MobileTrust icon={<Award size={13} />} label="Best Quality" />
+          <MobileTrust icon={<ArrowLeftRight size={13} />} label="Buy & Sell Anything" />
+          <MobileTrust icon={<Wallet size={13} />} label="Budget Friendly Deals" />
+          <MobileTrust icon={<Percent size={13} />} label="Zero Commission" />
         </div>
 
         {/* ── TRUST BADGES COLUMN ─────────────────────────────
             Own flex column right of the PNG frame with margin-left
             so it never touches the PNG canvas. */}
         <div className="relative z-30 -ml-16 hidden shrink-0 -translate-y-14 flex-col items-start justify-center gap-4 self-center lg:flex">
-          <FloatingBadge icon={<ShieldCheck size={16} />} label="Secure Payment" />
-          <FloatingBadge icon={<Truck size={16} />} label="Fast Delivery" />
-          <FloatingBadge icon={<Award size={16} />} label="Best Quality" />
+          <FloatingBadge icon={<ArrowLeftRight size={16} />} label="Buy & Sell Anything" />
+          <FloatingBadge icon={<Wallet size={16} />} label="Budget Friendly Deals" />
+          <FloatingBadge icon={<Percent size={16} />} label="Zero Commission" />
         </div>
       </div>
     </section>
