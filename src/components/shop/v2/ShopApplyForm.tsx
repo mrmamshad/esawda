@@ -123,11 +123,9 @@ export function ShopApplyForm({
       return fail('Owner mobile must be an 11-digit Bangladeshi number, e.g. 01712345678.');
     }
 
-    if (!nidFile || !tradeLicenceFile) {
-      return fail('Please attach both your NID and trade licence.');
-    }
-
-    if ([nidFile, tradeLicenceFile].some(file => file.size > 5 * 1024 * 1024)) {
+    // NID / trade licence are optional at apply time — validate only
+    // the files that were actually attached.
+    if ([nidFile, tradeLicenceFile].some(file => file && file.size > 5 * 1024 * 1024)) {
       setError('Each document must be 5MB or smaller.');
       return;
     }
@@ -175,8 +173,8 @@ export function ShopApplyForm({
       fd.append('shop_address', shopAddress.trim());
       if (shopCategory.trim()) fd.append('shop_category', shopCategory.trim());
       if (shopDescription.trim()) fd.append('shop_description', shopDescription.trim());
-      fd.append('documents[nid]', nidFile);
-      fd.append('documents[trade_licence]', tradeLicenceFile);
+      if (nidFile) fd.append('documents[nid]', nidFile);
+      if (tradeLicenceFile) fd.append('documents[trade_licence]', tradeLicenceFile);
       if (avatar) fd.append('avatar', avatar);
       if (cover) fd.append('cover', cover);
       if (banner) fd.append('banner', banner);
@@ -400,9 +398,9 @@ export function ShopApplyForm({
 
       {/* Documents */}
       <div className="mt-6">
-        <span className={label}>Supporting documents *</span>
+        <span className={label}>Supporting documents (optional)</span>
         <p className="mb-3 text-xs text-ink-muted">
-          Upload both documents as JPG, PNG or PDF. Each file must be 5MB or smaller.
+          NID and trade licence are not required to open your shop — attach them now or later. Each file must be JPG, PNG or PDF and 5MB or smaller.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <DocumentUpload
@@ -519,7 +517,7 @@ function DocumentUpload({
         className="hidden"
         onChange={(event) => onFile(event.target.files?.[0] ?? null)}
       />
-      <p className="mt-2 text-center text-[11px] font-semibold text-ink">{label} *</p>
+      <p className="mt-2 text-center text-[11px] font-semibold text-ink">{label}</p>
       <p className="truncate text-center text-[10px] text-ink-faint">{file?.name ?? hint}</p>
     </div>
   );
