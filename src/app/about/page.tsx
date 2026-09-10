@@ -13,6 +13,44 @@ export const metadata: Metadata = {
 
 const BRAND_RED = '#FF003F';
 
+const PRINCIPLES = [
+  {
+    title: 'Trust Above All',
+    body: 'Account verification, authentic buyer reviews, and strict listing moderation are the foundation of our platform ecosystem.',
+  },
+  {
+    title: 'Speed & Simplicity',
+    body: 'Optimized for rapid page loads and instant search response times, ensuring an effortless trading journey on any device.',
+  },
+  {
+    title: 'Locally Engineered',
+    body: 'Designed from the ground up to address the distinct needs of Bangladeshi entrepreneurs and consumers.',
+  },
+];
+
+const FAQS = [
+  {
+    q: 'How do I create a shop or post a product on eSawda?',
+    a: 'Simply click the "Create a Shop" or "Post a Product" button in the top menu. Sign in to your account, fill in your product details, upload clear images, and publish your listing instantly.',
+  },
+  {
+    q: 'Is posting an ad or setting up a shop on eSawda free?',
+    a: 'Yes, creating a basic shop and posting general ad listings on eSawda is free. We also offer optional premium memberships and featured ad placements if you want to increase your visibility and sell faster.',
+  },
+  {
+    q: 'How does eSawda ensure buyer and seller safety?',
+    a: 'We verify seller accounts, moderate image and content listings, and maintain a direct messaging system so buyers and sellers can communicate securely before closing a deal.',
+  },
+  {
+    q: 'What should I do if a product I received is damaged or not as described?',
+    a: 'For Doorstep Delivery orders, you can submit a replacement or return request within 72 hours of delivery by contacting support@esawda.com with details and photo evidence.',
+  },
+  {
+    q: 'How can I contact customer support?',
+    a: 'You can reach our support team by clicking the "Contact us" button on this page or by emailing support@esawda.com.',
+  },
+];
+
 export default async function AboutPage() {
   const user = await getSessionUser();
 
@@ -32,13 +70,13 @@ export default async function AboutPage() {
               About eSawda
             </p>
             <h1 className="mt-3 text-[38px] leading-[1.1] font-extrabold tracking-[-0.02em] text-ink md:text-[52px]">
-              A modern marketplace, built for real people.
+              Empowering Bangladesh&apos;s Commerce, One Connection at a Time.
             </h1>
             <p className="mt-5 text-[17px] leading-[1.6] text-ink-muted">
-              eSawda is where thousands of trusted sellers list new and pre-owned
-              products every day — vehicles, phones, homes, electronics and more.
-              We started with one goal: make local buying and selling feel simple,
-              safe and fast.
+              eSawda is a modern hybrid marketplace designed to unite individual
+              buyers, sellers, and business vendors across Bangladesh. Whether
+              trading pre-loved items or launching a digital storefront, we make
+              local commerce seamless, secure, and transparent.
             </p>
           </div>
         </section>
@@ -46,50 +84,57 @@ export default async function AboutPage() {
         {/* ─── Who we are (two column narrative) ─── */}
         <section className="container-page py-12 md:py-16">
           <div className="mx-auto grid max-w-4xl gap-10 md:grid-cols-[220px_1fr]">
-            <h2 className="text-[24px] font-bold text-ink">Who we are</h2>
+            <h2 className="text-[24px] font-bold text-ink">Who We Are</h2>
             <div className="space-y-4 text-[16px] leading-[1.7] text-ink-muted">
               <p>
-                eSawda is a Bangladesh-based classifieds platform that helps
-                individuals, small businesses and dealers reach thousands of
-                local buyers with a single ad. We handle listings, messaging,
-                verification and moderation so people can focus on the deal.
+                eSawda is a next-generation classifieds and e-commerce platform
+                built to streamline trading for individuals, small enterprises,
+                and established brand vendors. By taking care of listing
+                infrastructure, merchant verification, end-to-end messaging, and
+                robust content moderation, we allow our users to focus on what
+                matters most — closing great deals.
               </p>
               <p>
-                We're a small team of engineers and designers who care deeply
-                about craft. Every screen you see on eSawda was drawn, argued
-                over, coded and iterated on until it felt right.
+                Driven by a dedicated team of tech innovators, UI/UX designers,
+                and market strategists, eSawda is meticulously crafted to deliver
+                a frictionless digital experience tailored to the Bangladesh market.
               </p>
             </div>
           </div>
         </section>
 
-        {/* ─── What we believe ─── */}
+        {/* ─── Our core principles ─── */}
         <section className="container-page py-12 md:py-16">
           <div className="mx-auto grid max-w-4xl gap-10 md:grid-cols-[220px_1fr]">
-            <h2 className="text-[24px] font-bold text-ink">What we believe</h2>
+            <h2 className="text-[24px] font-bold text-ink">Our Core Principles</h2>
             <ul className="space-y-6 text-[16px] leading-[1.6] text-ink-muted">
-              <li>
-                <p className="font-semibold text-ink">Trust before growth.</p>
-                <p className="mt-1">
-                  Verified sellers, buyer reviews and a proper moderation
-                  system aren't optional — they're the product.
-                </p>
-              </li>
-              <li>
-                <p className="font-semibold text-ink">Speed is a feature.</p>
-                <p className="mt-1">
-                  Every page must open in under a second. Every search must
-                  return results instantly. Time is respect.
-                </p>
-              </li>
-              <li>
-                <p className="font-semibold text-ink">Local first.</p>
-                <p className="mt-1">
-                  Marketplaces work best when they're built for the community
-                  they serve — not translated from somewhere else.
-                </p>
-              </li>
+              {PRINCIPLES.map((p) => (
+                <li key={p.title}>
+                  <p className="font-semibold text-ink">{p.title}:</p>
+                  <p className="mt-1">{p.body}</p>
+                </li>
+              ))}
             </ul>
+          </div>
+        </section>
+
+        {/* ─── FAQ ─── */}
+        <section className="container-page py-12 md:py-16">
+          <div className="mx-auto max-w-4xl">
+            <h2 className="text-[24px] font-bold text-ink">Frequently Asked Questions (FAQ)</h2>
+            <div className="mt-6 space-y-3">
+              {FAQS.map((f) => (
+                <details
+                  key={f.q}
+                  className="rounded-xl border border-line bg-white px-5 py-4"
+                >
+                  <summary className="cursor-pointer text-[15px] font-semibold text-ink">
+                    {f.q}
+                  </summary>
+                  <p className="mt-2 text-[15px] leading-[1.65] text-ink-muted">{f.a}</p>
+                </details>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -123,7 +168,7 @@ export default async function AboutPage() {
           <div className="mx-auto max-w-4xl">
             <h2 className="text-[24px] font-bold text-ink">Get in touch</h2>
             <p className="mt-3 max-w-2xl text-[16px] leading-[1.6] text-ink-muted">
-              Questions, partnership ideas, or press enquiries? We'd love to
+              Questions, partnership ideas, or press enquiries? We&apos;d love to
               hear from you.
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
