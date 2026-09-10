@@ -44,9 +44,12 @@ function parseCategories(raw: unknown): string[] {
 export function ShopApplyForm({
   initial,
   isGuest = false,
+  categoryOptions = [],
 }: {
   initial: { name?: string; phone?: string };
   isGuest?: boolean;
+  /** Live DB category names — when present, the dropdown skips the admin settings list. */
+  categoryOptions?: string[];
 }) {
   const router = useRouter();
 
@@ -65,7 +68,9 @@ export function ShopApplyForm({
   const [avatar, setAvatar] = useState<File | null>(null);
   const [cover, setCover] = useState<File | null>(null);
   const [banner, setBanner] = useState<File | null>(null);
-  const [shopCategories, setShopCategories] = useState<string[]>(FALLBACK_SHOP_CATEGORIES);
+  const [shopCategories, setShopCategories] = useState<string[]>(
+    categoryOptions.length > 0 ? categoryOptions : FALLBACK_SHOP_CATEGORIES,
+  );
   const nidRef = useRef<HTMLInputElement>(null);
   const tradeLicenceRef = useRef<HTMLInputElement>(null);
   const avatarRef = useRef<HTMLInputElement>(null);
@@ -77,8 +82,10 @@ export function ShopApplyForm({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [done, setDone] = useState(false);
 
-  // Admin-driven category list (cached 5 min server-side).
+  // Admin-driven category list (cached 5 min server-side) — skipped when
+  // the page already passed live DB categories.
   useEffect(() => {
+    if (categoryOptions.length > 0) return;
     let cancelled = false;
     fetch(`${env.api.base}/settings`, { headers: { Accept: 'application/json' } })
       .then((r) => (r.ok ? r.json() : null))
@@ -89,7 +96,7 @@ export function ShopApplyForm({
       })
       .catch(() => { /* fallback list stays */ });
     return () => { cancelled = true; };
-  }, []);
+  }, [categoryOptions]);
 
   // Live password-match state (guest signup only).
   const pwTouched = passwordConfirmation.length > 0;

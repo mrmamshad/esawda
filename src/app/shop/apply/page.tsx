@@ -3,15 +3,25 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
 import { getSessionUser } from '@/lib/session';
+import { apiFromServer } from '@/lib/api';
+import type { Category } from '@/types/api';
 import { ShopApplyForm } from '@/components/shop/v2/ShopApplyForm';
 
 export const metadata: Metadata = { title: 'Open your shop' };
 export const dynamic = 'force-dynamic';
 
-export default async function ShopApplyPage() {
-  const user = await getSessionUser();
+/** Live product-category names for the shop-category dropdown. */
+async function loadCategoryNames(): Promise<string[]> {
+  try {
+    const res = await apiFromServer<Category[]>('/categories', { revalidate: 300 });
+    return (res.data ?? []).map((c) => c.name).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
 
-  if (user && (user.is_shop || user.user_type === 'seller')) {
+export default async function ShopApplyPage() {
+  const user = await getSessionUser();  if (user && (user.is_shop || user.user_type === 'seller')) {
     return (
       <>
         <Header variant="default" user={user} />
@@ -44,6 +54,7 @@ export default async function ShopApplyPage() {
           <ShopApplyForm
             initial={{ name: user?.name ?? undefined, phone: user?.phone ?? undefined }}
             isGuest={!user}
+            categoryOptions={await loadCategoryNames()}
           />
         </div>
       </main>
