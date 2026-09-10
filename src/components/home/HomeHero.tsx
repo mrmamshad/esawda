@@ -88,6 +88,13 @@ export function HomeHero({ siteName = 'eSawda', categories = [] }: HomeHeroProps
 
         {/* ── LEFT COLUMN ─────────────────────────────────────── */}
         <div className="flex w-full max-w-[680px] flex-col items-start lg:flex-1">
+          {/* Bengali tagline */}
+          <p
+            className="mb-4 inline-flex items-center rounded-full border px-3.5 py-1.5 text-[14px] font-bold"
+            style={{ color: BRAND_RED, borderColor: `${BRAND_RED}55`, backgroundColor: `${BRAND_RED}0D` }}
+          >
+            এক ক্লিকেই বেচা কেনা
+          </p>
           {/* Eyebrow */}
           <p
             className="inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.14em]"
