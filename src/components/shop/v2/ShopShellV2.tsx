@@ -24,6 +24,7 @@ export function ShopShellV2({
   user, counts, children,
 }: { user: User; counts?: ShopCounts; children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   useEffect(() => {
     try {
       const raw = localStorage.getItem('esawda-shop-nav');
@@ -41,14 +42,21 @@ export function ShopShellV2({
       className="shop-scope flex min-h-[100dvh]"
       style={{ background: 'var(--shp-bg)', color: 'var(--shp-fg)' }}
     >
-      <ShopSidebar user={user} collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} groups={groups} />
+      <ShopSidebar
+        user={user}
+        collapsed={collapsed}
+        onToggle={() => setCollapsed((v) => !v)}
+        groups={groups}
+        open={mobileNavOpen}
+        onClose={() => setMobileNavOpen(false)}
+      />
       <div
         className={
           'flex min-h-[100dvh] min-w-0 flex-1 flex-col transition-[padding] duration-200 ' +
           (collapsed ? 'md:pl-16' : 'md:pl-64')
         }
       >
-        <ShopTopbar user={user} />
+        <ShopTopbar user={user} onOpenNav={() => setMobileNavOpen(true)} />
         <main className="flex-1 px-4 py-6 md:px-8 md:py-8">
           {children}
         </main>

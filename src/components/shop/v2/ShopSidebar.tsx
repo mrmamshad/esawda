@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { usePathname } from 'next/navigation';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import {
   LayoutDashboard, Crown, PlusSquare, List, CircleCheckBig, Clock, DollarSign,
   Trash2, FileEdit, Heart, MessageSquare, Receipt, Settings, Store, CalendarX,
@@ -62,26 +62,47 @@ export function buildShopGroups(counts?: { active?: number; pending?: number; so
 }
 
 export function ShopSidebar({
-  user, collapsed, onToggle, groups,
-}: { user: User; collapsed: boolean; onToggle: () => void; groups: NavGroup[] }) {
+  user, collapsed, onToggle, groups, open, onClose,
+}: {
+  user: User; collapsed: boolean; onToggle: () => void; groups: NavGroup[];
+  /** Mobile drawer state (desktop ignores these). */
+  open: boolean; onClose: () => void;
+}) {
   const pathname = usePathname();
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useClickOutside<HTMLDivElement>(profileOpen, () => setProfileOpen(false));
 
+  // Navigation closes the mobile drawer.
+  useEffect(() => { onClose(); }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Labels/icons render expanded on mobile (drawer is always full width);
+  // `collapsed` only applies to the desktop rail.
+  const wide = open || !collapsed;
+
   return (
-    <aside
-      style={{ background: 'var(--shp-surface)', borderColor: 'var(--shp-border)' }}
-      className={cn(
-        'fixed inset-y-0 left-0 z-40 hidden h-screen shrink-0 flex-col overflow-hidden border-r transition-[width] duration-200 md:flex',
-        collapsed ? 'w-16' : 'w-64',
+    <>
+      {open && (
+        <div
+          aria-hidden="true"
+          onClick={onClose}
+          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+        />
       )}
-    >
+      <aside
+        style={{ background: 'var(--shp-surface)', borderColor: 'var(--shp-border)' }}
+        className={cn(
+          'fixed inset-y-0 left-0 z-40 flex h-screen w-64 shrink-0 flex-col overflow-hidden border-r transition-transform duration-200',
+          open ? 'translate-x-0' : '-translate-x-full',
+          'md:translate-x-0 md:transition-[width]',
+          collapsed && 'md:w-16',
+        )}
+      >
       <div className="flex h-16 items-center justify-between px-4">
-        <ShopLogo collapsed={collapsed} />
+        <ShopLogo collapsed={!wide} />
         <button
           type="button" onClick={onToggle}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className="grid h-7 w-7 place-items-center rounded-md hover:bg-[color:var(--shp-bg)]"
+          className="hidden h-7 w-7 place-items-center rounded-md hover:bg-[color:var(--shp-bg)] md:grid"
           style={{ color: 'var(--shp-fg-muted)' }}
         >
           {collapsed ? <ChevronsRight size={15} /> : <ChevronsLeft size={15} />}
@@ -91,7 +112,7 @@ export function ShopSidebar({
       <nav data-lenis-prevent className="flex-1 overflow-y-auto overscroll-contain px-2.5 pb-4">
         {groups.map((group) => (
           <div key={group.title} className="mt-4 first:mt-1">
-            {!collapsed && (
+            {wide && (
               <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--shp-fg-faint)' }}>
                 {group.title}
               </p>
@@ -114,7 +135,7 @@ export function ShopSidebar({
               const active = pathname === it.href || (
                 !hasChild && it.href !== '/shop' && (pathname?.startsWith(it.href + '/') ?? false)
               );
-              return <NavItemLink key={it.href} item={it} active={active} collapsed={collapsed} />;
+              return <NavItemLink key={it.href} item={it} active={active} collapsed={!wide} />;
             })}
           </div>
         ))}
@@ -132,7 +153,7 @@ export function ShopSidebar({
             >
               {(user.name || user.username || '?').slice(0, 2).toUpperCase()}
             </span>
-            {!collapsed && (
+            {wide && (
               <>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-xs font-semibold" style={{ color: 'var(--shp-fg)' }}>
@@ -186,6 +207,7 @@ export function ShopSidebar({
         </div>
       </div>
     </aside>
+    </>
   );
 }
 
