@@ -15,6 +15,7 @@ export function AdminShellV2({
 }: { user: User; children: ReactNode }) {
   // Sidebar collapse — persist across navigations.
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   useEffect(() => {
     try {
       const raw = localStorage.getItem('esawda-admin-nav');
@@ -27,7 +28,13 @@ export function AdminShellV2({
 
   return (
     <div className="admin-scope adm-bg min-h-[100dvh]">
-      <AdminSidebar user={user} collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} />
+      <AdminSidebar
+        user={user}
+        collapsed={collapsed}
+        onToggle={() => setCollapsed((v) => !v)}
+        open={mobileNavOpen}
+        onClose={() => setMobileNavOpen(false)}
+      />
       {/*
         `md:pl-16` (64px) when collapsed, `md:pl-60` (240px) otherwise.
         Tailwind ships both classes in the build so switching is instant
@@ -39,7 +46,7 @@ export function AdminShellV2({
           (collapsed ? 'md:pl-16' : 'md:pl-60')
         }
       >
-        <AdminTopbar user={user} />
+        <AdminTopbar user={user} onOpenNav={() => setMobileNavOpen(true)} />
         <main className="flex-1 px-4 py-6 md:px-8 md:py-8">
           {children}
         </main>

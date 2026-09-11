@@ -5,7 +5,7 @@ import type { Route } from 'next';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import {
-  Search, Plus, ChevronRight, LogOut,
+  Menu, Search, Plus, ChevronRight, LogOut,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useClickOutside } from './useClickOutside';
@@ -17,7 +17,7 @@ import type { User } from '@/types/api';
  * toggle, notification bell, and avatar. NEVER shows the public site's
  * "Explore / Post Ad / EN" chrome.
  */
-export function AdminTopbar({ user }: { user: User }) {
+export function AdminTopbar({ user, onOpenNav }: { user: User; onOpenNav: () => void }) {
   const pathname = usePathname();
   const crumbs = deriveCrumbs(pathname);
   const [scrolled, setScrolled] = useState(false);
@@ -44,8 +44,19 @@ export function AdminTopbar({ user }: { user: User }) {
       }}
       className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b px-4 md:px-6 transition-shadow"
     >
-      {/* ── Breadcrumb ── */}
-      <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5">
+      {/* ── Mobile menu + Breadcrumb ── */}
+      <div className="flex min-w-0 items-center gap-2">
+        <button
+          type="button"
+          onClick={onOpenNav}
+          aria-label="Open menu"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border md:hidden"
+          style={{ borderColor: 'var(--adm-border)', color: 'var(--adm-fg)' }}
+        >
+          <Menu size={17} />
+        </button>
+
+        <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5">
         {crumbs.map((c, i) => (
           <span key={c.href + i} className="flex items-center gap-1.5">
             {i > 0 && <ChevronRight size={13} style={{ color: 'var(--adm-fg-faint)' }} />}
@@ -63,6 +74,7 @@ export function AdminTopbar({ user }: { user: User }) {
           </span>
         ))}
       </nav>
+      </div>
 
       {/* ── Search ── */}
       <div className="hidden md:block md:flex-1 md:max-w-md">

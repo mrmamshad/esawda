@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { usePathname } from 'next/navigation';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import {
   LayoutDashboard, Users, Store, Megaphone, PackageCheck, FolderTree, CreditCard, PackageOpen,
   Receipt, Newspaper, Settings, ChevronsLeft, ChevronsRight, LogOut, ChevronDown, Zap,
@@ -74,28 +74,44 @@ const GROUPS: NavGroup[] = [
 ];
 
 export function AdminSidebar({
-  user, collapsed, onToggle,
-}: { user: User; collapsed: boolean; onToggle: () => void }) {
+  user, collapsed, onToggle, open, onClose,
+}: { user: User; collapsed: boolean; onToggle: () => void; open: boolean; onClose: () => void }) {
   const pathname = usePathname();
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useClickOutside<HTMLDivElement>(profileOpen, () => setProfileOpen(false));
 
+  // Navigation closes the mobile drawer.
+  useEffect(() => { onClose(); }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Drawer is always expanded on mobile; `collapsed` only applies to the desktop rail.
+  const wide = open || !collapsed;
+
   return (
+    <>
+      {open && (
+        <div
+          aria-hidden="true"
+          onClick={onClose}
+          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+        />
+      )}
     <aside
       style={{ background: 'var(--adm-surface)', borderColor: 'var(--adm-border)' }}
       className={cn(
-        'fixed inset-y-0 left-0 z-40 hidden shrink-0 flex-col border-r transition-[width] duration-200 md:flex',
-        collapsed ? 'w-16' : 'w-60',
+        'fixed inset-y-0 left-0 z-40 flex w-60 shrink-0 flex-col overflow-hidden border-r transition-transform duration-200',
+        open ? 'translate-x-0' : '-translate-x-full',
+        'md:translate-x-0 md:transition-[width]',
+        collapsed && 'md:w-16',
       )}
     >
       {/* ── Brand ── */}
       <div className="flex h-16 items-center justify-between px-4">
-        <AdminLogo collapsed={collapsed} />
+        <AdminLogo collapsed={!wide} />
         <button
           type="button"
           onClick={onToggle}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className="grid h-7 w-7 place-items-center rounded-md text-[color:var(--adm-fg-muted)] hover:bg-[color:var(--adm-bg)]"
+          className="hidden h-7 w-7 place-items-center rounded-md text-[color:var(--adm-fg-muted)] hover:bg-[color:var(--adm-bg)] md:grid"
         >
           {collapsed ? <ChevronsRight size={15} /> : <ChevronsLeft size={15} />}
         </button>
@@ -105,7 +121,7 @@ export function AdminSidebar({
       <nav className="flex-1 overflow-y-auto px-2.5 pb-4">
         {GROUPS.map((group) => (
           <div key={group.title} className="mt-4 first:mt-1">
-            {!collapsed && (
+            {wide && (
               <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--adm-fg-faint)' }}>
                 {group.title}
               </p>
@@ -121,7 +137,7 @@ export function AdminSidebar({
                 !hasChild && it.href !== '/admin' && (pathname?.startsWith(it.href + '/') ?? false)
               );
               return (
-                <NavItemLink key={it.href} item={it} active={active} collapsed={collapsed} />
+                <NavItemLink key={it.href} item={it} active={active} collapsed={!wide} />
               );
             })}
           </div>
@@ -144,7 +160,7 @@ export function AdminSidebar({
             >
               {(user.name || user.username || '?').slice(0, 2).toUpperCase()}
             </span>
-            {!collapsed && (
+            {wide && (
               <>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-xs font-semibold" style={{ color: 'var(--adm-fg)' }}>
@@ -195,6 +211,7 @@ export function AdminSidebar({
         </div>
       </div>
     </aside>
+    </>
   );
 }
 
