@@ -71,14 +71,16 @@ function iconForCategory(name: string, slug: string | null): React.ReactNode {
   return <Tag size={18} />;
 }
 
-const MAX_QUICK_LINKS = 8;
+
 
 export function HomeHero({ siteName = 'eSawda', categories = [] }: HomeHeroProps = {}) {
-  const quickLinks: QuickLink[] = categories.slice(0, MAX_QUICK_LINKS).map((c) => ({
-    label: c.name,
-    href: (c.slug ? `/category/${c.slug}` : `/ads?filter[category]=${c.id}`) as Route,
-    icon: iconForCategory(c.name, c.slug),
-  }));
+  const quickLinks: QuickLink[] = [...categories]
+    .sort((a, b) => a.name.length - b.name.length || a.name.localeCompare(b.name))
+    .map((c) => ({
+      label: c.name,
+      href: (c.slug ? `/category/${c.slug}` : `/ads?filter[category]=${c.id}`) as Route,
+      icon: iconForCategory(c.name, c.slug),
+    }));
   return (
     <section
       className="relative w-full overflow-x-clip"
