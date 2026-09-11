@@ -48,7 +48,7 @@ export function AdGallery({
           fill
           sizes="(min-width:1024px) 60vw, 100vw"
           priority
-          className="object-cover"
+          className="object-contain"
           unoptimized={hero.url.startsWith('/')}
         />
         {count > 1 && (
@@ -87,7 +87,7 @@ export function AdGallery({
                 i === active ? 'ring-2 ring-brand-700' : 'hover:opacity-90',
               )}
             >
-              <Image src={img.thumb} alt="" fill sizes="120px" className="object-cover" unoptimized={img.thumb.startsWith('/')} />
+              <Image src={img.thumb} alt="" fill sizes="120px" className="object-contain" unoptimized={img.thumb.startsWith('/')} />
             </button>
           ))}
         </div>
