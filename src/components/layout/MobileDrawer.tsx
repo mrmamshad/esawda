@@ -90,7 +90,6 @@ function getAuthLinks(isSeller: boolean): NavLink[] {
     { href: '/dashboard' as Route,    label: 'Dashboard' },
     { href: '/messages' as Route,     label: 'Messages' },
     { href: '/post/product' as Route, label: 'Post ad' },
-    { href: '/shop/apply' as Route,   label: 'Create a Shop' },
     { href: '/membership' as Route,   label: 'Membership' },
     { href: '/contact' as Route,      label: 'Support' },
   ];
