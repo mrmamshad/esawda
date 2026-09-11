@@ -27,3 +27,10 @@ test('image picker exposes only backend-supported formats', () => {
   assert.match(source, /accept="image\/jpeg,image\/png,image\/webp"/);
   assert.match(source, /All images are optional/);
 });
+
+
+test('post form accepts up to 25MB per image to match server rule', () => {
+  assert.match(source, /MAX_IMAGE_MB = 25/);
+  assert.match(source, /MAX_IMAGE_BYTES = MAX_IMAGE_MB \* 1024 \* 1024/);
+  assert.match(source, /larger than \$\{MAX_IMAGE_MB\}MB/);
+});

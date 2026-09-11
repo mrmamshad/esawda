@@ -64,6 +64,8 @@ type FormState = {
 };
 
 const MAX_PRODUCT_IMAGES = 4;
+const MAX_IMAGE_MB = 25;
+const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
 
 const INITIAL: FormState = {
   title: '', description: '', category: '', sub_category: '', child_category: '',
@@ -154,7 +156,7 @@ export default function AdForm({
     const paidListingPrice = price('paid_listing_price', 500);
   const sym = settings.currency_symbol || '৳';
 
-/** Mirrors StoreAdRequest images.* — up to 4 optional JPG/PNG/WebP files, each ≤5MB. */
+/** Mirrors StoreAdRequest images.* — up to 4 optional JPG/PNG/WebP files, each ≤25MB. */
 function validateImages(files: File[]): string | null {
   if (files.length > MAX_PRODUCT_IMAGES) return 'A product can have a maximum of 4 images.';
   const okTypes = ['image/jpeg', 'image/png', 'image/webp'];
@@ -166,8 +168,8 @@ function validateImages(files: File[]): string | null {
     if (!okTypes.includes(f.type) && !['jpg', 'jpeg', 'png', 'webp'].includes(ext ?? '')) {
       return `"${f.name}" is not accepted — please use JPG, PNG or WebP.`;
     }
-    if (f.size > 5 * 1024 * 1024) {
-      return `"${f.name}" is larger than 5MB. Please choose a smaller file.`;
+    if (f.size > MAX_IMAGE_BYTES) {
+      return `"${f.name}" is larger than ${MAX_IMAGE_MB}MB. Please choose a smaller file.`;
     }
   }
   return null;
@@ -784,7 +786,7 @@ function validateImages(files: File[]): string | null {
               {errors.images?.[0] && <p className="text-xs font-medium text-danger">{errors.images[0]}</p>}
               <Uploader
                 label={featuredImage ? 'Replace Main Image' : 'Upload Main Image'}
-                hint="Recommended: 810×450 JPG, PNG, or WebP up to 5MB. You may leave this blank if you upload gallery images."
+                hint="Recommended: 810×450 JPG, PNG, or WebP up to 25MB. Large files are optimized automatically after upload."
                 preview={featuredPreview}
                 disabled={!featuredImage && galleryImages.length >= MAX_PRODUCT_IMAGES}
                 onFilesPicked={(files) => {
