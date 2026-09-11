@@ -72,7 +72,7 @@ const INITIAL: FormState = {
   // Condition defaults to `used` (backend requires it; most P2P listings are
   // pre-owned) so an untouched form can never 422 on `condition`.
   condition: 'used', authenticity: '', brand: '',
-  plan: 'premium', featured: false, urgent: false, highlight: false, agree: false,
+  plan: 'free', featured: false, urgent: false, highlight: false, agree: false,
   guestName: '', guestMobile: '', guestPassword: '', guestPasswordConfirm: '',
 };
 
@@ -868,9 +868,9 @@ function validateImages(files: File[]): string | null {
               <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-danger">{error}</div>
             )}
 
-            <label className="flex items-center gap-2 text-sm text-ink">
-              <input type="checkbox" checked={form.agree} onChange={set('agree')} required />
-              I have read and agree to the <Link href={'/terms' as Route} className="text-brand-700 underline">Terms &amp; Conditions</Link>, <Link href={'/refund-policy' as Route} className="text-brand-700 underline">Refund &amp; Cancellation Policy</Link>, and <Link href={'/privacy' as Route} className="text-brand-700 underline">Privacy Policy</Link>
+            <label className="flex items-start gap-2 text-sm text-ink">
+              <input type="checkbox" checked={form.agree} onChange={set('agree')} required className="mt-1 h-4 w-4 shrink-0" />
+              <span className="min-w-0 leading-6">I have read and agree to the <Link href={'/terms' as Route} className="whitespace-nowrap text-brand-700 underline">Terms &amp; Conditions</Link>, <Link href={'/refund-policy' as Route} className="whitespace-nowrap text-brand-700 underline">Refund &amp; Cancellation Policy</Link>, and <Link href={'/privacy' as Route} className="whitespace-nowrap text-brand-700 underline">Privacy Policy</Link></span>
             </label>
 
             <div className="flex justify-end gap-3">
