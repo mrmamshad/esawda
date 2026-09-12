@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { ColumnDef } from '@tanstack/react-table';
 import {
-  Star, CheckCircle2, XCircle, Trash2, Sparkles,
+  Star, CheckCircle2, XCircle, Trash2, Sparkles, Eye, EyeOff,
 } from 'lucide-react';
 import { AdminTable } from '@/components/admin/v2/AdminTable';
 import { StatusBadge } from '@/components/admin/v2/StatusBadge';
@@ -22,6 +22,7 @@ export type AdminAdRow = {
   status: string;
   price: number;
   featured: string | null;
+  hide?: string | null;
   condition?: string;
   created_at?: string | null;
   user?: { id: number; username: string; name: string | null } | null;
@@ -115,8 +116,20 @@ export function AdsTableClient({ initialRows }: { initialRows: AdminAdRow[] }) {
       id: 'status',
       accessorKey: 'status',
       header: 'Status',
-      cell: (info) => <StatusBadge value={info.getValue() as string} />,
-      size: 110,
+      cell: (info) => {
+        const r = info.row.original;
+        return (
+          <span className="inline-flex flex-wrap items-center gap-1">
+            <StatusBadge value={info.getValue() as string} />
+            {r.hide === '1' && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-500">
+                <EyeOff size={11} /> Hidden
+              </span>
+            )}
+          </span>
+        );
+      },
+      size: 130,
     },
     {
       id: 'featured',
@@ -135,14 +148,22 @@ export function AdsTableClient({ initialRows }: { initialRows: AdminAdRow[] }) {
       cell: (info) => {
         const r = info.row.original;
         const isFeatured = r.featured === '1';
+        const isHidden = r.hide === '1';
         const actions: RowAction[] = [];
         if (r.status === 'pending') actions.push({
           label: 'Approve', icon: <CheckCircle2 size={13} />, disabled: busyId === r.id || pending,
           onClick: () => call(r.id, '/approve', 'POST', undefined, 'Ad approved'),
         });
-        if (r.status !== 'expire' && r.status !== 'removed') actions.push({
+        // No repeat Reject — already-rejected ads stay rejected.
+        if (r.status === 'pending' || r.status === 'active') actions.push({
           label: 'Reject', icon: <XCircle size={13} />, disabled: busyId === r.id || pending,
           onClick: () => call(r.id, '/reject', 'POST', { reason: 'Rejected by admin' }, 'Ad rejected'),
+        });
+        // Inactive switch — hides from the marketplace without changing status.
+        actions.push({
+          label: isHidden ? 'Unhide' : 'Hide', icon: isHidden ? <Eye size={13} /> : <EyeOff size={13} />,
+          disabled: busyId === r.id || pending,
+          onClick: () => call(r.id, isHidden ? '/unhide' : '/hide', 'POST', undefined, isHidden ? 'Ad visible' : 'Ad hidden'),
         });
         actions.push({
           label: isFeatured ? 'Unfeature' : 'Feature',
