@@ -4,21 +4,16 @@ import type { Route } from 'next';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
 import { getSessionUser } from '@/lib/session';
 import { apiFromServer } from '@/lib/api';
-import type { ShopCategory } from '@/types/api';
+import type { Category } from '@/types/api';
 import { ShopApplyForm } from '@/components/shop/v2/ShopApplyForm';
 
 export const metadata: Metadata = { title: 'Open your shop' };
 export const dynamic = 'force-dynamic';
 
-/**
- * Shop-taxonomy names for the shop-category dropdown — the SAME list the
- * /shops sidebar and filter use. (Product categories look similar but use
- * different names like "Fashion", which would never match the sidebar.)
- * Empty → the form falls back to its built-in shop-taxonomy list.
- */
+/** Product-category names for the shop-category dropdown (single taxonomy). */
 async function loadCategoryNames(): Promise<string[]> {
   try {
-    const res = await apiFromServer<ShopCategory[]>('/shop-categories', { revalidate: 300 });
+    const res = await apiFromServer<Category[]>('/categories', { revalidate: 300 });
     return (res.data ?? []).map((c) => c.name).filter(Boolean);
   } catch {
     return [];

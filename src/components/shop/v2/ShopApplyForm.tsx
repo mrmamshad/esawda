@@ -13,23 +13,28 @@ import { Button } from '@/components/ui/Button';
 import { PasswordInput } from '@/components/forms/PasswordInput';
 import type { User } from '@/types/api';
 
-/** Fallback when /settings is unreachable — the admin list wins when present. */
-const FALLBACK_SHOP_CATEGORIES = [
-  'Electronics', 'Fashion & Apparel', 'Groceries & Food', 'Health & Beauty',
-  'Home & Living', 'Mobiles & Gadgets', 'Vehicles & Parts', 'Baby & Kids',
-  'Sports & Outdoors', 'Books & Stationery', 'Services', 'Other',
-];
+/** Last-resort list when the taxonomy APIs are unreachable. */
+const FALLBACK_SHOP_CATEGORIES: string[] = [];
 
-/** Admins edit `shop_categories` in Settings as JSON array, CSV or newlines. */
+/** Accepts the /shop-categories endpoint shape ([{name,…}] or strings). */
 function parseCategories(raw: unknown): string[] {
-  if (Array.isArray(raw)) return raw.map(String).map((s) => s.trim()).filter(Boolean);
+  if (Array.isArray(raw)) {
+    return raw
+      .map((item) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object' && 'name' in item) return String((item as { name: unknown }).name ?? '');
+        return '';
+      })
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
   if (typeof raw !== 'string') return [];
   const t = raw.trim();
   if (!t) return [];
   if (t.startsWith('[')) {
     try {
       const arr = JSON.parse(t) as unknown;
-      if (Array.isArray(arr)) return arr.map(String).map((s) => s.trim()).filter(Boolean);
+      if (Array.isArray(arr)) return parseCategories(arr);
     } catch { /* fall through to delimiter split */ }
   }
   return t.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
@@ -100,16 +105,17 @@ export function ShopApplyForm({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [done, setDone] = useState(false);
 
-  // Admin-driven category list (cached 5 min server-side) — skipped when
-  // the page already passed live DB categories.
+  // Single-taxonomy category list (product categories) via the same
+  // endpoint the /shops sidebar uses — skipped when the page already
+  // passed live names.
   useEffect(() => {
     if (categoryOptions.length > 0) return;
     let cancelled = false;
-    fetch(`${env.api.base}/settings`, { headers: { Accept: 'application/json' } })
+    fetch(`${env.api.base}/shop-categories`, { headers: { Accept: 'application/json' } })
       .then((r) => (r.ok ? r.json() : null))
       .then((payload) => {
         if (cancelled) return;
-        const list = parseCategories(payload?.data?.settings?.shop_categories);
+        const list = parseCategories(payload?.data);
         if (list.length > 0) setShopCategories(list);
       })
       .catch(() => { /* fallback list stays */ });

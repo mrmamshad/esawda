@@ -3,10 +3,14 @@ import type { Route } from 'next';
 import type { ReactNode } from 'react';
 import {
   Baby,
+  Bike,
   BookOpen,
   BriefcaseBusiness,
+  Building2,
   Car,
+  Clapperboard,
   Cpu,
+  CupSoda,
   Dumbbell,
   HeartPulse,
   House,
@@ -14,25 +18,41 @@ import {
   Shirt,
   ShoppingBasket,
   Smartphone,
+  Sparkles,
   Store,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import type { ShopCategory } from '@/types/api';
 
-const iconMap: Record<string, ReactNode> = {
-  Electronics: <Cpu size={17} />,
-  'Fashion & Apparel': <Shirt size={17} />,
-  'Groceries & Food': <ShoppingBasket size={17} />,
-  'Health & Beauty': <HeartPulse size={17} />,
-  'Home & Living': <House size={17} />,
-  'Mobiles & Gadgets': <Smartphone size={17} />,
-  'Vehicles & Parts': <Car size={17} />,
-  'Baby & Kids': <Baby size={17} />,
-  'Sports & Outdoors': <Dumbbell size={17} />,
-  'Books & Stationery': <BookOpen size={17} />,
-  Services: <BriefcaseBusiness size={17} />,
-  Other: <Shapes size={17} />,
-};
+/**
+ * Keyword icon matcher (same idea as the homepage chips) — shop categories
+ * ARE product categories, whose names are admin-managed data, so exact-name
+ * maps go stale. Unknown names fall back to a neutral store.
+ */
+function iconForShopCategory(name: string): ReactNode {
+  const hay = name.toLowerCase();
+  if (/\bbike|\bcycle|scooter/.test(hay)) return <Bike size={17} />;
+  if (/beauty|cosmetic|salon|\bspa\b|personal care/.test(hay)) return <Sparkles size={17} />;
+  if (/\bcar\b|\bcars\b|vehicle|\bauto\b|moto/.test(hay)) return <Car size={17} />;
+  if (/mobil|phone|tablet|smart/.test(hay)) return <Smartphone size={17} />;
+  if (/electronic|laptop|computer|cpu|gadget/.test(hay)) return <Cpu size={17} />;
+  if (/real|estate|property|apartment|plot/.test(hay)) return <Building2 size={17} />;
+  if (/hotel|tour|travel/.test(hay)) return <Building2 size={17} />;
+  if (/furniture|sofa|decor/.test(hay)) return <House size={17} />;
+  if (/\bhome\b|living/.test(hay)) return <House size={17} />;
+  if (/galler|market|shop|store/.test(hay)) return <Store size={17} />;
+  if (/grocer|food|beverage|restaurant/.test(hay)) return <ShoppingBasket size={17} />;
+  if (/fashion|cloth|shirt|wear|apparel/.test(hay)) return <Shirt size={17} />;
+  if (/health|heart|medical|pharma/.test(hay)) return <HeartPulse size={17} />;
+  if (/baby|kid|toy|child/.test(hay)) return <Baby size={17} />;
+  if (/book|stationery|read/.test(hay)) return <BookOpen size={17} />;
+  if (/sport|hobby|game|fitness|outdoor/.test(hay)) return <Dumbbell size={17} />;
+  if (/job|career|hiring/.test(hay)) return <BriefcaseBusiness size={17} />;
+  if (/entertain|movie|music|film/.test(hay)) return <Clapperboard size={17} />;
+  if (/drink|soda|juice|beverage/.test(hay)) return <CupSoda size={17} />;
+  if (/service|repair|plumb|electric/.test(hay)) return <BriefcaseBusiness size={17} />;
+  return <Shapes size={17} />;
+}
 
 /** Independent shop taxonomy rail; never mixes in product categories. */
 export function ShopCategorySidebar({
@@ -83,7 +103,7 @@ export function ShopCategorySidebar({
                 className={linkClass(active)}
               >
                 <span className={active ? 'text-brand-800' : 'text-brand-700'}>
-                  {iconMap[category.name] ?? <Store size={17} />}
+                  {iconForShopCategory(category.name)}
                 </span>
                 <span className="min-w-0 flex-1 truncate">{category.name}</span>
                 <span className="text-xs tabular-nums text-ink-faint">
