@@ -16,6 +16,8 @@ export type AdminUserRow = {
   username: string;
   email: string;
   name: string | null;
+  phone?: string | null;
+  address?: string | null;
   user_type: string;
   status: string;
   created_at: string | null;
@@ -70,6 +72,31 @@ export function UsersTableClient({ initialRows }: { initialRows: AdminUserRow[] 
       header: 'Type',
       cell: (info) => <span className="capitalize" style={{ color: 'var(--adm-fg-muted)' }}>{info.getValue() as string}</span>,
       size: 100,
+    },
+    {
+      id: 'contact',
+      accessorKey: 'name',
+      header: 'Contact',
+      cell: (info) => {
+        const r = info.row.original;
+        return (
+          <div className="min-w-0 text-[12.5px]">
+            <p className="truncate" style={{ color: 'var(--adm-fg)' }}>{r.name || '—'}</p>
+            <p className="tabular-nums text-[11px]" style={{ color: 'var(--adm-fg-faint)' }}>{r.phone || '—'}</p>
+          </div>
+        );
+      },
+      size: 170,
+    },
+    {
+      id: 'address',
+      accessorKey: 'address',
+      header: 'Address',
+      cell: (info) => {
+        const v = info.getValue() as string | null;
+        return <span className="block max-w-44 truncate text-[12.5px]" style={{ color: 'var(--adm-fg-muted)' }}>{v || '—'}</span>;
+      },
+      size: 170,
     },
     {
       id: 'status',
