@@ -72,7 +72,7 @@ export function PlanCard({
         ))}
       </ul>
 
-      <div className="mt-8">
+      <div className="mt-auto pt-8">
         <Link href={`/membership/checkout/${plan.id}?cadence=${cadence}` as Route} className="contents">
           <Button variant={highlighted ? 'filled' : 'outline'} size="lg" fullWidth>
             {price > 0 ? 'Subscribe' : 'Get Started'}
