@@ -12,7 +12,7 @@ import { formatMoney } from '@/lib/format';
 import type { Plan } from '@/types/api';
 
 type Cadence = 'monthly' | 'annual';
-type PlanSettings = { ads_limit?: number; featured_ads?: number; duration_days?: number };
+type PlanSettings = { ads_limit?: number; featured_ads?: number; duration_days?: number; features?: unknown };
 
 function settingsOf(plan: Plan): PlanSettings {
   return plan.settings && typeof plan.settings === 'object' && !Array.isArray(plan.settings)
@@ -22,6 +22,11 @@ function settingsOf(plan: Plan): PlanSettings {
 
 function featuresOf(plan: Plan): string[] {
   const settings = settingsOf(plan);
+  // Admin-written offer bullets win; otherwise derive from the numeric limits.
+  if (Array.isArray(settings.features)) {
+    const custom = settings.features.map(String).map((s) => s.trim()).filter(Boolean).slice(0, 20);
+    if (custom.length > 0) return custom;
+  }
   return [
     settings.ads_limit ? `${settings.ads_limit} product listings` : 'Flexible product listings',
     settings.featured_ads ? `${settings.featured_ads} featured product boosts` : 'Standard marketplace visibility',
@@ -49,6 +54,9 @@ export function ShopPlansClient({
   const [processingPlanId, setProcessingPlanId] = useState<number | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [showConsent, setShowConsent] = useState<number | null>(null);
+  // Hovered card borrows the featured (red-border) look so every plan
+  // gets the Starter-style highlight on hover.
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
   const highestSaving = useMemo(() => Math.max(0, ...plans.map(savingFor)), [plans]);
 
   const startCheckout = async (consent: PaymentConsentFormData, planId: number, billingCadence: Cadence) => {
@@ -146,6 +154,7 @@ export function ShopPlansClient({
       <div className="mt-6 grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
         {plans.map((plan, index) => {
           const featured = plan.recommended || (plans.every(item => !item.recommended) && index === 1);
+          const highlighted = featured || hoveredId === plan.id;
           const current = currentPlanId !== null && String(plan.id) === String(currentPlanId);
           const effectiveCadence: Cadence = cadence === 'annual' && plan.annual_price > 0 ? 'annual' : 'monthly';
           const price = effectiveCadence === 'annual' ? plan.annual_price : plan.monthly_price;
@@ -155,21 +164,23 @@ export function ShopPlansClient({
           return (
             <article
               key={plan.id}
+              onMouseEnter={() => setHoveredId(plan.id)}
+              onMouseLeave={() => setHoveredId(null)}
               className={`relative flex min-h-[420px] flex-col overflow-hidden rounded-2xl border p-6 transition duration-200 hover:-translate-y-1 hover:shadow-xl ${
-                featured ? 'shadow-lg' : 'bg-[color:var(--shp-surface)]'
+                highlighted ? 'shadow-lg' : 'bg-[color:var(--shp-surface)]'
               }`}
               style={{
-                borderColor: featured ? 'var(--shp-accent)' : 'var(--shp-border)',
-                background: featured ? 'linear-gradient(155deg, var(--shp-surface) 55%, var(--shp-accent-soft))' : undefined,
+                borderColor: highlighted ? 'var(--shp-accent)' : 'var(--shp-border)',
+                background: highlighted ? 'linear-gradient(155deg, var(--shp-surface) 55%, var(--shp-accent-soft))' : undefined,
               }}
             >
-              {featured && <div className="absolute inset-x-0 top-0 h-1 bg-[color:var(--shp-accent)]" />}
+              {highlighted && <div className="absolute inset-x-0 top-0 h-1 bg-[color:var(--shp-accent)]" />}
 
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-lg font-bold text-[color:var(--shp-fg)]">{plan.name}</h3>
-                    {featured && <Sparkles size={16} className="text-[color:var(--shp-accent)]" />}
+                    {highlighted && <Sparkles size={16} className="text-[color:var(--shp-accent)]" />}
                   </div>
                   <p className="mt-1 min-h-5 text-xs font-medium text-[color:var(--shp-fg-muted)]">{plan.badge || 'Built for growing online shops'}</p>
                 </div>
@@ -219,11 +230,11 @@ export function ShopPlansClient({
                     onClick={() => setShowConsent(plan.id)}
                     disabled={processingPlanId !== null || showConsent !== null}
                     className={`flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold transition disabled:cursor-wait disabled:opacity-70 ${
-                      featured
+                      highlighted
                         ? 'bg-[color:var(--shp-accent)] text-white hover:brightness-110'
                         : 'border text-[color:var(--shp-fg)] hover:bg-[color:var(--shp-bg)]'
                     }`}
-                    style={featured ? undefined : { borderColor: 'var(--shp-border)' }}
+                    style={highlighted ? undefined : { borderColor: 'var(--shp-border)' }}
                   >
                     <Zap size={16} />
                     {processingPlanId === plan.id ? 'Opening secure payment…' : `Subscribe to ${plan.name}`}

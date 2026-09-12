@@ -20,17 +20,36 @@ export type AdminPlanRow = {
   recommended: boolean | number;
   is_free: boolean | number | null;
   status: string | null;
+  /** Raw model from GET /admin/plans — settings arrives as a JSON string. */
+  settings?: unknown;
 };
+
+/** "one feature per line" textarea → clean string list for the API. */
+function parseFeatureLines(raw: string): string[] {
+  return raw.split('\n').map((s) => s.trim()).filter(Boolean).slice(0, 20);
+}
+
+/** Read the stored offer bullets regardless of string/object shape. */
+function featuresFromSettings(settings: unknown): string[] {
+  try {
+    const obj = typeof settings === 'string' ? JSON.parse(settings) as unknown : settings;
+    if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+      const list = (obj as Record<string, unknown>).features;
+      if (Array.isArray(list)) return list.map(String).map((s) => s.trim()).filter(Boolean).slice(0, 20);
+    }
+  } catch { /* corrupt JSON — treat as no features */ }
+  return [];
+}
 
 export function PlansTableClient({ initialRows }: { initialRows: AdminPlanRow[] }) {
   const router = useRouter();
   const [rows, setRows] = useState<AdminPlanRow[]>(initialRows);
-  const [form, setForm] = useState({ name: '', monthly_price: '', annual_price: '', badge: '', is_free: false, ads_limit: '20', featured_ads: '5', duration_days: '30' });
+  const [form, setForm] = useState({ name: '', monthly_price: '', annual_price: '', badge: '', is_free: false, ads_limit: '20', featured_ads: '5', duration_days: '30', features: '' });
   const [busyId, setBusyId] = useState<number | null>(null);
   const [creating, setCreating] = useState(false);
   const [pending, start] = useTransition();
   const [editing, setEditing] = useState<AdminPlanRow | null>(null);
-  const [editForm, setEditForm] = useState({ name: '', monthly_price: '', annual_price: '', badge: '', is_free: false });
+  const [editForm, setEditForm] = useState({ name: '', monthly_price: '', annual_price: '', badge: '', is_free: false, features: '' });
   const [saving, setSaving] = useState(false);
 
   const refresh = async () => {
@@ -57,10 +76,11 @@ export function PlansTableClient({ initialRows }: { initialRows: AdminPlanRow[] 
             featured_ads: parseInt(form.featured_ads || '0', 10),
             duration_days: parseInt(form.duration_days || '30', 10),
           } : {}),
+          ...(parseFeatureLines(form.features).length > 0 ? { features: parseFeatureLines(form.features) } : {}),
         },
       });
       toast.success('Plan created');
-      setForm({ name: '', monthly_price: '', annual_price: '', badge: '', is_free: false, ads_limit: '20', featured_ads: '5', duration_days: '30' });
+      setForm({ name: '', monthly_price: '', annual_price: '', badge: '', is_free: false, ads_limit: '20', featured_ads: '5', duration_days: '30', features: '' });
       await refresh();
     } catch (e2) {
       toast.error(e2 instanceof Error ? e2.message : 'Create failed');
@@ -87,6 +107,7 @@ export function PlansTableClient({ initialRows }: { initialRows: AdminPlanRow[] 
       annual_price: String(row.annual_price ?? ''),
       badge: row.badge ?? '',
       is_free: row.is_free === true || Number(row.is_free) === 1,
+      features: featuresFromSettings(row.settings).join('\n'),
     });
   };
 
@@ -103,6 +124,7 @@ export function PlansTableClient({ initialRows }: { initialRows: AdminPlanRow[] 
           annual_price: parseFloat(editForm.annual_price || '0'),
           badge: editForm.badge.trim() || null,
           is_free: editForm.is_free,
+          features: parseFeatureLines(editForm.features),
         },
       });
       toast.success('Plan updated');
@@ -219,6 +241,18 @@ export function PlansTableClient({ initialRows }: { initialRows: AdminPlanRow[] 
         >
           {creating ? 'Adding…' : 'Add plan'}
         </button>
+        <div className="md:col-span-5">
+          <label className="mb-1 block text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--adm-fg-faint)' }}>Offer bullets (optional, one per line)</label>
+          <textarea
+            rows={3}
+            value={form.features}
+            onChange={(e) => setForm({ ...form, features: e.target.value })}
+            placeholder={'e.g.\n20 product listings\n5 featured product boosts'}
+            className="w-full rounded-md border px-3 py-2 text-[13px] outline-none focus:ring-2"
+            style={{ background: 'var(--adm-bg)', borderColor: 'var(--adm-border)', color: 'var(--adm-fg)' }}
+          />
+          <p className="mt-1 text-[11px]" style={{ color: 'var(--adm-fg-faint)' }}>Shown as the checkmark list on the shop plan page. Empty = automatic bullets.</p>
+        </div>
       </form>
 
       <AdminTable
@@ -263,6 +297,17 @@ export function PlansTableClient({ initialRows }: { initialRows: AdminPlanRow[] 
             <div>
               <label className="mb-1 block text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--adm-fg-faint)' }}>Badge (optional)</label>
               <input value={editForm.badge} onChange={(e) => setEditForm({ ...editForm, badge: e.target.value })} placeholder="e.g. LAUNCH OFFER" className={inp} style={{ background: 'var(--adm-bg)', borderColor: 'var(--adm-border)', color: 'var(--adm-fg)' }} />
+            </div>
+            <div>
+              <label className="mb-1 block text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--adm-fg-faint)' }}>Offer bullets (one per line)</label>
+              <textarea
+                rows={4}
+                value={editForm.features}
+                onChange={(e) => setEditForm({ ...editForm, features: e.target.value })}
+                placeholder="Empty = automatic bullets"
+                className="w-full rounded-md border px-3 py-2 text-[13px] outline-none focus:ring-2"
+                style={{ background: 'var(--adm-bg)', borderColor: 'var(--adm-border)', color: 'var(--adm-fg)' }}
+              />
             </div>
             <label className="flex cursor-pointer items-center gap-2 text-[12.5px] font-semibold" style={{ color: 'var(--adm-fg)' }}>
               <input type="checkbox" checked={editForm.is_free} onChange={(e) => setEditForm({ ...editForm, is_free: e.target.checked })} className="h-4 w-4 accent-green-600" />
