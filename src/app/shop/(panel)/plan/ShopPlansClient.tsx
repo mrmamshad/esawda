@@ -9,32 +9,10 @@ import { readToken } from '@/lib/auth';
 import { generateIdempotencyKey } from '@/lib/idempotency';
 import { isSafePaymentRedirect } from '@/lib/paymentRedirect';
 import { formatMoney } from '@/lib/format';
+import { planFeatures as featuresOf } from '@/lib/planFeatures';
 import type { Plan } from '@/types/api';
 
 type Cadence = 'monthly' | 'annual';
-type PlanSettings = { ads_limit?: number; featured_ads?: number; duration_days?: number; features?: unknown };
-
-function settingsOf(plan: Plan): PlanSettings {
-  return plan.settings && typeof plan.settings === 'object' && !Array.isArray(plan.settings)
-    ? plan.settings as PlanSettings
-    : {};
-}
-
-function featuresOf(plan: Plan): string[] {
-  const settings = settingsOf(plan);
-  // Admin-written offer bullets win; otherwise derive from the numeric limits.
-  if (Array.isArray(settings.features)) {
-    const custom = settings.features.map(String).map((s) => s.trim()).filter(Boolean).slice(0, 20);
-    if (custom.length > 0) return custom;
-  }
-  return [
-    settings.ads_limit ? `${settings.ads_limit} product listings` : 'Flexible product listings',
-    settings.featured_ads ? `${settings.featured_ads} featured product boosts` : 'Standard marketplace visibility',
-    settings.duration_days ? `${settings.duration_days}-day listing duration` : 'Long-running product visibility',
-    'Buyer messaging and sales dashboard',
-    'Shop performance insights',
-  ];
-}
 
 function savingFor(plan: Plan): number {
   if (plan.monthly_price <= 0 || plan.annual_price <= 0) return 0;
@@ -152,8 +130,8 @@ export function ShopPlansClient({
       </p>
 
       <div className="mt-6 grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
-        {plans.map((plan, index) => {
-          const featured = plan.recommended || (plans.every(item => !item.recommended) && index === 1);
+        {plans.map((plan) => {
+          const featured = plan.recommended;
           const highlighted = featured || hoveredId === plan.id;
           const current = currentPlanId !== null && String(plan.id) === String(currentPlanId);
           const effectiveCadence: Cadence = cadence === 'annual' && plan.annual_price > 0 ? 'annual' : 'monthly';

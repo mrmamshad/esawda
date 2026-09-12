@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { Check } from 'lucide-react';
@@ -5,12 +8,14 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { formatMoney } from '@/lib/format';
 import { cn } from '@/lib/cn';
+import { planFeatures } from '@/lib/planFeatures';
 import type { Plan } from '@/types/api';
 import type { Cadence } from './PricingToggle';
 
 /**
- * Membership tier card. Featured variant adds brand-700 ring + Most-popular
- * badge and switches the CTA to filled.
+ * Membership tier card. `featured` (admin `recommended`) adds the brand-700
+ * ring + Most-popular badge + filled CTA; otherwise the card stays normal
+ * and borrows the same look on hover.
  */
 export function PlanCard({
   plan,
@@ -31,11 +36,17 @@ export function PlanCard({
   const priceLabel = price > 0 ? formatMoney(price, currency) : 'Free';
   const per = price > 0 ? (cadence === 'annual' ? '/year' : '/month') : '';
 
-  const ring = featured ? 'ring-2 ring-brand-700' : 'ring-1 ring-line';
-  const list = features && features.length ? features : deriveFeatures(plan);
+  const [hovered, setHovered] = useState(false);
+  const highlighted = Boolean(featured) || hovered;
+  const ring = highlighted ? 'ring-2 ring-brand-700' : 'ring-1 ring-line';
+  const list = features && features.length ? features : planFeatures(plan);
 
   return (
-    <div className={cn('surface-card relative flex flex-col p-8', ring, className)}>
+    <div
+      className={cn('surface-card relative flex flex-col p-8 transition duration-200 hover:-translate-y-1 hover:shadow-xl', ring, className)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       {featured && (
         <Badge tone="featured" className="absolute -top-3 left-1/2 -translate-x-1/2">
           Most popular
@@ -63,21 +74,11 @@ export function PlanCard({
 
       <div className="mt-8">
         <Link href={`/membership/checkout/${plan.id}?cadence=${cadence}` as Route} className="contents">
-          <Button variant={featured ? 'filled' : 'outline'} size="lg" fullWidth>
+          <Button variant={highlighted ? 'filled' : 'outline'} size="lg" fullWidth>
             {price > 0 ? 'Subscribe' : 'Get Started'}
           </Button>
         </Link>
       </div>
     </div>
   );
-}
-
-function deriveFeatures(plan: Plan): string[] {
-  // Fallback bullet copy when the backend didn't provide a features list.
-  return [
-    `${plan.name} tier access`,
-    plan.recommended ? 'Featured badge on your products' : 'Standard product listings',
-    'Direct chat with buyers',
-    'Analytics & insights',
-  ];
 }

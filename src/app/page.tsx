@@ -9,7 +9,7 @@ import { HomeSections } from '@/components/home/HomeSections';
 import { SectionHeader } from '@/components/home/SectionHeader';
 import { BlogCard } from '@/components/blog/BlogCard';
 import { TestimonialCard } from '@/components/ui/TestimonialCard';
-import { PlanCard } from '@/components/membership/PlanCard';
+import { HomePlansSection } from '@/components/home/HomePlansSection';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { api, ApiError } from '@/lib/api';
 import type { Ad, Blog, Category, Plan, Testimonial } from '@/types/api';
@@ -165,14 +165,8 @@ async function loadLegacy(): Promise<HomeData> {
                 eyebrow="Level up"
                 title={<>Grow your reach with a <span className="text-brand-700">seller tier.</span></>}
                 description="Pick the plan that matches your ambition — from casual sellers to power dealers."
-                actionLabel="Compare plans"
-                actionHref={'/membership' as Route}
               />
-              <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {activePlans.map((p, i) => (
-                  <PlanCard key={p.id} plan={p} cadence="monthly" featured={p.recommended || i === 1} />
-                ))}
-              </div>
+              <HomePlansSection plans={activePlans} />
             </div>
           </section>
         )}
