@@ -62,7 +62,6 @@ export function ShopCard({ shop }: { shop: Shop }) {
                 {shop.shop_name}
               </Link>
             </h2>
-            <p className="mt-0.5 truncate text-xs text-ink-muted">Owned by {shop.name}</p>
           </div>
           {shop.shop_verified && (
             <span title="Verified shop" aria-label="Verified shop" className="mt-0.5 text-green-600">
