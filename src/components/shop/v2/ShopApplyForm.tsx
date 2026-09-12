@@ -319,7 +319,7 @@ export function ShopApplyForm({
 
       <div className="mt-6 grid gap-5 sm:grid-cols-2">
         <div>
-          <label className={label}>Owner name *</label>
+          <label className={label}>Owner name / Authorized person *</label>
           <input className={field} value={ownerName} onChange={e => setOwnerName(e.target.value)} required />
         </div>
         <div>
