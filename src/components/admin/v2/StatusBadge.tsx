@@ -19,6 +19,7 @@ const MAP: Record<string, { bg: string; fg: string; label?: string }> = {
   sold_out:  { bg: 'var(--adm-danger-soft)',  fg: 'var(--adm-danger)' },
   removed:   { bg: 'var(--adm-danger-soft)',  fg: 'var(--adm-danger)', label: 'Removed' },
   rejected:  { bg: 'var(--adm-danger-soft)',  fg: 'var(--adm-danger)' },
+  inactive:  { bg: 'var(--adm-bg)',           fg: 'var(--adm-fg-muted)', label: 'Inactive' },
 };
 
 export function StatusBadge({ value, className }: { value: string | number | null | undefined; className?: string }) {

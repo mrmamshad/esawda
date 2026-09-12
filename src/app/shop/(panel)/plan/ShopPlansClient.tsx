@@ -158,7 +158,7 @@ export function ShopPlansClient({
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-lg font-bold text-[color:var(--shp-fg)]">{plan.name}</h3>
-                    {highlighted && <Sparkles size={16} className="text-[color:var(--shp-accent)]" />}
+                    {featured && <Sparkles size={16} className="text-[color:var(--shp-accent)]" />}
                   </div>
                   <p className="mt-1 min-h-5 text-xs font-medium text-[color:var(--shp-fg-muted)]">{plan.badge || 'Built for growing online shops'}</p>
                 </div>

@@ -129,8 +129,6 @@ export function AdminTopbar({ user, onOpenNav }: { user: User; onOpenNav: () => 
                 {[
                   // Admin quick-new stays inside the admin panel so operators
                   // never bounce out to the public/shop chrome mid-workflow.
-                  { href: '/admin/ads/new',  label: 'New product' },
-                  { href: '/admin/users',    label: 'New user' },
                   { href: '/admin/blog/new', label: 'New blog post' },
                 ].map((it) => (
                   <Link

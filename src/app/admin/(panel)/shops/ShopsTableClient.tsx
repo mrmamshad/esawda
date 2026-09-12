@@ -148,7 +148,7 @@ export function ShopsTableClient({ initialRows }: { initialRows: AdminShopRow[] 
     },
     {
       id: 'status', accessorKey: 'status', header: 'Status',
-      cell: (info) => <StatusBadge value={(info.getValue() as string) === '1' ? 'active' : 'expired'} />,
+      cell: (info) => <StatusBadge value={(info.getValue() as string) === '1' ? 'active' : 'inactive'} />,
       size: 100,
     },
     {
