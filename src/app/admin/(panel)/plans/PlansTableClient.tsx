@@ -17,7 +17,7 @@ export type AdminPlanRow = {
   monthly_price: number | null;
   annual_price: number | null;
   badge: string | null;
-  recommended: boolean | number;
+  recommended: boolean | number | string;
   is_free: boolean | number | null;
   status: string | null;
   /** Raw model from GET /admin/plans — settings arrives as a JSON string. */
@@ -44,12 +44,12 @@ function featuresFromSettings(settings: unknown): string[] {
 export function PlansTableClient({ initialRows }: { initialRows: AdminPlanRow[] }) {
   const router = useRouter();
   const [rows, setRows] = useState<AdminPlanRow[]>(initialRows);
-  const [form, setForm] = useState({ name: '', monthly_price: '', annual_price: '', badge: '', is_free: false, ads_limit: '20', featured_ads: '5', duration_days: '30', features: '' });
+  const [form, setForm] = useState({ name: '', monthly_price: '', annual_price: '', badge: '', is_free: false, ads_limit: '20', featured_ads: '5', duration_days: '30', features: '', recommended: false });
   const [busyId, setBusyId] = useState<number | null>(null);
   const [creating, setCreating] = useState(false);
   const [pending, start] = useTransition();
   const [editing, setEditing] = useState<AdminPlanRow | null>(null);
-  const [editForm, setEditForm] = useState({ name: '', monthly_price: '', annual_price: '', badge: '', is_free: false, features: '' });
+  const [editForm, setEditForm] = useState({ name: '', monthly_price: '', annual_price: '', badge: '', is_free: false, features: '', recommended: false });
   const [saving, setSaving] = useState(false);
 
   const refresh = async () => {
@@ -71,6 +71,7 @@ export function PlansTableClient({ initialRows }: { initialRows: AdminPlanRow[] 
           annual_price:  parseFloat(form.annual_price  || '0'),
           badge: form.badge || null,
           is_free: form.is_free,
+          recommended: form.recommended,
           ...(form.is_free ? {
             ads_limit: parseInt(form.ads_limit || '20', 10),
             featured_ads: parseInt(form.featured_ads || '0', 10),
@@ -80,7 +81,7 @@ export function PlansTableClient({ initialRows }: { initialRows: AdminPlanRow[] 
         },
       });
       toast.success('Plan created');
-      setForm({ name: '', monthly_price: '', annual_price: '', badge: '', is_free: false, ads_limit: '20', featured_ads: '5', duration_days: '30', features: '' });
+      setForm({ name: '', monthly_price: '', annual_price: '', badge: '', is_free: false, ads_limit: '20', featured_ads: '5', duration_days: '30', features: '', recommended: false });
       await refresh();
     } catch (e2) {
       toast.error(e2 instanceof Error ? e2.message : 'Create failed');
@@ -108,6 +109,8 @@ export function PlansTableClient({ initialRows }: { initialRows: AdminPlanRow[] 
       badge: row.badge ?? '',
       is_free: row.is_free === true || Number(row.is_free) === 1,
       features: featuresFromSettings(row.settings).join('\n'),
+      // Admin index returns the raw enum string ('yes'/'no').
+      recommended: row.recommended === true || row.recommended === 'yes' || Number(row.recommended) === 1,
     });
   };
 
@@ -124,6 +127,7 @@ export function PlansTableClient({ initialRows }: { initialRows: AdminPlanRow[] 
           annual_price: parseFloat(editForm.annual_price || '0'),
           badge: editForm.badge.trim() || null,
           is_free: editForm.is_free,
+          recommended: editForm.recommended,
           features: parseFeatureLines(editForm.features),
         },
       });
@@ -217,6 +221,10 @@ export function PlansTableClient({ initialRows }: { initialRows: AdminPlanRow[] 
         <label className="flex h-9 cursor-pointer items-center gap-2 text-[12.5px] font-semibold" style={{ color: 'var(--adm-fg)' }}>
           <input type="checkbox" checked={form.is_free} onChange={(e) => setForm({ ...form, is_free: e.target.checked })} className="h-4 w-4 accent-green-600" />
           Free plan (no payment)
+        </label>
+        <label className="flex h-9 cursor-pointer items-center gap-2 text-[12.5px] font-semibold" style={{ color: 'var(--adm-fg)' }} title="Highlighted red card by default">
+          <input type="checkbox" checked={form.recommended} onChange={(e) => setForm({ ...form, recommended: e.target.checked })} className="h-4 w-4 accent-rose-600" />
+          Most popular
         </label>
         {form.is_free && (
           <>
@@ -312,6 +320,10 @@ export function PlansTableClient({ initialRows }: { initialRows: AdminPlanRow[] 
             <label className="flex cursor-pointer items-center gap-2 text-[12.5px] font-semibold" style={{ color: 'var(--adm-fg)' }}>
               <input type="checkbox" checked={editForm.is_free} onChange={(e) => setEditForm({ ...editForm, is_free: e.target.checked })} className="h-4 w-4 accent-green-600" />
               Free plan (no payment)
+            </label>
+            <label className="flex cursor-pointer items-center gap-2 text-[12.5px] font-semibold" style={{ color: 'var(--adm-fg)' }} title="Highlighted red card by default">
+              <input type="checkbox" checked={editForm.recommended} onChange={(e) => setEditForm({ ...editForm, recommended: e.target.checked })} className="h-4 w-4 accent-rose-600" />
+              Most popular
             </label>
             <div className="flex justify-end gap-2 pt-1">
               <button
