@@ -20,7 +20,7 @@ import {
   Trophy,
   Sparkles,
   WashingMachine,
-  Wrench,
+  Clapperboard,
 } from 'lucide-react';
 import type { Category } from '@/types/api';
 
@@ -109,7 +109,7 @@ function iconForChip(name: string, slug: string | null): React.ReactNode {
   if (/book|hobby|read/.test(hay)) return <BookOpen size={17} />;
   if (/sport|game|fitness|football|cricket/.test(hay)) return <Trophy size={17} />;
   if (/service|repair|plumb|electric/.test(hay)) return <Headset size={17} />;
-  if (/entertain|movie|music|film/.test(hay)) return <Wrench size={17} />;
+  if (/entertain|movie|music|film/.test(hay)) return <Clapperboard size={17} />;
   return <Tag size={17} />;
 }
 
