@@ -53,7 +53,7 @@ export function MarketingCard({ hasActivePlan }: { hasActivePlan?: boolean }) {
             className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[12.5px] font-semibold text-white transition active:translate-y-[1px]"
             style={{ background: 'var(--shp-brand)' }}
           >
-            {hasActivePlan ? 'Compare plans' : 'Choose a plan'} <ArrowRight size={13} />
+            {hasActivePlan ? 'Explore plans' : 'Choose a plan'} <ArrowRight size={13} />
           </Link>
           <Link
             href={'/shop/ads/new' as Route}
