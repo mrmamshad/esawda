@@ -36,6 +36,25 @@ function parseCategories(raw: unknown): string[] {
 }
 
 /**
+ * Username derived from the shop name — the form has no username field.
+ * Mirrors the backend rule (ShopController::apply): URL-safe slug, falls
+ * back to `shop_<phone>` / random when the name has no usable characters.
+ */
+function usernameFromShopName(shopName: string, phoneDigits: string): string {
+  const slug = shopName
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 32);
+  if (slug.length >= 3) return slug;
+  const digits = phoneDigits.replace(/\D/g, '').slice(-8);
+  if (digits.length >= 3) return `shop_${digits}`;
+  return `shop_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/**
  * Bikroy-style shop opening application. Buyer provides owner identity +
  * shop details + supporting documents (NID / trade licence / photos).
  * The shop opens instantly — no admin approval — after which the seller
@@ -53,7 +72,6 @@ export function ShopApplyForm({
 }) {
   const router = useRouter();
 
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
@@ -121,8 +139,11 @@ export function ShopApplyForm({
     if (isGuest && !accountCreated) {
       if (!pwLongEnough) return fail('Password must be at least 8 characters.');
       if (password !== passwordConfirmation) return fail('Password confirmation does not match.');
-      if (!/^[A-Za-z0-9_.-]+$/.test(username.trim())) {
-        return fail('Username may only contain letters, digits, dot, dash and underscore (no spaces).');
+      // No username field — it is derived from the shop name (and stored
+      // as the account username by the backend on apply).
+      const derived = usernameFromShopName(shopName.trim(), ownerPhone.trim());
+      if (!/^[A-Za-z0-9_.-]{3,40}$/.test(derived)) {
+        return fail('Shop name must contain at least 3 English letters or digits — it becomes your public username.');
       }
     }
 
@@ -141,7 +162,7 @@ export function ShopApplyForm({
     try {
       if (isGuest && !accountCreated) {
         const payload = {
-          username: username.trim(),
+          username: usernameFromShopName(shopName.trim(), ownerPhone.trim()),
           email: email.trim(),
           name: ownerName.trim(),
           phone: ownerPhone.trim(),
@@ -242,20 +263,6 @@ export function ShopApplyForm({
           </div>
           <div className="mt-4 grid gap-5 sm:grid-cols-2">
             <div>
-              <label className={label}>Username *</label>
-              <input
-                className={field}
-                value={username}
-                onChange={e => setUsername(e.target.value.replace(/\s/g, ''))}
-                minLength={3}
-                maxLength={40}
-                pattern="[A-Za-z0-9_.-]+"
-                title="Letters, digits, dot, dash and underscore only — no spaces."
-                autoComplete="username"
-                required
-              />
-            </div>
-            <div>
               <label className={label}>Email address *</label>
               <input
                 className={field}
@@ -339,6 +346,7 @@ export function ShopApplyForm({
         <div>
           <label className={label}>Shop name *</label>
           <input className={field} value={shopName} onChange={e => setShopName(e.target.value)} required />
+          <p className="mt-1.5 text-xs text-ink-faint">This becomes your public shop username (e.g. mystore).</p>
         </div>
         <div>
           <label className={label}>Shop category</label>
