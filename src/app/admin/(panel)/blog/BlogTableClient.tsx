@@ -58,7 +58,7 @@ export function BlogTableClient({ initialRows }: { initialRows: AdminBlogRow[] }
     },
     {
       id: 'status', accessorKey: 'status', header: 'Status',
-      cell: (info) => <StatusBadge value={(info.getValue() as string) === '1' ? 'active' : 'draft'} />,
+      cell: (info) => <StatusBadge value={(info.getValue() as string) === 'publish' ? 'active' : 'pending'} />,
       size: 110,
     },
     {

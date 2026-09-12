@@ -24,7 +24,7 @@ export function BlogCard({ blog, className }: { blog: Blog; className?: string }
               alt={blog.title}
               fill
               sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
-              className="object-cover transition duration-500 hover:scale-105"
+              className="object-contain transition duration-500 hover:scale-[1.02]"
             />
           ) : (
             <div className="flex h-full items-center justify-center bg-brand-50 text-brand-500 text-sm">No cover</div>

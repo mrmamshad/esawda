@@ -66,8 +66,8 @@ export default async function BlogSingle({ params }: { params: Params }) {
           </div>
 
           {blog.image_url && (
-            <div className="relative mt-8 aspect-[16/9] w-full overflow-hidden rounded-card bg-surface-muted">
-              <Image src={blog.image_url} alt={blog.title} fill sizes="(min-width:1024px) 768px, 100vw" className="object-cover" priority />
+            <div className="relative mt-8 w-full overflow-hidden rounded-card bg-surface-muted">
+              <Image src={blog.image_url} alt={blog.title} width={1200} height={800} sizes="(min-width:1024px) 768px, 100vw" className="h-auto w-full object-contain" priority />
             </div>
           )}
 
