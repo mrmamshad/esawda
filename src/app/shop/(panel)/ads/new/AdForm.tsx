@@ -188,10 +188,8 @@ function validateImages(files: File[]): string | null {
   const [featuredImage, setFeaturedImage] = useState<File | null>(null);
   const [galleryImages, setGalleryImages] = useState<File[]>([]);
   const selectedImageCount = (featuredImage ? 1 : 0) + galleryImages.length;
-  const remainingImageSlots = MAX_PRODUCT_IMAGES - selectedImageCount;
 
-  const featuredInputRef = useRef<HTMLInputElement>(null);
-  const galleryInputRef  = useRef<HTMLInputElement>(null);
+  const slotInputRef = useRef<HTMLInputElement>(null);
 
   const cats = categories;
 
@@ -226,14 +224,37 @@ function validateImages(files: File[]): string | null {
       });
     };
 
-  const featuredPreview = useMemo(
-    () => (featuredImage ? URL.createObjectURL(featuredImage) : null),
-    [featuredImage],
+  // Four visible slots, packed left-to-right — the first image is the
+  // main cover. Kept as featured + gallery split so submit stays untouched.
+  const slotFiles: (File | null)[] = [
+    featuredImage,
+    galleryImages[0] ?? null,
+    galleryImages[1] ?? null,
+    galleryImages[2] ?? null,
+  ];
+  const slotPreviews = useMemo(
+    () => slotFiles.map((f) => (f ? URL.createObjectURL(f) : null)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [featuredImage, galleryImages],
   );
-  const galleryPreviews = useMemo(
-    () => galleryImages.map((f) => URL.createObjectURL(f)),
-    [galleryImages],
-  );
+
+  const addImageToSlot = (file: File) => {
+    const ordered = featuredImage ? [featuredImage, ...galleryImages] : [...galleryImages];
+    const imageError = validateImages([...ordered, file]);
+    if (imageError) { setError(imageError); return; }
+    if (!featuredImage) setFeaturedImage(file);
+    else setGalleryImages((prev) => [...prev, file].slice(0, MAX_PRODUCT_IMAGES - 1));
+    setError(null);
+  };
+
+  const removeImageAt = (i: number) => {
+    if (i === 0) {
+      setFeaturedImage(galleryImages[0] ?? null);
+      setGalleryImages(galleryImages.slice(1));
+    } else {
+      setGalleryImages(galleryImages.filter((_, idx) => idx !== i - 1));
+    }
+  };
 
   // Payment is required for pay-per-listing, or premium plan with boosts.
   // The number defaults to the contact numbers already on the form
@@ -820,53 +841,59 @@ function validateImages(files: File[]): string | null {
             {/* Images ──────────────────────────────────────────────── */}
             <Card title="Images" iconRight={`${selectedImageCount} / ${MAX_PRODUCT_IMAGES}`}>
               <p className="text-sm text-ink-muted">
-                Upload up to 4 product images. All images are optional, so you may post with none, one, two, three, or four.
+                Upload up to 4 product images — one per box below. All images are optional.
+                The first box is the main cover (recommended 810×450 JPG, PNG, or WebP up to 25MB).
               </p>
               {errors.images?.[0] && <p className="text-xs font-medium text-danger">{errors.images[0]}</p>}
-              <Uploader
-                label={featuredImage ? 'Replace Main Image' : 'Upload Main Image'}
-                hint="Recommended: 810×450 JPG, PNG, or WebP up to 25MB. Large files are optimized automatically after upload."
-                preview={featuredPreview}
-                disabled={!featuredImage && galleryImages.length >= MAX_PRODUCT_IMAGES}
-                onFilesPicked={(files) => {
-                  const next = files[0] ?? null;
-                  const nextFiles = next ? [next, ...galleryImages] : galleryImages;
-                  const imageError = validateImages(nextFiles);
-                  if (imageError) { setError(imageError); return; }
-                  setFeaturedImage(next);
-                  setError(null);
+              <input
+                ref={slotInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] ?? null;
+                  // Reset so uploading the same file twice re-triggers onChange.
+                  if (slotInputRef.current) slotInputRef.current.value = '';
+                  if (file) addImageToSlot(file);
                 }}
-                inputRef={featuredInputRef}
-                onClearFeatured={() => setFeaturedImage(null)}
               />
-              <Uploader
-                label={remainingImageSlots === 0
-                  ? 'All 4 Images Selected'
-                  : selectedImageCount > 0
-                    ? `+ Add ${remainingImageSlots} More Image${remainingImageSlots === 1 ? '' : 's'}`
-                    : 'Upload Additional Images'}
-                hint={remainingImageSlots === 0
-                  ? 'Remove an image to add a different one.'
-                  : `${remainingImageSlots} slot${remainingImageSlots === 1 ? '' : 's'} remaining — click here to add more.`}
-                multiple
-                disabled={remainingImageSlots === 0}
-                previews={galleryPreviews}
-                onFilesPicked={(files) => {
-                  if (remainingImageSlots === 0) {
-                    setError('A product can have a maximum of 4 images.');
-                    return;
-                  }
-                  const additions = files.slice(0, remainingImageSlots);
-                  const nextGallery = [...galleryImages, ...additions];
-                  const allImages = featuredImage ? [featuredImage, ...nextGallery] : nextGallery;
-                  const imageError = validateImages(allImages);
-                  if (imageError) { setError(imageError); return; }
-                  setGalleryImages(nextGallery);
-                  setError(files.length > remainingImageSlots ? 'Only the first available image slots were added (maximum 4).' : null);
-                }}
-                inputRef={galleryInputRef}
-                onRemove={(i) => setGalleryImages(galleryImages.filter((_, idx) => idx !== i))}
-              />
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {[0, 1, 2, 3].map((i) => {
+                  const preview = slotPreviews[i];
+                  const boxLabel = i === 0 ? 'Main Image' : `Image ${i + 1}`;
+                  return preview ? (
+                    <div key={i} className="relative aspect-[4/3] overflow-hidden rounded-lg border border-line">
+                      <Image src={preview} alt={boxLabel} fill className="object-cover" unoptimized />
+                      <span className="absolute left-1.5 top-1.5 rounded-pill bg-black/70 px-2 py-0.5 text-[11px] font-semibold text-white">
+                        {i === 0 ? 'Main' : `#${i + 1}`}
+                      </span>
+                      <button
+                        type="button" onClick={() => removeImageAt(i)}
+                        className="absolute right-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-full bg-black/70 text-white transition hover:bg-black"
+                        aria-label={`Remove ${boxLabel}`}
+                        title="Remove"
+                      >×</button>
+                    </div>
+                  ) : (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => {
+                        if (selectedImageCount >= MAX_PRODUCT_IMAGES) {
+                          setError('A product can have a maximum of 4 images.');
+                          return;
+                        }
+                        slotInputRef.current?.click();
+                      }}
+                      className="grid aspect-[4/3] place-items-center gap-1 rounded-lg border-2 border-dashed border-brand-200 bg-brand-50/40 px-2 py-4 text-center transition hover:bg-brand-50"
+                    >
+                      <span className="text-xl text-brand-700">🖼️</span>
+                      <span className="text-xs font-semibold text-brand-700">Upload {boxLabel}</span>
+                      <span className="text-[11px] text-ink-muted">JPG, PNG or WebP</span>
+                    </button>
+                  );
+                })}
+              </div>
             </Card>
 
             {/* Visibility upgrades ─────────────────────────────────── */}
@@ -1124,85 +1151,6 @@ function Tip({ children }: { children: React.ReactNode }) {
  * and can be swapped for a real editor (Tiptap / Lexical) later without
  * changing the surrounding markup.
  */
-function Uploader({
-  label, hint, multiple, disabled, preview, previews, onFilesPicked, inputRef, onRemove, onClearFeatured,
-}: {
-  label: string;
-  hint: string;
-  multiple?: boolean;
-  disabled?: boolean;
-  preview?: string | null;
-  previews?: string[];
-  onFilesPicked: (files: File[]) => void;
-  inputRef: React.RefObject<HTMLInputElement | null>;
-  onRemove?: (index: number) => void;
-  onClearFeatured?: () => void;
-}) {
-  const pick = () => {
-    if (!disabled) inputRef.current?.click();
-  };
-  const handle = (e: ChangeEvent<HTMLInputElement>) => {
-    onFilesPicked(Array.from(e.target.files ?? []));
-    // Reset so re-uploading the same file re-triggers onChange
-    if (inputRef.current) inputRef.current.value = '';
-  };
-
-  return (
-    <div>
-      {preview && (
-        <div className="relative mb-3 h-32 w-48 overflow-hidden rounded-lg border border-line">
-          <Image src={preview} alt="preview" fill className="object-cover" unoptimized />
-          {onClearFeatured && (
-            <button
-              type="button" onClick={onClearFeatured}
-              className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/70 text-white transition hover:bg-black"
-              aria-label="Remove featured image"
-              title="Remove"
-            >×</button>
-          )}
-        </div>
-      )}
-
-      {previews && previews.length > 0 && (
-        <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-          {previews.map((src, i) => (
-            <div key={src} className="relative h-24 overflow-hidden rounded-lg border border-line">
-              <Image src={src} alt={`gallery ${i + 1}`} fill className="object-cover" unoptimized />
-              {onRemove && (
-                <button
-                  type="button" onClick={() => onRemove(i)}
-                  className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/70 text-xs text-white transition hover:bg-black"
-                  aria-label={`Remove image ${i + 1}`}
-                >×</button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      <button
-        type="button"
-        onClick={pick}
-        disabled={disabled}
-        className="grid w-full place-items-center gap-2 rounded-lg border-2 border-dashed border-brand-200 bg-brand-50/40 px-4 py-8 text-center transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        <span className="text-2xl text-brand-700">🖼️</span>
-        <span className="font-semibold text-brand-700">{label}</span>
-        <span className="text-xs text-ink-muted">{hint}</span>
-      </button>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        multiple={multiple}
-        disabled={disabled}
-        onChange={handle}
-        className="hidden"
-      />
-    </div>
-  );
-}
-
 function UpgradeRow({
   tag, tagClass, price, checked, onChange, copy,
 }: {
