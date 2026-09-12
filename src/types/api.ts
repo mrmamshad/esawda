@@ -244,11 +244,14 @@ export type Transaction = {
 export type Order = {
   id: number;
   product_id: number;
-  buyer_id: number;
+  buyer_id: number | null;
+  buyer_name?: string | null;
+  buyer_phone?: string | null;
+  buyer_address?: string | null;
   seller_id: number;
   transaction_id: number | null;
   amount: number;
-  shipping_status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | string;
+  shipping_status: 'pending' | 'confirmed' | 'delivered' | 'cancelled' | 'processing' | 'shipped' | string;
   courier_name: string | null;
   tracking_no: string | null;
   seller_paid: boolean;

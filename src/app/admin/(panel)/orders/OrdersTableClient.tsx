@@ -14,7 +14,9 @@ import { readToken } from '@/lib/auth';
 export type AdminOrderRow = {
   id: number;
   product_id: number;
-  buyer_id: number;
+  buyer_id: number | null;
+  buyer_name?: string | null;
+  buyer_phone?: string | null;
   seller_id: number;
   transaction_id: number | null;
   amount: number;
@@ -30,11 +32,13 @@ export type AdminOrderRow = {
 };
 
 const NEXT_STATUS: Record<string, { key: string; label: string } | null> = {
-  pending:    { key: 'processing', label: 'Mark processing' },
-  processing: { key: 'shipped',    label: 'Mark shipped' },
-  shipped:    { key: 'delivered',  label: 'Mark delivered' },
+  pending:    { key: 'confirmed', label: 'Mark confirmed' },
+  confirmed:  { key: 'delivered', label: 'Mark delivered' },
   delivered:  null,
   cancelled:  null,
+  // Legacy "Buy Now" statuses — still mapped so historical rows can advance.
+  processing: { key: 'shipped',   label: 'Mark shipped' },
+  shipped:    { key: 'delivered', label: 'Mark delivered' },
 };
 
 export function OrdersTableClient({ initialRows }: { initialRows: AdminOrderRow[] }) {
@@ -72,7 +76,7 @@ export function OrdersTableClient({ initialRows }: { initialRows: AdminOrderRow[
     },
     {
       id: 'buyer',
-      accessorFn: (r) => r.buyer?.username ?? `#${r.buyer_id}`,
+      accessorFn: (r) => r.buyer_name ?? r.buyer?.username ?? (r.buyer_id ? `#${r.buyer_id}` : 'Guest'),
       header: 'Buyer',
       cell: (info) => <span className="text-[12.5px]" style={{ color: 'var(--adm-fg-muted)' }}>{info.getValue() as string}</span>,
     },
@@ -135,7 +139,7 @@ export function OrdersTableClient({ initialRows }: { initialRows: AdminOrderRow[
       searchable
       searchPlaceholder="Search product / buyer / seller…"
       emptyTitle="No orders match this filter"
-      emptyDescription="Buy-now purchases will appear here once buyers check out."
+      emptyDescription="Orders will appear here once buyers place them on shop products."
     />
   );
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { ShoppingCart } from 'lucide-react';
-import { OrderRow } from '@/components/dashboard/OrderRow';
+import { ShopOrdersClient } from '@/components/shop/v2/ShopOrdersClient';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Pagination } from '@/components/ui/Pagination';
 import { apiFromServer, ApiError } from '@/lib/api';
@@ -12,12 +12,11 @@ export const metadata: Metadata = { title: 'Orders' };
 export const dynamic = 'force-dynamic';
 
 const TABS = [
-  { key: '',           label: 'All' },
-  { key: 'pending',    label: 'Pending' },
-  { key: 'processing', label: 'Processing' },
-  { key: 'shipped',    label: 'Shipped' },
-  { key: 'delivered',  label: 'Delivered' },
-  { key: 'cancelled',  label: 'Cancelled' },
+  { key: '',          label: 'All' },
+  { key: 'pending',   label: 'Pending' },
+  { key: 'confirmed', label: 'Confirmed' },
+  { key: 'delivered', label: 'Delivered' },
+  { key: 'cancelled', label: 'Cancelled' },
 ];
 
 type Search = Promise<{ page?: string; status?: string }>;
@@ -43,7 +42,7 @@ export default async function ShopOrdersPage({ searchParams }: { searchParams: S
     <>
       <header>
         <h1 className="text-2xl font-bold text-ink">Orders</h1>
-        <p className="text-sm text-ink-muted">Buy-now purchases on your products and their fulfilment state.</p>
+        <p className="text-sm text-ink-muted">Order and fulfilment state for your products.</p>
       </header>
 
       <nav className="mb-4 mt-3 flex flex-wrap gap-1.5">
@@ -72,15 +71,12 @@ export default async function ShopOrdersPage({ searchParams }: { searchParams: S
         <EmptyState
           icon={<ShoppingCart size={20} />}
           title="No orders yet"
-          description="Once buyers check out your products, orders will appear here."
+          description="When buyers place an order on your products, it will appear here."
         />
       ) : (
-        <section className="surface-card overflow-hidden">
-          <div className="hidden grid-cols-6 gap-3 border-b border-line px-4 py-3 text-xs font-semibold uppercase tracking-wide text-ink-muted md:grid">
-            <div>Date</div><div>Product</div><div>Buyer</div><div>Amount</div><div>Status</div><div className="text-right">Paid out</div>
-          </div>
-          {items.map((order) => <OrderRow key={order.id} order={order} />)}
-        </section>
+        <div className="mt-4">
+          <ShopOrdersClient orders={items} />
+        </div>
       )}
 
       <Pagination current={meta.current_page} last={meta.last_page} basePath="/shop/orders" params={{ status: status || undefined }} />

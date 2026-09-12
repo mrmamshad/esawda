@@ -9,6 +9,7 @@ import { ScrollToTopOnMount } from '@/components/layout/ScrollToTopOnMount';
 import { AdGallery } from '@/components/listing/AdGallery';
 import { ListingCard } from '@/components/listing/ListingCard';
 import { SellerCard } from '@/components/seller/SellerCard';
+import { PlaceOrderCard } from '@/components/seller/PlaceOrderCard';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { PriceTag } from '@/components/ui/PriceTag';
 import { Badge } from '@/components/ui/Badge';
@@ -183,9 +184,14 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
           <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
             {ad.seller && <SellerCard seller={ad.seller} productId={ad.id} productTitle={ad.title} adWhatsapp={ad.whatsapp} />}
 
-            {/* NOTE: no Buy Now card — products are never sold online.
-                Payment happens only for shop subscriptions and ad boosts
-                (post-a-product / shop panel). Buyers contact the seller. */}
+            {ad.seller?.is_shop && Number(ad.price) > 0 && (
+              <PlaceOrderCard adId={ad.id} price={Number(ad.price)} />
+            )}
+
+            {/* NOTE: no online payment here — the COD Place Order card above
+                just records the order for the shop. Payment happens only
+                for shop subscriptions and ad boosts (post-a-product /
+                shop panel). Buyers can also contact the seller directly. */}
 
             {/* AD SLOT — sidebar MPU (300×250), high-CPM inventory. */}
             <AdSlot placement={`ad.${ad.id}.sidebar_mpu`} size="mpu" />

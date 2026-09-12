@@ -2,17 +2,17 @@ import type { Metadata } from 'next';
 import { apiFromServer, ApiError } from '@/lib/api';
 import { PageHeader } from '@/components/admin/v2/PageHeader';
 import { OrdersTableClient, type AdminOrderRow } from './OrdersTableClient';
+import { ShopOrdersSummary, type ShopOrderSummaryRow } from './ShopOrdersSummary';
 
 export const metadata: Metadata = { title: 'Orders' };
 export const dynamic = 'force-dynamic';
 
 const TABS = [
-  { key: '',             label: 'All' },
-  { key: 'pending',      label: 'Pending' },
-  { key: 'processing',   label: 'Processing' },
-  { key: 'shipped',      label: 'Shipped' },
-  { key: 'delivered',    label: 'Delivered' },
-  { key: 'cancelled',    label: 'Cancelled' },
+  { key: '',          label: 'All' },
+  { key: 'pending',   label: 'Pending' },
+  { key: 'confirmed', label: 'Confirmed' },
+  { key: 'delivered', label: 'Delivered' },
+  { key: 'cancelled', label: 'Cancelled' },
 ];
 
 async function safe<T>(fn: () => Promise<T>, fb: T): Promise<T> {
@@ -31,9 +31,17 @@ export default async function AdminOrdersPage({
   );
   const rows: AdminOrderRow[] = Array.isArray(res.data) ? res.data : ((res.data as { data: AdminOrderRow[] }).data ?? []);
 
+  const summaryRes = await safe(
+    () => apiFromServer<ShopOrderSummaryRow[] | { data: ShopOrderSummaryRow[] }>('/admin/orders/summary?per_page=100', { cache: 'no-store' }),
+    { data: [] as ShopOrderSummaryRow[] },
+  );
+  const summary: ShopOrderSummaryRow[] = Array.isArray(summaryRes.data) ? summaryRes.data : ((summaryRes.data as { data: ShopOrderSummaryRow[] }).data ?? []);
+
   return (
     <>
-      <PageHeader title="Orders" description="Buy-now product purchases and their fulfilment state." />
+      <PageHeader title="Orders" description="Cash-on-delivery orders across every shop and their fulfilment state." />
+
+      <ShopOrdersSummary rows={summary} />
 
       <nav className="mb-4 flex flex-wrap gap-1.5">
         {TABS.map((t) => {
