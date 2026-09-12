@@ -18,6 +18,7 @@ import {
   CupSoda,
   Tag,
   Trophy,
+  Sparkles,
   WashingMachine,
   Wrench,
 } from 'lucide-react';
@@ -91,7 +92,10 @@ const PASTELS: Array<{ bg: string; ink: string }> = [
 function iconForChip(name: string, slug: string | null): React.ReactNode {
   const hay = `${name} ${slug ?? ''}`.toLowerCase();
   if (/\bbike|\bcycle|scooter/.test(hay)) return <Bike size={17} />;
-  if (/car|vehicle|auto|moto/.test(hay)) return <Car size={17} />;
+  // NOTE: `car` needs a word boundary — without it "Personal Care"
+  // matches and Beauty & Personal Care gets a car icon.
+  if (/beauty|cosmetic|salon|\bspa\b|personal care/.test(hay)) return <Sparkles size={17} />;
+  if (/\bcar\b|\bcars\b|vehicle|\bauto\b|moto/.test(hay)) return <Car size={17} />;
   if (/mobil|phone|tablet|smart/.test(hay)) return <Smartphone size={17} />;
   if (/appliance|washing|fridge|refrigerator/.test(hay)) return <WashingMachine size={17} />;
   if (/laptop|computer|cpu|gadget/.test(hay)) return <Cpu size={17} />;

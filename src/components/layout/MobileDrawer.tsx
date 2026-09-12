@@ -23,6 +23,7 @@ import {
   UtensilsCrossed,
   Wrench,
   Clapperboard,
+  Sparkles,
   Tag,
 } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
@@ -43,7 +44,10 @@ type NavLink = { href: Route; label: string };
 function iconForCategory(name: string, slug: string | null): ReactNode {
   const hay = `${name} ${slug ?? ''}`.toLowerCase();
   if (/\bbike|\bcycle|scooter/.test(hay)) return <Bike size={14} />;
-  if (/car|vehicle|auto|moto/.test(hay)) return <Car size={14} />;
+  // NOTE: `car` needs a word boundary — without it "Personal Care"
+  // matches and Beauty & Personal Care gets a car icon.
+  if (/beauty|cosmetic|salon|\bspa\b|personal care/.test(hay)) return <Sparkles size={14} />;
+  if (/\bcar\b|\bcars\b|vehicle|\bauto\b|moto/.test(hay)) return <Car size={14} />;
   if (/mobil|phone|tablet|smart/.test(hay)) return <Smartphone size={14} />;
   if (/appliance|washing|fridge|refrigerator/.test(hay)) return <WashingMachine size={14} />;
   if (/electronic|laptop|computer|cpu|gadget/.test(hay)) return <Cpu size={14} />;
