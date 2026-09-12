@@ -156,6 +156,13 @@ export default function AdForm({
     const paidListingPrice = price('paid_listing_price', 500);
   const sym = settings.currency_symbol || '৳';
 
+  // Admin listing-type switches (Settings → Premium upgrades). ON unless
+  // the stored setting is exactly '0'; missing keys default to ON so old
+  // installs keep both options visible.
+  const freeEnabled = (settings['listing_free_enabled'] ?? '1') !== '0';
+  const premiumEnabled = (settings['listing_premium_enabled'] ?? '1') !== '0';
+  const listingTypesOff = !freeEnabled && !premiumEnabled;
+
 /** Mirrors StoreAdRequest images.* — up to 4 optional JPG/PNG/WebP files, each ≤25MB. */
 function validateImages(files: File[]): string | null {
   if (files.length > MAX_PRODUCT_IMAGES) return 'A product can have a maximum of 4 images.';
@@ -192,6 +199,19 @@ function validateImages(files: File[]): string | null {
     () => cats.find((c) => c.id === Number(form.category)),
     [cats, form.category],
   );
+
+  // Keep the selected plan valid when the admin switches a listing type
+  // off (e.g. Free was picked, then admin disables it → move to Premium).
+  useEffect(() => {
+    if (listingTypesOff) return;
+    setForm((s) => {
+      if (!freeEnabled && s.plan === 'free') return { ...s, plan: 'premium' };
+      if (!premiumEnabled && s.plan === 'premium') {
+        return { ...s, plan: 'free', featured: false, urgent: false, highlight: false };
+      }
+      return s;
+    });
+  }, [freeEnabled, premiumEnabled, listingTypesOff]);
 
   const set = <K extends keyof FormState>(k: K) =>
     (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -242,6 +262,22 @@ function validateImages(files: File[]): string | null {
 
     if (!form.agree) {
       setError('Please accept the Terms & Conditions, Refund & Cancellation Policy, and Privacy Policy to continue.');
+      setBusy(false); return;
+    }
+
+    // Admin listing-type switches — the radios below are already filtered,
+    // but re-check here so a stale page (toggled mid-form) can't submit a
+    // disabled type.
+    if (listingTypesOff) {
+      setError('Listing types are currently disabled by the admin. Please contact support.');
+      setBusy(false); return;
+    }
+    if (form.plan === 'free' && !freeEnabled) {
+      setError('Free Listing is currently disabled. Please choose Premium.');
+      setBusy(false); return;
+    }
+    if (form.plan === 'premium' && !premiumEnabled) {
+      setError('Premium Listing is currently disabled. Please choose Free Listing.');
       setBusy(false); return;
     }
 
@@ -300,6 +336,9 @@ function validateImages(files: File[]): string | null {
     if (form.whatsapp) fd.append('whatsapp', form.whatsapp);
     fd.append('duration_days', form.duration_days || '30');
     fd.append('hide_phone',  form.hide_phone ? '1' : '0');
+    // Tells the backend which radio was picked so it can enforce the
+    // admin's listing-type switches (old clients omit it → treated as free).
+    fd.append('listing_type', form.plan);
     if (form.address) fd.append('address', form.address);
     if (form.city)    fd.append('city',    form.city);
     if (form.state)   fd.append('state',   form.state);
@@ -833,29 +872,54 @@ function validateImages(files: File[]): string | null {
             {/* Visibility upgrades ─────────────────────────────────── */}
             {postingMode === 'subscription' ? (
               <Card title="Recommended" iconRight="✨">
-                <div className="rounded-field border border-brand-200 bg-white">
-                  <label className="flex cursor-pointer items-center gap-3 border-b border-brand-100 px-4 py-3">
-                    <input type="radio" name="plan" value="premium"
-                           checked={form.plan === 'premium'}
-                           onChange={() => setForm((s) => ({ ...s, plan: 'premium' }))} />
-                    <span className="font-medium">Premium</span>
-                    <span className="ml-auto rounded-pill bg-brand-100 px-2 py-0.5 text-xs text-brand-700">Recommended</span>
-                  </label>
-                  <label className="flex cursor-pointer items-center gap-3 px-4 py-3">
-                    <input type="radio" name="plan" value="free"
-                           checked={form.plan === 'free'}
-                           onChange={() => setForm((s) => ({ ...s, plan: 'free' }))} />
-                    <span className="font-medium">Free Listing</span>
-                  </label>
-                </div>
+                {listingTypesOff ? (
+                  <p className="text-sm leading-6 text-danger">
+                    Listing types are currently disabled by the admin. Please contact support before submitting.
+                  </p>
+                ) : !freeEnabled || !premiumEnabled ? (
+                  <>
+                    <div className="rounded-field border border-brand-200 bg-white px-4 py-3">
+                      <span className="font-medium">{premiumEnabled ? 'Premium' : 'Free Listing'}</span>
+                      {premiumEnabled && (
+                        <span className="ml-2 rounded-pill bg-brand-100 px-2 py-0.5 text-xs text-brand-700">Recommended</span>
+                      )}
+                    </div>
+                    {premiumEnabled && (
+                      <div className="mt-4 space-y-2">
+                        <p className="text-sm text-ink-muted">Select any boosts you want to purchase after the base listing is submitted for review.</p>
+                        <UpgradeRow tag="Featured" tagClass="bg-purple-100 text-purple-700" price={`${sym}${upgradePrices.featured}`} checked={form.featured} onChange={set('featured')} copy="Show the product prominently in featured sections after admin approval." />
+                        <UpgradeRow tag="Urgent" tagClass="bg-amber-100 text-amber-700" price={`${sym}${upgradePrices.urgent}`} checked={form.urgent} onChange={set('urgent')} copy="Mark the listing as time-sensitive after admin approval." />
+                        <UpgradeRow tag="Highlight" tagClass="bg-rose-100 text-rose-700" price={`${sym}${upgradePrices.highlight}`} checked={form.highlight} onChange={set('highlight')} copy="Add visual emphasis in approved listing results." />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div className="rounded-field border border-brand-200 bg-white">
+                      <label className="flex cursor-pointer items-center gap-3 border-b border-brand-100 px-4 py-3">
+                        <input type="radio" name="plan" value="premium"
+                               checked={form.plan === 'premium'}
+                               onChange={() => setForm((s) => ({ ...s, plan: 'premium' }))} />
+                        <span className="font-medium">Premium</span>
+                        <span className="ml-auto rounded-pill bg-brand-100 px-2 py-0.5 text-xs text-brand-700">Recommended</span>
+                      </label>
+                      <label className="flex cursor-pointer items-center gap-3 px-4 py-3">
+                        <input type="radio" name="plan" value="free"
+                               checked={form.plan === 'free'}
+                               onChange={() => setForm((s) => ({ ...s, plan: 'free', featured: false, urgent: false, highlight: false }))} />
+                        <span className="font-medium">Free Listing</span>
+                      </label>
+                    </div>
 
-                {form.plan === 'premium' && (
-                  <div className="mt-4 space-y-2">
-                    <p className="text-sm text-ink-muted">Select any boosts you want to purchase after the base listing is submitted for review.</p>
-                    <UpgradeRow tag="Featured" tagClass="bg-purple-100 text-purple-700" price={`${sym}${upgradePrices.featured}`} checked={form.featured} onChange={set('featured')} copy="Show the product prominently in featured sections after admin approval." />
-                    <UpgradeRow tag="Urgent" tagClass="bg-amber-100 text-amber-700" price={`${sym}${upgradePrices.urgent}`} checked={form.urgent} onChange={set('urgent')} copy="Mark the listing as time-sensitive after admin approval." />
-                    <UpgradeRow tag="Highlight" tagClass="bg-rose-100 text-rose-700" price={`${sym}${upgradePrices.highlight}`} checked={form.highlight} onChange={set('highlight')} copy="Add visual emphasis in approved listing results." />
-                  </div>
+                    {form.plan === 'premium' && (
+                      <div className="mt-4 space-y-2">
+                        <p className="text-sm text-ink-muted">Select any boosts you want to purchase after the base listing is submitted for review.</p>
+                        <UpgradeRow tag="Featured" tagClass="bg-purple-100 text-purple-700" price={`${sym}${upgradePrices.featured}`} checked={form.featured} onChange={set('featured')} copy="Show the product prominently in featured sections after admin approval." />
+                        <UpgradeRow tag="Urgent" tagClass="bg-amber-100 text-amber-700" price={`${sym}${upgradePrices.urgent}`} checked={form.urgent} onChange={set('urgent')} copy="Mark the listing as time-sensitive after admin approval." />
+                        <UpgradeRow tag="Highlight" tagClass="bg-rose-100 text-rose-700" price={`${sym}${upgradePrices.highlight}`} checked={form.highlight} onChange={set('highlight')} copy="Add visual emphasis in approved listing results." />
+                      </div>
+                    )}
+                  </>
                 )}
               </Card>
             ) : (

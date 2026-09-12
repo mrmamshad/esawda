@@ -65,6 +65,18 @@ export function SettingsForm({ initial }: { initial: Record<string, string> }) {
       blurb: 'Off = regular users also need a plan with quota, like shops.',
       on: (state.single_free_listings ?? '') !== '0',
     },
+    {
+      k: 'listing_free_enabled',
+      title: 'Free Listing option',
+      blurb: 'Off hides the Free Listing radio on the Post a Product form.',
+      on: (state.listing_free_enabled ?? '') !== '0',
+    },
+    {
+      k: 'listing_premium_enabled',
+      title: 'Premium Listing option',
+      blurb: 'Off hides the Premium radio (and its paid boosts) on the Post a Product form.',
+      on: (state.listing_premium_enabled ?? '') !== '0',
+    },
   ];
 
   return (

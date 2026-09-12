@@ -10,6 +10,7 @@ const EMPTY: UpgradePrices = {
   prices: { featured: 200, urgent: 150, highlight: 100 },
   defaults: { featured: 200, urgent: 150, highlight: 100 },
   currency: 'BDT',
+  listing: { free_enabled: true, premium_enabled: true },
 };
 
 async function safe<T>(fn: () => Promise<T>, fb: T): Promise<T> {

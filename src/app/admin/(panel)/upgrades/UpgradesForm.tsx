@@ -9,6 +9,8 @@ export type UpgradePrices = {
   prices: Record<'featured' | 'urgent' | 'highlight', number>;
   defaults: Record<'featured' | 'urgent' | 'highlight', number>;
   currency: string;
+  /** Admin on/off switches for the Free / Premium radios on the Post a Product form. Missing = on. */
+  listing?: { free_enabled: boolean; premium_enabled: boolean };
 };
 
 function Pill({ tone, children }: { tone: 'purple' | 'amber' | 'red'; children: string }) {
@@ -48,7 +50,9 @@ const FLAGS = [
 /**
  * Premium upgrade price manager. Each card shows the price buyers
  * currently pay, pre-filled and editable; saving writes the three
- * values to the backend in one call.
+ * values to the backend in one call. The two listing-type switches on
+ * top control whether the Free Listing / Premium radios appear on the
+ * Post a Product form at all.
  */
 export function UpgradesForm({ initial }: { initial: UpgradePrices }) {
   const [values, setValues] = useState<Record<string, string>>({
@@ -56,13 +60,18 @@ export function UpgradesForm({ initial }: { initial: UpgradePrices }) {
     urgent: String(initial.prices.urgent),
     highlight: String(initial.prices.highlight),
   });
+  const [freeEnabled, setFreeEnabled] = useState(initial.listing?.free_enabled ?? true);
+  const [premiumEnabled, setPremiumEnabled] = useState(initial.listing?.premium_enabled ?? true);
   const [busy, setBusy] = useState(false);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setBusy(true);
     try {
-      const body: Record<string, number> = {};
+      const body: Record<string, number | boolean> = {
+        free_enabled: freeEnabled,
+        premium_enabled: premiumEnabled,
+      };
       for (const [k, v] of Object.entries(values)) {
         const n = Number(v);
         if (v !== '' && Number.isFinite(n) && n >= 0) body[k] = n;
@@ -77,6 +86,8 @@ export function UpgradesForm({ initial }: { initial: UpgradePrices }) {
         urgent: String(data.prices.urgent),
         highlight: String(data.prices.highlight),
       });
+      setFreeEnabled(data.listing?.free_enabled ?? true);
+      setPremiumEnabled(data.listing?.premium_enabled ?? true);
       toast.success('Upgrade prices updated');
     } catch (e2) {
       toast.error(e2 instanceof Error ? e2.message : 'Save failed');
@@ -85,8 +96,50 @@ export function UpgradesForm({ initial }: { initial: UpgradePrices }) {
     }
   };
 
+  const toggles = [
+    {
+      title: 'Free Listing',
+      blurb: 'Off hides the Free Listing radio on the Post a Product form.',
+      on: freeEnabled,
+      set: setFreeEnabled,
+    },
+    {
+      title: 'Premium Listing',
+      blurb: 'Off hides the Premium radio (and its paid boosts) on the Post a Product form.',
+      on: premiumEnabled,
+      set: setPremiumEnabled,
+    },
+  ];
+
   return (
-    <form onSubmit={submit} className="grid max-w-3xl grid-cols-1 gap-4 md:grid-cols-3">
+    <form onSubmit={submit} className="max-w-3xl space-y-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {toggles.map(({ title, blurb, on, set }) => (
+          <button
+            key={title}
+            type="button"
+            role="switch"
+            aria-checked={on}
+            onClick={() => set(!on)}
+            className="flex items-start justify-between gap-3 rounded-2xl border border-line bg-white p-5 text-left"
+          >
+            <span>
+              <span className="block text-sm font-semibold text-ink">{title}</span>
+              <span className="mt-1 block text-xs leading-5 text-ink-muted">{blurb}</span>
+              <span className={`mt-2 inline-block rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${on ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                {on ? 'On' : 'Off'}
+              </span>
+            </span>
+            <span
+              className="mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition"
+              style={{ background: on ? 'var(--adm-brand, #E11D48)' : '#CBD5E1', justifyContent: on ? 'flex-end' : 'flex-start' }}
+            >
+              <span className="h-5 w-5 rounded-full bg-white shadow" />
+            </span>
+          </button>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
       {FLAGS.map(({ key, title, blurb, tone }) => (
         <div
           key={key}
@@ -111,13 +164,14 @@ export function UpgradesForm({ initial }: { initial: UpgradePrices }) {
           </label>
         </div>
       ))}
-      <div className="md:col-span-3">
+      </div>
+      <div>
         <button
           type="submit"
           disabled={busy}
           className="inline-flex h-10 items-center rounded-full bg-brand-600 px-8 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60"
         >
-          {busy ? 'Saving…' : 'Save prices'}
+          {busy ? 'Saving…' : 'Save changes'}
         </button>
       </div>
     </form>
