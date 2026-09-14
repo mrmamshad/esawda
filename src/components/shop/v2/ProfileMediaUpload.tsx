@@ -33,7 +33,7 @@ export function ProfileMediaUpload({ user }: { user: User }) {
         />
         <TileUpload
           label="Cover"
-          hint="Wide, e.g. 1920×400"
+          hint="Wide, e.g. 1920×300"
           endpoint="/me/cover"
           formField="cover"
           currentUrl={user.cover_url ?? undefined}
