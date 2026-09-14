@@ -19,7 +19,7 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setBusy(true); setErr(null);
     try {
-      await api('/auth/forgot', { method: 'POST', body: { email } });
+      await api('/auth/forgot', { method: 'POST', body: { email: email.trim() } });
       setDone(true);
     } catch (e2) {
       setErr(e2 instanceof ApiError ? e2.message : 'Something went wrong.');
@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
               <h1 className="text-2xl font-bold text-ink">Check your inbox</h1>
               <p className="mt-2 text-sm text-ink-muted">
                 If an account exists for <span className="font-medium text-ink">{email}</span>, we've sent a password reset link.
-                It expires in 30 minutes.
+                It expires in 60 minutes.
               </p>
               <div className="mt-6 flex flex-col gap-2 sm:flex-row">
                 <Link href={'/login' as Route} className="contents">
