@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 import type { User } from '@/types/api';
 
 type Extra = {
-  tagline?: string; description?: string; website?: string;
+  tagline?: string; description?: string; shop_description?: string; website?: string;
   whatsapp?: string; facebook?: string; twitter?: string;
   instagram?: string; linkedin?: string; youtube?: string; pinterest?: string;
 };
@@ -16,9 +16,10 @@ export function ShopProfileForm({ user }: { user: User }) {
   const extra = user as unknown as Extra;
   const [msg, setMsg] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
   const [form, setForm] = useState({
-    tagline:     extra.tagline     ?? '',
-    description: extra.description ?? '',
-    website:     extra.website     ?? '',
+    tagline:          extra.tagline          ?? '',
+    description:      extra.description      ?? '',
+    shop_description: extra.shop_description ?? '',
+    website:          extra.website          ?? '',
     whatsapp:    extra.whatsapp    ?? '',
     facebook:    extra.facebook    ?? '',
     twitter:     extra.twitter     ?? '',
@@ -92,6 +93,12 @@ export function ShopProfileForm({ user }: { user: User }) {
       <section>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-ink-muted">Public bio</h2>
         <div className="grid gap-4">
+          <div>
+            <label className="block text-xs uppercase tracking-widest text-ink-muted">Shop description</label>
+            <input value={form.shop_description} onChange={(e) => setForm({ ...form, shop_description: e.target.value })}
+              placeholder="Short line shown on the Shops directory & your store header" className={`${inp} mt-1`} />
+            <p className="mt-1 text-xs text-ink-muted">This is the subtitle buyers see on the Shops page card and your public store.</p>
+          </div>
           <div>
             <label className="block text-xs uppercase tracking-widest text-ink-muted">Tagline</label>
             <input value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })}
