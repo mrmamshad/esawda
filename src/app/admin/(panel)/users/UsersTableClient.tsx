@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { ColumnDef } from '@tanstack/react-table';
-import { Ban, ShieldCheck, Trash2 } from 'lucide-react';
+import { Ban, ShieldCheck, Trash2, KeyRound } from 'lucide-react';
 import { AdminTable } from '@/components/admin/v2/AdminTable';
 import { StatusBadge } from '@/components/admin/v2/StatusBadge';
 import { RowActionsMenu, type RowAction } from '@/components/admin/v2/RowActionsMenu';
@@ -32,15 +32,33 @@ export function UsersTableClient({ initialRows }: { initialRows: AdminUserRow[] 
   const [busyId, setBusyId] = useState<number | null>(null);
   const [pending, start] = useTransition();
 
-  const call = async (id: number, path: string, method: 'POST' | 'DELETE' = 'POST', success = 'Done') => {
+  const call = async (
+    id: number,
+    path: string,
+    method: 'POST' | 'DELETE' = 'POST',
+    success = 'Done',
+    body?: Record<string, unknown>,
+  ) => {
     setBusyId(id);
     try {
-      await api(`/admin/users/${id}${path}`, { method, token: readToken() });
+      await api(`/admin/users/${id}${path}`, { method, token: readToken(), body });
       toast.success(success);
       start(() => router.refresh());
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Action failed');
     } finally { setBusyId(null); }
+  };
+
+  // Prompt the admin for a new password, then set it via the backend
+  // reset-password endpoint (which expects { password }, min 8 chars).
+  const resetPassword = (id: number, name: string) => {
+    const pw = window.prompt(`Set a new password for ${name} (min 8 characters):`);
+    if (pw === null) return;              // admin cancelled
+    if (pw.trim().length < 8) {
+      toast.error('Password must be at least 8 characters.');
+      return;
+    }
+    call(id, '/reset-password', 'POST', 'Password updated', { password: pw });
   };
 
   const columns = useMemo<ColumnDef<AdminUserRow, any>[]>(() => [
@@ -124,10 +142,13 @@ export function UsersTableClient({ initialRows }: { initialRows: AdminUserRow[] 
       cell: (info) => {
         const r = info.row.original;
         const isActive = r.status === '1';
+        const who = r.name?.trim() || r.username;
         const actions: RowAction[] = [
           isActive
-            ? { label: 'Ban',    icon: <Ban size={13} />,         disabled: busyId === r.id || pending, onClick: () => call(r.id, '/ban',   'POST', 'User banned') }
-            : { label: 'Unban',  icon: <ShieldCheck size={13} />, disabled: busyId === r.id || pending, onClick: () => call(r.id, '/unban', 'POST', 'User unbanned') },
+            ? { label: 'Set inactive', icon: <Ban size={13} />,         disabled: busyId === r.id || pending, onClick: () => call(r.id, '/ban',   'POST', 'User set inactive') }
+            : { label: 'Set active',   icon: <ShieldCheck size={13} />, disabled: busyId === r.id || pending, onClick: () => call(r.id, '/unban', 'POST', 'User set active') },
+          { label: 'Reset password', icon: <KeyRound size={13} />, disabled: busyId === r.id || pending,
+            onClick: () => resetPassword(r.id, who) },
           { label: 'Delete', icon: <Trash2 size={13} />, danger: true, disabled: busyId === r.id || pending,
             onClick: () => { if (confirm(`Delete user #${r.id}?`)) call(r.id, '', 'DELETE', 'User deleted'); } },
         ];
