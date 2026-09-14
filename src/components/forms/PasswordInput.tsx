@@ -12,13 +12,17 @@ import { cn } from '@/lib/cn';
 export const PasswordInput = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   function PasswordInput({ className, ...rest }, ref) {
     const [show, setShow] = useState(false);
+    // Strip any `type` the caller passed (FormField sends type="password").
+    // Spreading `...rest` after our own `type` would otherwise override the
+    // show/hide toggle, so the eye button would never reveal the text.
+    const { type: _type, ...inputProps } = rest;
     return (
       <div className="relative">
         <input
           ref={ref}
           type={show ? 'text' : 'password'}
           className={cn(className, 'pr-10')}
-          {...rest}
+          {...inputProps}
         />
         <button
           type="button"
