@@ -51,7 +51,7 @@ export function BannerUpload({ user }: { user: User }) {
           <div className="min-w-0">
             <h3 className="text-sm font-bold" style={{ color: 'var(--shp-fg)' }}>Update banner</h3>
             <p className="text-[11.5px]" style={{ color: 'var(--shp-fg-faint)' }}>
-              Wide banner shown at the top of your public store. Recommended 1920×300.
+              Wide banner shown at the top of your public store. Recommended 1920×400.
             </p>
           </div>
         </div>

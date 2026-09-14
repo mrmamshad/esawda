@@ -247,9 +247,9 @@ export default async function SellerProfilePage({ params, searchParams }: {
               {/* Shop banner — full width of the right column. Uses object-cover
                   so the banner fills the box edge-to-edge (no letterbox bars),
                   which looks clean for a store hero. The box holds the
-                  recommended 1920×300 (32:5) shape, matching the upload hint. */}
+                  recommended 1920×400 (24:5) shape, matching the upload hint. */}
               {s.shop_banner_url && (
-                <div className="relative aspect-[32/5] w-full overflow-hidden rounded-xl bg-ink">
+                <div className="relative aspect-[24/5] w-full overflow-hidden rounded-xl bg-ink">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={s.shop_banner_url}
