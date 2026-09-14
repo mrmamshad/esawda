@@ -23,6 +23,8 @@ export type AdminShopRow = {
   shop_name: string | null;
   shop_verified_at: string | null;
   status: string;
+  /** Shop listing flag (independent of account status / login). */
+  shop_status?: 'active' | 'inactive' | string | null;
   created_at: string | null;
   post_policy?: 'inherit' | 'free' | 'blocked' | string | null;
   listings_total?: number;
@@ -85,15 +87,16 @@ export function ShopsTableClient({ initialRows }: { initialRows: AdminShopRow[] 
     } finally { setBusyId(null); }
   };
 
-  // Active / Inactive switch. Deactivating (ban) also drops the shop from
-  // the public /shops directory, which only lists status='1' sellers.
+  // Shop Activate / Deactivate switch. Controls only public Shops-listing
+  // (shop_status); the owner can still log in regardless. Deactivating drops
+  // the shop from the /shops directory, which lists only active shops.
   const toggleActive = async (r: AdminShopRow) => {
-    const active = r.status === '1';
+    const active = (r.shop_status ?? 'active') === 'active';
     setBusyId(r.id);
     try {
-      await api(`/admin/users/${r.id}${active ? '/ban' : '/unban'}`, { method: 'POST', token: readToken() });
+      await api(`/admin/users/${r.id}${active ? '/deactivate-shop' : '/activate-shop'}`, { method: 'POST', token: readToken() });
       toast.success(active ? 'Shop deactivated — hidden from public list' : 'Shop activated');
-      setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, status: active ? '0' : '1' } : x)));
+      setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, shop_status: active ? 'inactive' : 'active' } : x)));
       start(() => router.refresh());
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Action failed');
@@ -147,8 +150,8 @@ export function ShopsTableClient({ initialRows }: { initialRows: AdminShopRow[] 
       size: 120,
     },
     {
-      id: 'status', accessorKey: 'status', header: 'Status',
-      cell: (info) => <StatusBadge value={(info.getValue() as string) === '1' ? 'active' : 'inactive'} />,
+      id: 'status', accessorKey: 'shop_status', header: 'Status',
+      cell: (info) => <StatusBadge value={(info.getValue() as string | null) === 'active' || info.getValue() == null ? 'active' : 'inactive'} />,
       size: 100,
     },
     {
@@ -204,7 +207,7 @@ export function ShopsTableClient({ initialRows }: { initialRows: AdminShopRow[] 
       cell: (info) => {
         const r = info.row.original;
         const isVerified = !!r.shop_verified_at;
-        const isActive = r.status === '1';
+        const isActive = (r.shop_status ?? 'active') === 'active';
         const actions: RowAction[] = [
           isVerified
             ? { label: 'Unverify', icon: <BadgeX size={13} />, danger: true, disabled: busyId === r.id || pending,
