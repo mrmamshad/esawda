@@ -324,7 +324,7 @@ export default async function SellerProfilePage({ params, searchParams }: {
                 <div className="rounded-card border border-dashed border-line bg-white p-12 text-center text-ink-muted">
                   {activeCat
                     ? 'No products in this category yet.'
-                    : 'This seller hasn&apos;t posted any products yet.'}
+                    : 'This seller hasn’t posted any products yet.'}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
