@@ -14,7 +14,7 @@ export function ShopCard({ shop }: { shop: Shop }) {
 
   return (
     <article className="surface-card group flex h-full min-w-0 flex-col overflow-hidden transition duration-300 hover:-translate-y-1 hover:shadow-cardHover">
-      <Link href={href} className="relative block aspect-[24/5] overflow-hidden bg-brand-900" tabIndex={-1}>
+      <Link href={href} className="relative block aspect-[16/5] overflow-hidden bg-brand-900" tabIndex={-1}>
         {banner ? (
           <Image
             src={banner}

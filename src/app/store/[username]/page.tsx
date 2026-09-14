@@ -130,14 +130,13 @@ export default async function SellerProfilePage({ params, searchParams }: {
             <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
               {/* Seller identity card */}
               <div className="surface-card overflow-hidden">
-                {/* Cover uses the same 24:5 (1920×400) ratio as the shop banner
-                    so both share one shape and a correctly-sized cover fills
-                    the box without cropping. */}
+                {/* Cover box matches the recommended 800×315 upload size, so a
+                    correctly-sized cover fills it exactly without cropping. */}
                 {s.cover_url && (
                   <img
                     src={s.cover_url}
                     alt=""
-                    className="aspect-[24/5] w-full object-cover"
+                    className="aspect-[800/315] w-full object-cover"
                   />
                 )}
                 <div className="flex flex-col items-center px-6 pt-8 pb-6 text-center">
@@ -254,9 +253,9 @@ export default async function SellerProfilePage({ params, searchParams }: {
               {/* Shop banner — full width of the right column. Uses object-cover
                   so the banner fills the box edge-to-edge (no letterbox bars),
                   which looks clean for a store hero. The box holds the
-                  recommended 1920×400 (24:5) shape, matching the upload hint. */}
+                  recommended 1920×600 (16:5) shape, matching the upload hint. */}
               {s.shop_banner_url && (
-                <div className="relative aspect-[24/5] w-full overflow-hidden rounded-xl bg-ink">
+                <div className="relative aspect-[16/5] w-full overflow-hidden rounded-xl bg-ink">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={s.shop_banner_url}
