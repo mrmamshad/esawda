@@ -400,7 +400,7 @@ export function ShopApplyForm({
           />
           <PhotoUpload
             label="Cover"
-            hint="Wide, e.g. 1920×300"
+            hint="Wide, e.g. 1920×400"
             file={cover}
             inputRef={coverRef}
             onPick={() => coverRef.current?.click()}
