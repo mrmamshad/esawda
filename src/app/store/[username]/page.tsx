@@ -241,16 +241,18 @@ export default async function SellerProfilePage({ params, searchParams }: {
 
             {/* ───────── Right: listings ───────── */}
             <section className="min-w-0 space-y-4">
-              {/* Shop banner — full width of the right column. The box uses the
-                  same 1920×300 (32:5) ratio recommended on upload, so a
-                  correctly-sized banner fills it edge-to-edge without cropping. */}
+              {/* Shop banner — full width of the right column. object-contain
+                  guarantees the whole uploaded banner is always shown without
+                  cropping, whatever aspect ratio it was uploaded at. The box
+                  targets the recommended 1920×300 (32:5) shape; off-ratio
+                  images sit centred with the shop background showing around. */}
               {s.shop_banner_url && (
                 <div className="relative aspect-[32/5] w-full overflow-hidden rounded-xl bg-ink">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={s.shop_banner_url}
                     alt={`${s.shop_name || s.name} banner`}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-contain"
                   />
                 </div>
               )}
