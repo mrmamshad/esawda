@@ -42,11 +42,14 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
   try {
     const { data: seller } = await api<Seller>(`/sellers/${username}`, { revalidate: 300 });
     const desc = `${seller.stats.total_listings} listings · ${seller.stats.sold} sold${seller.location.city ? ` · ${seller.location.city}` : ''}`;
+    // Prefer the shop's public name for the browser tab / SEO title; fall
+    // back to the person's name only when no shop name is set.
+    const displayName = seller.shop_name || seller.name;
     return {
-      title:       `${seller.name}'s Listings`,
+      title:       `${displayName}'s Listings`,
       description: desc,
       alternates:  { canonical: `/store/${seller.username}` },
-      openGraph:   { title: `${seller.name} · eSawda`, description: desc, images: [seller.avatar_url], type: 'profile' },
+      openGraph:   { title: `${displayName} · eSawda`, description: desc, images: [seller.avatar_url], type: 'profile' },
     };
   } catch { return { title: 'Seller not found' }; }
 }
