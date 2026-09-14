@@ -130,8 +130,15 @@ export default async function SellerProfilePage({ params, searchParams }: {
             <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
               {/* Seller identity card */}
               <div className="surface-card overflow-hidden">
+                {/* Cover uses the same 24:5 (1920×400) ratio as the shop banner
+                    so both share one shape and a correctly-sized cover fills
+                    the box without cropping. */}
                 {s.cover_url && (
-                  <img src={s.cover_url} alt="" className="h-32 w-full object-cover" />
+                  <img
+                    src={s.cover_url}
+                    alt=""
+                    className="aspect-[24/5] w-full object-cover"
+                  />
                 )}
                 <div className="flex flex-col items-center px-6 pt-8 pb-6 text-center">
                   <div className="relative">
