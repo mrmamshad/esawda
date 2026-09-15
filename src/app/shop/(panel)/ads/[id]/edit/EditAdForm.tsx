@@ -1,12 +1,16 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, useRef, type FormEvent, type ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Route } from 'next';
+import { X, ImagePlus } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
 import { readToken } from '@/lib/auth';
 import { Button } from '@/components/ui/Button';
 import type { AdDetail } from '@/types/api';
+
+const MAX_IMAGES = 4;
+const MAX_BYTES = 25 * 1024 * 1024; // 25 MB
 
 /**
  * Simplified edit form — reuses the same field set as PostAdPage but pre-populated.
@@ -31,25 +35,62 @@ export function EditAdForm({ ad }: { ad: AdDetail }) {
   const [err,  setErr]  = useState<string | null>(null);
   const [fields, setFields] = useState<Record<string, string[]>>({});
 
+  // Image editing state
+  const [existingImgs, setExistingImgs] = useState<{ url: string; thumb: string; filename: string }[]>(
+    (ad.images ?? []).map((img) => ({
+      ...img,
+      filename: img.url.split('/').pop() ?? '',
+    }))
+  );
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [deletingImg, setDeletingImg] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const totalImages = existingImgs.length + newFiles.length;
+  const remainingSlots = MAX_IMAGES - totalImages;
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    const valid = files.filter((f) => {
+      if (f.size > MAX_BYTES) { setErr(`"${f.name}" exceeds 25 MB.`); return false; }
+      return true;
+    });
+    const canAdd = MAX_IMAGES - existingImgs.length - newFiles.length;
+    setNewFiles((prev) => [...prev, ...valid].slice(0, prev.length + canAdd));
+    e.target.value = '';
+  };
+
+  const removeNewFile = (i: number) => setNewFiles((prev) => prev.filter((_, idx) => idx !== i));
+
+  const deleteExistingImage = async (filename: string) => {
+    setDeletingImg(filename);
+    try {
+      await api(`/ads/${ad.id}/images/${filename}`, { method: 'DELETE', token: readToken() });
+      setExistingImgs((prev) => prev.filter((img) => img.filename !== filename));
+    } catch { setErr('Failed to delete image.'); }
+    finally { setDeletingImg(null); }
+  };
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setBusy(true); setErr(null); setFields({});
 
-    const body = {
-      title: form.title,
-      description: form.description,
-      condition: form.condition,
-      price: Number(form.price) || 0,
-      negotiable: form.negotiable,
-      phone: form.phone,
-      address: form.address,
-      city: form.city,
-      state: form.state,
-      country: form.country,
-    };
-
     try {
-      await api(`/ads/${ad.id}`, { method: 'PUT', token: readToken(), body });
+      // Use FormData so we can attach image files
+      const fd = new FormData();
+      fd.append('title',       form.title);
+      fd.append('description', form.description);
+      fd.append('condition',   form.condition);
+      fd.append('price',       String(Number(form.price) || 0));
+      fd.append('negotiable',  form.negotiable ? '1' : '0');
+      fd.append('phone',       form.phone);
+      fd.append('address',     form.address);
+      fd.append('city',        form.city);
+      fd.append('state',       form.state);
+      fd.append('country',     form.country);
+      newFiles.forEach((f) => fd.append('images[]', f));
+
+      await api(`/ads/${ad.id}`, { method: 'PUT', token: readToken(), body: fd });
       router.push('/shop/ads' as Route);
     } catch (e2) {
       if (e2 instanceof ApiError) {
@@ -66,6 +107,73 @@ export function EditAdForm({ ad }: { ad: AdDetail }) {
   return (
     <form onSubmit={submit} className="surface-card space-y-4 p-6">
       {err && <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-800">{err}</p>}
+
+      {/* ── Images ── */}
+      <div>
+        <label className="block text-xs uppercase tracking-widest text-ink-muted">
+          Images <span className="normal-case text-ink-faint">({totalImages} / {MAX_IMAGES})</span>
+        </label>
+        <p className="mb-3 mt-0.5 text-xs text-ink-muted">Click ✕ to remove an existing image. Add new images below (JPG, PNG or WebP, max 25 MB each).</p>
+
+        {/* Existing images */}
+        {existingImgs.length > 0 && (
+          <div className="mb-3 flex flex-wrap gap-2">
+            {existingImgs.map((img) => (
+              <div key={img.filename} className="relative h-24 w-24 overflow-hidden rounded-lg border border-line">
+                <img src={img.thumb} alt="" className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => deleteExistingImage(img.filename)}
+                  disabled={deletingImg === img.filename}
+                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white hover:bg-red-600 disabled:opacity-50"
+                  title="Remove image"
+                >
+                  <X size={11} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* New files preview */}
+        {newFiles.length > 0 && (
+          <div className="mb-3 flex flex-wrap gap-2">
+            {newFiles.map((f, i) => (
+              <div key={i} className="relative h-24 w-24 overflow-hidden rounded-lg border-2 border-dashed border-brand-400 bg-brand-50">
+                <img src={URL.createObjectURL(f)} alt="" className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => removeNewFile(i)}
+                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white hover:bg-red-600"
+                >
+                  <X size={11} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Upload button */}
+        {remainingSlots > 0 && (
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              className="hidden"
+              onChange={handleFileChange}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-2 rounded-lg border border-dashed border-line px-4 py-2.5 text-sm text-ink-muted hover:border-brand-400 hover:text-brand-700"
+            >
+              <ImagePlus size={16} /> Add image{remainingSlots > 1 ? 's' : ''} ({remainingSlots} slot{remainingSlots > 1 ? 's' : ''} left)
+            </button>
+          </>
+        )}
+      </div>
 
       <div>
         <label className="block text-xs uppercase tracking-widest text-ink-muted">Title *</label>
