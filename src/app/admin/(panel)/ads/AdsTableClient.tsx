@@ -7,11 +7,12 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { ColumnDef } from '@tanstack/react-table';
 import {
-  Star, CheckCircle2, XCircle, Trash2, Sparkles, Eye, EyeOff,
+  Star, CheckCircle2, XCircle, Trash2, Sparkles, Eye, EyeOff, ScanSearch,
 } from 'lucide-react';
 import { AdminTable } from '@/components/admin/v2/AdminTable';
 import { StatusBadge } from '@/components/admin/v2/StatusBadge';
 import { RowActionsMenu, type RowAction } from '@/components/admin/v2/RowActionsMenu';
+import { ProductPreviewDrawer } from '@/components/admin/v2/ProductPreviewDrawer';
 import { api } from '@/lib/api';
 import { readToken } from '@/lib/auth';
 
@@ -39,6 +40,8 @@ export function AdsTableClient({ initialRows }: { initialRows: AdminAdRow[] }) {
   const [rows, setRows] = useState<AdminAdRow[]>(initialRows);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [pending, start] = useTransition();
+  const [previewId, setPreviewId] = useState<number | null>(null);
+  const [previewStatus, setPreviewStatus] = useState<string | undefined>();
 
   // router.refresh() hands back fresh rows after an action — keep in sync.
   useEffect(() => { setRows(initialRows); }, [initialRows]);
@@ -150,6 +153,10 @@ export function AdsTableClient({ initialRows }: { initialRows: AdminAdRow[] }) {
         const isFeatured = r.featured === '1';
         const isHidden = r.hide === '1';
         const actions: RowAction[] = [];
+        actions.unshift({
+          label: 'View details', icon: <ScanSearch size={13} />, disabled: busyId === r.id || pending,
+          onClick: () => { setPreviewStatus(r.status); setPreviewId(r.id); },
+        });
         if (r.status === 'pending') actions.push({
           label: 'Approve', icon: <CheckCircle2 size={13} />, disabled: busyId === r.id || pending,
           onClick: () => call(r.id, '/approve', 'POST', undefined, 'Ad approved'),
@@ -187,24 +194,33 @@ export function AdsTableClient({ initialRows }: { initialRows: AdminAdRow[] }) {
   ], [busyId, pending, router]);
 
   return (
-    <AdminTable
-      title="Ads"
-      description={`${rows.length} listing${rows.length === 1 ? '' : 's'} shown`}
-      columns={columns}
-      data={rows}
-      searchable
-      searchPlaceholder="Search title / seller…"
-      headerRight={
-        <Link
-          href={'/shop/ads/new' as Route}
-          className="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[12px] font-semibold text-white transition active:translate-y-[1px]"
-          style={{ background: 'var(--adm-brand)' }}
-        >
-          + New ad
-        </Link>
-      }
-      emptyTitle="No ads match this filter"
-      emptyDescription="Try a different status or condition."
-    />
+    <>
+      <ProductPreviewDrawer
+        adId={previewId}
+        initialStatus={previewStatus}
+        onClose={() => setPreviewId(null)}
+        onApprove={() => { toast.success('Ad approved'); start(() => router.refresh()); }}
+        onReject={() => { toast.success('Ad rejected'); start(() => router.refresh()); }}
+      />
+      <AdminTable
+        title="Ads"
+        description={`${rows.length} listing${rows.length === 1 ? '' : 's'} shown`}
+        columns={columns}
+        data={rows}
+        searchable
+        searchPlaceholder="Search title / seller…"
+        headerRight={
+          <Link
+            href={'/shop/ads/new' as Route}
+            className="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[12px] font-semibold text-white transition active:translate-y-[1px]"
+            style={{ background: 'var(--adm-brand)' }}
+          >
+            + New ad
+          </Link>
+        }
+        emptyTitle="No ads match this filter"
+        emptyDescription="Try a different status or condition."
+      />
+    </>
   );
 }
