@@ -30,6 +30,8 @@ export type AdminShopRow = {
   listings_total?: number;
   listings_active?: number;
   listings_pending?: number;
+  group_id?: string | null;
+  plan_expires_at?: string | null;
 };
 
 const POLICY_LABEL: Record<string, string> = {
@@ -166,6 +168,33 @@ export function ShopsTableClient({ initialRows }: { initialRows: AdminShopRow[] 
         );
       },
       size: 130,
+    },
+    {
+      id: 'subscription', header: 'Subscription',
+      cell: (info) => {
+        const r = info.row.original;
+        const plan = r.group_id;
+        const expires = r.plan_expires_at;
+        const isActive = expires ? new Date(expires) > new Date() : false;
+        const isFree = !plan || plan === 'free';
+
+        if (isFree) {
+          return <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500">Free</span>;
+        }
+        return (
+          <div className="min-w-0 text-xs">
+            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${isActive ? 'bg-brand-50 text-brand-700' : 'bg-red-50 text-red-600'}`}>
+              {plan}
+            </span>
+            {expires && (
+              <p className="mt-0.5 tabular-nums" style={{ color: 'var(--adm-fg-faint)' }}>
+                {isActive ? 'Expires' : 'Expired'}: {expires.slice(0, 10)}
+              </p>
+            )}
+          </div>
+        );
+      },
+      size: 140,
     },
     {
       id: 'posting', header: 'Posting',
