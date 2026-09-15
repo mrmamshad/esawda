@@ -17,7 +17,7 @@ export function RevenueChart({
   series,
   window,
   title = 'Revenue',
-  subtitle = 'SSLCommerz confirmed transactions',
+  subtitle = 'Online payment confirmed transactions',
   currency = '৳',
 }: {
   series: Record<'7D' | '30D' | '90D' | '1Y', RevenuePoint[]>;

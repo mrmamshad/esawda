@@ -32,7 +32,7 @@ export default async function AdminTxPage({
 
   return (
     <>
-      <PageHeader title="Transactions" description="SSLCommerz payment activity across the platform." />
+      <PageHeader title="Transactions" description="Online payment activity across the platform." />
 
       <nav className="mb-4 flex flex-wrap gap-1.5">
         {TABS.map((t) => {

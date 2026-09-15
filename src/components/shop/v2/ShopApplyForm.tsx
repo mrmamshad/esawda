@@ -101,6 +101,7 @@ export function ShopApplyForm({
   const bannerRef = useRef<HTMLInputElement>(null);
   const [accountCreated, setAccountCreated] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [done, setDone] = useState(false);
@@ -130,7 +131,7 @@ export function ShopApplyForm({
   const mobileInvalid = ownerPhone.length > 0 && !isValidBdMobile(ownerPhone);
   // Submit stays disabled until the guest credentials are valid — this is
   // the #1 repeated-submit failure (register 422 after typing mismatch).
-  const credentialsOk = !isGuest || accountCreated || pwMatch;
+  const credentialsOk = (!isGuest || accountCreated || pwMatch) && agreedToTerms;
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -456,7 +457,23 @@ export function ShopApplyForm({
         </div>
       )}
 
-      <div className="mt-6 flex items-center justify-between">
+      <label className="mt-6 flex items-start gap-2 text-sm text-ink">
+        <input
+          type="checkbox"
+          checked={agreedToTerms}
+          onChange={(e) => setAgreedToTerms(e.target.checked)}
+          className="mt-1 h-4 w-4 shrink-0"
+        />
+        <span className="min-w-0 leading-6">
+          I have read and agree to the{' '}
+          <Link href={'/terms' as Route} className="whitespace-nowrap text-brand-700 underline">Terms &amp; Conditions</Link>,{' '}
+          <Link href={'/refund-policy' as Route} className="whitespace-nowrap text-brand-700 underline">Refund &amp; Cancellation Policy</Link>,{' '}
+          and{' '}
+          <Link href={'/privacy' as Route} className="whitespace-nowrap text-brand-700 underline">Privacy Policy</Link>
+        </span>
+      </label>
+
+      <div className="mt-4 flex items-center justify-between">
         <p className="flex items-center gap-1.5 text-xs text-ink-muted">
           <ShieldCheck size={14} /> Documents are stored securely for verification.
         </p>

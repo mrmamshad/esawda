@@ -15,7 +15,7 @@ export function SalesPanel({ series, subtitle }: { series: SalesPoint[]; subtitl
         <div>
           <h2 className="text-[15px] font-semibold" style={{ color: 'var(--shp-fg)' }}>Sales Performance</h2>
           <p className="mt-0.5 text-xs" style={{ color: 'var(--shp-fg-muted)' }}>
-            {subtitle || `${new Date().toLocaleString('en', { month: 'long', year: 'numeric' })} · SSLCommerz confirmed`}
+            {subtitle || `${new Date().toLocaleString('en', { month: 'long', year: 'numeric' })} · Online payment confirmed`}
           </p>
         </div>
         <span

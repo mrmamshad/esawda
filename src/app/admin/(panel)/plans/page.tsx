@@ -17,7 +17,7 @@ export default async function AdminPlansPage() {
   );
   return (
     <>
-      <PageHeader title="Membership plans" description="Pricing tiers sold via SSLCommerz checkout." />
+      <PageHeader title="Membership plans" description="Pricing tiers sold via online payment checkout." />
       <PlansTableClient initialRows={res.data} />
     </>
   );

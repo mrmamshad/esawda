@@ -216,7 +216,7 @@ function LatestTransactionsTable({ rows }: { rows: AdminRecentTx[] }) {
   return (
     <DataTableV2
       title="Latest transactions"
-      description="All SSLCommerz payment activity"
+      description="All online payment activity"
       viewAllHref="/admin/transactions"
       rows={rows}
       columns={cols}

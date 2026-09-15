@@ -1069,7 +1069,7 @@ function SubscriptionGate({
             {quotaExhausted ? 'Upgrade package' : 'Subscribe now'}
             <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
           </Link>
-          <p className="text-center text-[11px] text-ink-faint">Secure payment via SSLCommerz</p>
+          <p className="text-center text-[11px] text-ink-faint">Secure payment via online payment</p>
         </div>
       </div>
     </section>

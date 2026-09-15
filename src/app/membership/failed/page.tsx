@@ -25,8 +25,8 @@ export default async function FailedPage({ searchParams }: { searchParams: Promi
           <h1 className="mt-6 text-2xl font-bold text-ink">Payment didn't complete</h1>
           <p className="mt-2 text-sm text-ink-muted">
             {status === 'cancel'
-              ? 'You cancelled the payment on the SSLCommerz page. No charge has been made.'
-              : 'SSLCommerz reported the payment as failed. You can try again — no money has left your account.'}
+              ? 'You cancelled the payment on the online payment page. No charge has been made.'
+              : 'Online payment reported the payment as failed. You can try again — no money has left your account.'}
           </p>
           {tx && <p className="mt-2 text-xs text-ink-faint">Reference: TX-{tx}</p>}
           <div className="mt-8 flex flex-col gap-2 sm:flex-row sm:justify-center">

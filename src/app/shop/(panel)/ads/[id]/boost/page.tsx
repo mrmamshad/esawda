@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 
 /**
  * Ad-upgrade purchase flow. Buyer chooses which boosts to buy, we hit
- * POST /api/v1/checkout/ad-upgrade/{postId} → redirect to SSLCommerz.
+ * POST /api/v1/checkout/ad-upgrade/{postId} → redirect to online payment gateway.
  */
 export default async function BoostAdPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -33,7 +33,7 @@ export default async function BoostAdPage({ params }: { params: Promise<{ id: st
     <main className="container-page py-8">
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-ink">Boost this product</h1>
-        <p className="text-sm text-ink-muted">Increase visibility with paid placements. Paid via SSLCommerz.</p>
+        <p className="text-sm text-ink-muted">Increase visibility with paid placements. Paid via online payment.</p>
       </header>
       <BoostForm ad={ad} />
     </main>
