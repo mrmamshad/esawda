@@ -42,14 +42,14 @@ export default async function AdminAdDetailPage({ params }: { params: Promise<{ 
 
   let ad: AdDetail;
   try {
-    const res = await apiFromServer<AdDetail>(`/admin/ads/${id}`, { cache: 'no-store' });
+    const res = await apiFromServer<{ data: AdDetail }>(`/admin/ads/${id}`, { cache: 'no-store' });
+    // AdDetailResource returns {"data": {...}} — apiFromServer may unwrap one level
     ad = (res as any).data ?? res;
   } catch {
     notFound();
   }
 
   const images = ad.images ?? [];
-  const isPending = ad.status === 'pending';
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -205,15 +205,8 @@ export default async function AdminAdDetailPage({ params }: { params: Promise<{ 
             )}
           </div>
 
-          {/* Approve / Reject actions (client component for interactivity) */}
-          {isPending && <AdApproveRejectClient adId={ad.id} />}
-
-          {/* Non-pending status note */}
-          {!isPending && (
-            <div className="rounded-2xl border border-line bg-surface-muted p-4 text-center text-sm text-ink-muted">
-              This product is <strong className="text-ink">{ad.status}</strong> — no moderation action needed.
-            </div>
-          )}
+          {/* Approve / Reject actions — always visible */}
+          <AdApproveRejectClient adId={ad.id} currentStatus={ad.status} />
         </div>
       </div>
     </div>

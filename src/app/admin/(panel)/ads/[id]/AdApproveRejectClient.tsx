@@ -7,7 +7,7 @@ import { CheckCircle2, XCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { readToken } from '@/lib/auth';
 
-export function AdApproveRejectClient({ adId }: { adId: number }) {
+export function AdApproveRejectClient({ adId, currentStatus }: { adId: number; currentStatus?: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [rejecting, setRejecting] = useState(false);
@@ -41,7 +41,14 @@ export function AdApproveRejectClient({ adId }: { adId: number }) {
 
   return (
     <div className="rounded-2xl border border-line bg-white p-5 space-y-4">
-      <h2 className="text-xs font-semibold uppercase tracking-widest text-ink-muted">Moderation</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-ink-muted">Moderation</h2>
+        {currentStatus && (
+          <span className="rounded-full bg-surface-muted px-2.5 py-0.5 text-xs font-medium text-ink-muted capitalize">
+            Current: {currentStatus}
+          </span>
+        )}
+      </div>
 
       {!rejecting ? (
         <div className="flex flex-col gap-3">
