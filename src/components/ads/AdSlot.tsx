@@ -94,13 +94,10 @@ const SIZE_SPEC: Record<AdSlotSize, { h: string; label: string }> = {
   skyscraper:  { h: 'aspect-[160/600] w-full max-w-[160px] mx-auto', label: '160 × 600' },
 };
 
-const FALLBACK_IMG: Partial<Record<AdSlotSize, string>> = {
-  leaderboard: '/ad-infeed.gif',
-  large:       '/ad-large.gif',
-  wide:        '/ad-infeed.gif',
-  mpu:         '/ad-mpu.gif',
-  infeed:      '/ad-mpu.gif',
-};
+// No built-in image fallbacks. The old placeholder GIFs were ~28 MB combined
+// and dominated page weight. When no admin ad is set we now render the
+// lightweight "Ads will be placed here" box instead.
+const FALLBACK_IMG: Partial<Record<AdSlotSize, string>> = {};
 
 export function AdSlot({
   placement,
