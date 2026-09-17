@@ -36,11 +36,8 @@ export function EditAdForm({ ad }: { ad: AdDetail }) {
   const [fields, setFields] = useState<Record<string, string[]>>({});
 
   // Image editing state
-  const [existingImgs, setExistingImgs] = useState<{ url: string; thumb: string; filename: string }[]>(
-    (ad.images ?? []).map((img) => ({
-      ...img,
-      filename: img.url.split('/').pop() ?? '',
-    }))
+  const [existingImgs, setExistingImgs] = useState(
+    ad.images ?? []
   );
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [deletingImg, setDeletingImg] = useState<string | null>(null);
@@ -119,16 +116,18 @@ export function EditAdForm({ ad }: { ad: AdDetail }) {
         {existingImgs.length > 0 && (
           <div className="mb-3 flex flex-wrap gap-2">
             {existingImgs.map((img) => (
-              <div key={img.filename} className="relative h-24 w-24 overflow-hidden rounded-lg border border-line">
-                <img src={img.thumb} alt="" className="h-full w-full object-cover" />
+              <div key={img.filename} className="group relative h-24 w-24 rounded-lg border border-line">
+                <img src={img.thumb} alt="" className="h-full w-full rounded-lg object-cover" />
                 <button
                   type="button"
                   onClick={() => deleteExistingImage(img.filename)}
                   disabled={deletingImg === img.filename}
-                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white hover:bg-red-600 disabled:opacity-50"
+                  className="absolute -right-2 -top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-md hover:bg-red-700 disabled:opacity-50"
                   title="Remove image"
                 >
-                  <X size={11} />
+                  {deletingImg === img.filename
+                    ? <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    : <X size={13} strokeWidth={3} />}
                 </button>
               </div>
             ))}

@@ -90,7 +90,7 @@ export type AdDetail = Ad & {
   whatsapp: string | null;
   tags: string[];
   view_count: number;
-  images: { url: string; thumb: string }[];
+  images: { filename: string; url: string; thumb: string }[];
   location: Ad['location'] & { address: string | null; coords: { lat: number; lng: number } | null };
   category:     { id: number; name: string; slug: string | null; icon: string | null } | null;
   sub_category: { id: number; name: string; slug: string | null } | null;
