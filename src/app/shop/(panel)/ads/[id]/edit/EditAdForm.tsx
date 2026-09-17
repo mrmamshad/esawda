@@ -37,7 +37,10 @@ export function EditAdForm({ ad }: { ad: AdDetail }) {
 
   // Image editing state
   const [existingImgs, setExistingImgs] = useState(
-    ad.images ?? []
+    (ad.images ?? []).map((img) => ({
+      ...img,
+      filename: img.filename || img.url.split('/').pop() || img.thumb.split('/').pop() || '',
+    }))
   );
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [deletingImg, setDeletingImg] = useState<string | null>(null);
