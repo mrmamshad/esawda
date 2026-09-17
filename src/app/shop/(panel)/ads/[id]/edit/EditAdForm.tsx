@@ -65,7 +65,7 @@ export function EditAdForm({ ad }: { ad: AdDetail }) {
   const deleteExistingImage = async (filename: string) => {
     setDeletingImg(filename);
     try {
-      await api(`/ads/${ad.id}/images/${filename}`, { method: 'DELETE', token: readToken() });
+      await api(`/ads/${ad.id}/images?filename=${encodeURIComponent(filename)}`, { method: 'DELETE', token: readToken() });
       setExistingImgs((prev) => prev.filter((img) => img.filename !== filename));
     } catch { setErr('Failed to delete image.'); }
     finally { setDeletingImg(null); }
