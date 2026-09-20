@@ -20,6 +20,12 @@ const nextConfig = {
       { protocol: 'https', hostname: 'api.esawda.com',        pathname: '/uploads/**' },
     ],
     formats: ['image/avif', 'image/webp'],
+    // Cache optimized images for 30 days so repeat visits are instant and
+    // the optimizer doesn't re-encode on every request.
+    minimumCacheTTL: 2592000,
+    // Constrain generated sizes — fewer variants = fewer on-the-fly encodes.
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [64, 128, 256, 384],
   },
   experimental: {
     // Next 15 keeps typedRoutes stable; enable for App-Router link safety.
