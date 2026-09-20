@@ -113,13 +113,12 @@ export function ShopsTableClient({ initialRows }: { initialRows: AdminShopRow[] 
       cell: (info) => {
         const r = info.row.original;
         return (
-          <div className="min-w-0 text-xs" style={{ color: 'var(--adm-fg-muted)' }}>
-            <p className="tabular-nums">{r.phone || '—'}</p>
-            <p className="truncate" style={{ color: 'var(--adm-fg-faint)' }}>{r.shop_address || r.address || '—'}</p>
-          </div>
+          <span className="tabular-nums text-xs" style={{ color: 'var(--adm-fg-muted)' }}>
+            {r.phone || '—'}
+          </span>
         );
       },
-      size: 170,
+      size: 130,
     },
     {
       id: 'verified', accessorKey: 'shop_verified_at', header: 'Verified',
