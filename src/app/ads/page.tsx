@@ -127,31 +127,34 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
 
           </div>
 
-          {/* Condition filter chips */}
-          <div className="flex flex-wrap items-center gap-2">
-            {[
-              { key: '',     label: 'All items' },
-              { key: 'new',  label: 'Brand New' },
-              { key: 'used', label: 'Used' },
-            ].map((c) => {
-              const active = activeCondition === c.key;
-              return (
-                <a
-                  key={c.key || 'all'} href={buildHref(c.key)}
-                  className={`rounded-pill border px-4 py-1.5 text-sm ${active ? 'border-brand-700 bg-brand-700 text-white' : 'border-line bg-white text-ink-muted hover:border-brand-500'}`}
-                >{c.label}</a>
-              );
-            })}
-          </div>
-
-          {/* Grid / List — client component handles view toggle */}
+          {/* Grid / List — condition chips passed as toolbar so they appear in the same row as view toggle */}
           {ads.data.length === 0 ? (
             <div className="rounded-card border border-dashed border-line p-12 text-center text-ink-muted">
               No products match the current filters.{' '}
               <a href="/ads" className="ml-2 text-sm font-semibold text-brand-700 hover:underline">Reset</a>
             </div>
           ) : (
-            <BrowseGrid ads={ads.data} />
+            <BrowseGrid
+              ads={ads.data}
+              toolbar={
+                <>
+                  {[
+                    { key: '',     label: 'All items' },
+                    { key: 'new',  label: 'Brand New' },
+                    { key: 'used', label: 'Used' },
+                  ].map((c) => {
+                    const active = activeCondition === c.key;
+                    return (
+                      <a
+                        key={c.key || 'all'}
+                        href={buildHref(c.key)}
+                        className={`rounded-pill border px-4 py-1.5 text-sm transition ${active ? 'border-brand-700 bg-brand-700 text-white' : 'border-line bg-white text-ink-muted hover:border-brand-500'}`}
+                      >{c.label}</a>
+                    );
+                  })}
+                </>
+              }
+            />
           )}
 
           {/* Pagination */}
