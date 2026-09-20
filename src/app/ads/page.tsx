@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Fragment } from 'react';
 import { Search } from 'lucide-react';
 import { api } from '@/lib/api';
 import { toQueryString } from '@/lib/queryString';
@@ -9,10 +8,8 @@ import { HeroBanner } from '@/components/layout/HeroBanner';
 import { CategorySidebar } from '@/components/filter/CategorySidebar';
 import { MobileFilterToggle } from '@/components/filter/MobileFilterToggle';
 import { PriceRangeFilter } from '@/components/filter/PriceRangeFilter';
-import { ListingCard } from '@/components/listing/ListingCard';
-import { IconButton } from '@/components/ui/IconButton';
-import { Button } from '@/components/ui/Button';
 import { AdSlot } from '@/components/ads/AdSlot';
+import { BrowseGrid } from './BrowseGrid';
 import type { Ad, Category } from '@/types/api';
 
 /**
@@ -126,14 +123,6 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
               />
             </form>
 
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-ink-muted">
-                <span className="block text-xs">Products</span>
-                <span className="block font-semibold text-ink leading-tight">Views</span>
-              </span>
-              <IconButton icon={<span className="text-brand-700">☰</span>} label="List view" tone="muted" size="sm" />
-              <IconButton icon={<span className="text-brand-700">▦</span>} label="Grid view" tone="muted" size="sm" />
-            </div>
           </div>
 
           {/* Condition filter chips */}
@@ -153,19 +142,14 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
             })}
           </div>
 
-          {/* Grid */}
+          {/* Grid / List — client component handles view toggle */}
           {ads.data.length === 0 ? (
             <div className="rounded-card border border-dashed border-line p-12 text-center text-ink-muted">
-              No products match the current filters. <Button variant="ghost" size="sm">Reset</Button>
+              No products match the current filters.{' '}
+              <a href="/ads" className="ml-2 text-sm font-semibold text-brand-700 hover:underline">Reset</a>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
-              {ads.data.map((ad, i) => (
-                <Fragment key={ad.id}>
-                  <ListingCard ad={ad} />
-                </Fragment>
-              ))}
-            </div>
+            <BrowseGrid ads={ads.data} />
           )}
 
           {/* AD SLOT — wide, results-bottom (pre-pagination). */}
