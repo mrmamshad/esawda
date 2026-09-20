@@ -9,6 +9,7 @@ import { CategorySidebar } from '@/components/filter/CategorySidebar';
 import { MobileFilterToggle } from '@/components/filter/MobileFilterToggle';
 import { PriceRangeFilter } from '@/components/filter/PriceRangeFilter';
 import { AdSlot } from '@/components/ads/AdSlot';
+import { IconButton } from '@/components/ui/IconButton';
 import { BrowseGrid } from './BrowseGrid';
 import type { Ad, Category } from '@/types/api';
 
