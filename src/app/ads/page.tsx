@@ -163,8 +163,6 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
               {ads.data.map((ad, i) => (
                 <Fragment key={ad.id}>
                   <ListingCard ad={ad} variant="featured" />
-                  {/* AD SLOT — in-feed native after 9th card (every ~10 results). */}
-                  {i === 8 && <AdSlot placement="search.mid_infeed" size="infeed" />}
                 </Fragment>
               ))}
             </div>
