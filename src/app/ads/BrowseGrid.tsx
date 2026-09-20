@@ -39,7 +39,7 @@ export function BrowseGrid({ ads }: { ads: Ad[] }) {
       }>
         {ads.map((ad) => (
           <Fragment key={ad.id}>
-            <ListingCard ad={ad} variant={view === 'list' ? 'list' : undefined} />
+            <ListingCard ad={ad} />
           </Fragment>
         ))}
       </div>
