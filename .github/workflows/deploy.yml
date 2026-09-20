@@ -42,6 +42,8 @@ jobs:
           script: |
             set -eo pipefail
             echo "==> whoami: $(whoami)  pwd: $(pwd)"
+            # Fix ownership of .next so esawda-demo can write during build
+            chown -R esawda-demo:esawda-demo /home/esawda-demo/htdocs/demo.esawda.com/.next 2>/dev/null || true
             sudo -u esawda-demo bash -lc '
               set -eo pipefail
               export NVM_DIR="$HOME/.nvm"
