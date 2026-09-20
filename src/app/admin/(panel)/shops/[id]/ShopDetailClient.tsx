@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
   Store, User, Phone, MapPin, Tag, FileText,
   BadgeCheck, BadgeX, Ban, ShieldCheck, KeyRound, Save, Pencil, X,
+  ImageIcon, Upload, FileCheck2, AlertCircle,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { readToken } from '@/lib/auth';
@@ -62,9 +63,22 @@ export function ShopDetailClient({ shop: initial, defaultEditing = false }: { sh
     phone:            initial.phone ?? '',
     address:          initial.address ?? '',
     shop_address:     initial.shop_address ?? '',
-    shop_category:    (initial as any).shop_category ?? '',
-    shop_description: (initial as any).shop_description ?? '',
+    shop_category:    initial.shop_category ?? '',
+    shop_description: initial.shop_description ?? '',
   });
+
+  // Media file refs
+  const avatarRef  = useRef<HTMLInputElement>(null);
+  const coverRef   = useRef<HTMLInputElement>(null);
+  const bannerRef  = useRef<HTMLInputElement>(null);
+  const nidRef     = useRef<HTMLInputElement>(null);
+  const tradeRef   = useRef<HTMLInputElement>(null);
+
+  const [avatarFile,  setAvatarFile]  = useState<File | null>(null);
+  const [coverFile,   setCoverFile]   = useState<File | null>(null);
+  const [bannerFile,  setBannerFile]  = useState<File | null>(null);
+  const [nidFile,     setNidFile]     = useState<File | null>(null);
+  const [tradeFile,   setTradeFile]   = useState<File | null>(null);
 
   const set = (key: keyof typeof form) => (v: string) =>
     setForm((f) => ({ ...f, [key]: v }));
@@ -83,13 +97,24 @@ export function ShopDetailClient({ shop: initial, defaultEditing = false }: { sh
   const save = async () => {
     setSaving(true);
     try {
-      await api(`/admin/users/${initial.id}`, {
-        method: 'PATCH',
-        token: readToken(),
-        body: form,
-      });
+      // If any files selected, use FormData — otherwise JSON PATCH
+      const hasFiles = avatarFile || coverFile || bannerFile || nidFile || tradeFile;
+      if (hasFiles) {
+        const fd = new FormData();
+        Object.entries(form).forEach(([k, v]) => { if (v) fd.append(k, v); });
+        if (avatarFile)  fd.append('avatar', avatarFile);
+        if (coverFile)   fd.append('cover', coverFile);
+        if (bannerFile)  fd.append('banner', bannerFile);
+        if (nidFile)     fd.append('documents[nid]', nidFile);
+        if (tradeFile)   fd.append('documents[trade_licence]', tradeFile);
+        await api(`/admin/users/${initial.id}`, { method: 'POST', token: readToken(), body: fd });
+      } else {
+        await api(`/admin/users/${initial.id}`, { method: 'PATCH', token: readToken(), body: form });
+      }
       toast.success('Shop updated successfully');
       setEditing(false);
+      setAvatarFile(null); setCoverFile(null); setBannerFile(null);
+      setNidFile(null); setTradeFile(null);
       start(() => router.refresh());
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Update failed');
@@ -258,6 +283,123 @@ export function ShopDetailClient({ shop: initial, defaultEditing = false }: { sh
                 <InputField label="Address" name="address" value={form.address} onChange={set('address')} />
               </div>
             )}
+          </div>
+
+          <hr className="border-gray-100" />
+
+          {/* Shop Photos */}
+          <div>
+            <SectionTitle icon={<ImageIcon size={13} />} label="Shop Photos" />
+            <div className="grid grid-cols-3 gap-4">
+              {/* Avatar */}
+              <div className="flex flex-col gap-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Profile Photo</span>
+                {initial.avatar_url ? (
+                  <img src={initial.avatar_url} alt="Avatar" className="h-20 w-20 rounded-xl object-cover border border-gray-200" />
+                ) : (
+                  <div className="flex h-20 w-20 items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 text-gray-300">
+                    <ImageIcon size={24} />
+                  </div>
+                )}
+                {editing && (
+                  <>
+                    <input ref={avatarRef} type="file" accept="image/*" className="hidden" onChange={e => setAvatarFile(e.target.files?.[0] ?? null)} />
+                    <button type="button" onClick={() => avatarRef.current?.click()} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 transition">
+                      <Upload size={12} /> {avatarFile ? avatarFile.name.slice(0, 16) + '…' : 'Upload'}
+                    </button>
+                  </>
+                )}
+              </div>
+              {/* Cover */}
+              <div className="flex flex-col gap-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Cover (800×315)</span>
+                {initial.cover_url ? (
+                  <img src={initial.cover_url} alt="Cover" className="h-20 w-full rounded-xl object-cover border border-gray-200" />
+                ) : (
+                  <div className="flex h-20 w-full items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 text-gray-300">
+                    <ImageIcon size={24} />
+                  </div>
+                )}
+                {editing && (
+                  <>
+                    <input ref={coverRef} type="file" accept="image/*" className="hidden" onChange={e => setCoverFile(e.target.files?.[0] ?? null)} />
+                    <button type="button" onClick={() => coverRef.current?.click()} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 transition">
+                      <Upload size={12} /> {coverFile ? coverFile.name.slice(0, 16) + '…' : 'Upload'}
+                    </button>
+                  </>
+                )}
+              </div>
+              {/* Banner */}
+              <div className="flex flex-col gap-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Banner (1920×600)</span>
+                {initial.shop_banner_url ? (
+                  <img src={initial.shop_banner_url} alt="Banner" className="h-20 w-full rounded-xl object-cover border border-gray-200" />
+                ) : (
+                  <div className="flex h-20 w-full items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 text-gray-300">
+                    <ImageIcon size={24} />
+                  </div>
+                )}
+                {editing && (
+                  <>
+                    <input ref={bannerRef} type="file" accept="image/*" className="hidden" onChange={e => setBannerFile(e.target.files?.[0] ?? null)} />
+                    <button type="button" onClick={() => bannerRef.current?.click()} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 transition">
+                      <Upload size={12} /> {bannerFile ? bannerFile.name.slice(0, 16) + '…' : 'Upload'}
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <hr className="border-gray-100" />
+
+          {/* Documents */}
+          <div>
+            <SectionTitle icon={<FileText size={13} />} label="Supporting Documents" />
+            <div className="grid grid-cols-2 gap-4">
+              {/* NID */}
+              <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-gray-600">NID (National ID)</span>
+                  {initial.documents?.nid
+                    ? <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[11px] font-semibold text-green-700"><FileCheck2 size={11} /> Uploaded</span>
+                    : <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] text-gray-400"><AlertCircle size={11} /> Not uploaded</span>
+                  }
+                </div>
+                {initial.documents?.nid && (
+                  <a href={initial.documents.nid} target="_blank" rel="noreferrer" className="text-xs text-brand-700 underline hover:text-brand-800">View document ↗</a>
+                )}
+                {editing && (
+                  <>
+                    <input ref={nidRef} type="file" accept="image/*,.pdf" className="hidden" onChange={e => setNidFile(e.target.files?.[0] ?? null)} />
+                    <button type="button" onClick={() => nidRef.current?.click()} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition">
+                      <Upload size={12} /> {nidFile ? nidFile.name.slice(0, 20) + '…' : initial.documents?.nid ? 'Replace NID' : 'Upload NID'}
+                    </button>
+                  </>
+                )}
+              </div>
+              {/* Trade Licence */}
+              <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-gray-600">Trade Licence</span>
+                  {initial.documents?.trade_licence
+                    ? <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[11px] font-semibold text-green-700"><FileCheck2 size={11} /> Uploaded</span>
+                    : <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] text-gray-400"><AlertCircle size={11} /> Not uploaded</span>
+                  }
+                </div>
+                {initial.documents?.trade_licence && (
+                  <a href={initial.documents.trade_licence} target="_blank" rel="noreferrer" className="text-xs text-brand-700 underline hover:text-brand-800">View document ↗</a>
+                )}
+                {editing && (
+                  <>
+                    <input ref={tradeRef} type="file" accept="image/*,.pdf" className="hidden" onChange={e => setTradeFile(e.target.files?.[0] ?? null)} />
+                    <button type="button" onClick={() => tradeRef.current?.click()} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition">
+                      <Upload size={12} /> {tradeFile ? tradeFile.name.slice(0, 20) + '…' : initial.documents?.trade_licence ? 'Replace' : 'Upload Trade Licence'}
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
 
           <hr className="border-gray-100" />

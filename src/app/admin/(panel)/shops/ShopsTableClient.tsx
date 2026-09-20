@@ -21,6 +21,8 @@ export type AdminShopRow = {
   shop_address?: string | null;
   user_type: string;
   shop_name: string | null;
+  shop_category?: string | null;
+  shop_description?: string | null;
   shop_verified_at: string | null;
   status: string;
   /** Shop listing flag (independent of account status / login). */
@@ -32,6 +34,15 @@ export type AdminShopRow = {
   listings_pending?: number;
   group_id?: string | null;
   plan_expires_at?: string | null;
+  /** Media URLs */
+  avatar_url?: string | null;
+  cover_url?: string | null;
+  shop_banner_url?: string | null;
+  /** Documents */
+  documents?: {
+    nid?: string | null;
+    trade_licence?: string | null;
+  } | null;
 };
 
 
