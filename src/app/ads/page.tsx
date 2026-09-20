@@ -153,10 +153,6 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
             })}
           </div>
 
-          {/* AD SLOT — large (970×250), filter-under. Highest CPM inventory
-              on the browse page — users with active intent. */}
-          <AdSlot placement="search.filter_under" size="large" />
-
           {/* Grid */}
           {ads.data.length === 0 ? (
             <div className="rounded-card border border-dashed border-line p-12 text-center text-ink-muted">
