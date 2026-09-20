@@ -36,7 +36,8 @@ export function ListingCard({
   subtitle,
   href,
   className,
-}: { ad: Ad; variant?: Variant; subtitle?: string; href?: string; className?: string }) {
+  priority = false,
+}: { ad: Ad; variant?: Variant; subtitle?: string; href?: string; className?: string; priority?: boolean }) {
   const url = (href ?? `/ads/${ad.url_slug}`) as Route;
   const thumb = ad.thumbnail && !ad.thumbnail.endsWith('/thumb-fallback.png') ? ad.thumbnail : null;
   const isDataUri = !!thumb && thumb.startsWith('data:');
@@ -97,6 +98,11 @@ export function ListingCard({
             sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw"
             className="object-cover transition duration-500 group-hover:scale-105"
             unoptimized={isDataUri || thumb.startsWith('/')}
+            // First-row cards load eagerly with fetch priority so the LCP
+            // image paints fast; the rest lazy-load as the user scrolls,
+            // freeing the browser's connection pool on initial paint.
+            priority={priority}
+            loading={priority ? 'eager' : 'lazy'}
           />
         ) : <ThumbFallback />}
         <div className="absolute left-3 top-3 flex flex-col gap-1">

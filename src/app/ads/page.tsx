@@ -11,6 +11,7 @@ import { PriceRangeFilter } from '@/components/filter/PriceRangeFilter';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { IconButton } from '@/components/ui/IconButton';
 import { BrowseGrid } from './BrowseGrid';
+import { ListingCard } from '@/components/listing/ListingCard';
 import type { Ad, Category } from '@/types/api';
 
 /**
@@ -135,7 +136,6 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
             </div>
           ) : (
             <BrowseGrid
-              ads={ads.data}
               toolbar={
                 <>
                   {[
@@ -154,6 +154,15 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
                   })}
                 </>
               }
+              // Cards rendered on the server. First 8 (≈2 rows on desktop)
+              // get `priority` so above-the-fold images paint immediately;
+              // the rest lazy-load on scroll.
+              gridChildren={ads.data.map((ad, i) => (
+                <ListingCard key={ad.id} ad={ad} variant="featured" priority={i < 8} />
+              ))}
+              listChildren={ads.data.map((ad) => (
+                <ListingCard key={ad.id} ad={ad} variant="list-row" />
+              ))}
             />
           )}
 

@@ -112,7 +112,8 @@ export function HomeSections({
             <div className={`mt-12 ${GRID}`}>
               {stripTestAds(pick(featured)).slice(0, 8).map((ad, i) => (
                 <Fragment key={ad.id}>
-                  <ListingCard ad={ad} variant="featured" />
+                  {/* First row (4 cards) is above the fold → priority for LCP. */}
+                  <ListingCard ad={ad} variant="featured" priority={i < 4} />
                   {i === 2 && <AdSlot placement="home.sponsored_infeed" size="infeed" />}
                 </Fragment>
               ))}
