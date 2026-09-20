@@ -109,8 +109,8 @@ export function HomeSections({
                 </button>
               </Link>
             </div>
-            <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {stripTestAds(pick(featured)).slice(0, 6).map((ad, i) => (
+            <div className={`mt-12 ${GRID}`}>
+              {stripTestAds(pick(featured)).slice(0, 8).map((ad, i) => (
                 <Fragment key={ad.id}>
                   <ListingCard ad={ad} variant="featured" />
                   {i === 2 && <AdSlot placement="home.sponsored_infeed" size="infeed" />}

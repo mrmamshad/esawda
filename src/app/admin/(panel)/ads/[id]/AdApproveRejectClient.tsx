@@ -52,20 +52,26 @@ export function AdApproveRejectClient({ adId, currentStatus }: { adId: number; c
 
       {!rejecting ? (
         <div className="flex flex-col gap-3">
-          <button
-            onClick={handleApprove}
-            disabled={busy}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-60 transition"
-          >
-            <CheckCircle2 size={16} /> {busy ? 'Approving…' : 'Approve Product'}
-          </button>
-          <button
-            onClick={() => setRejecting(true)}
-            disabled={busy}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 hover:bg-red-100 disabled:opacity-60 transition"
-          >
-            <XCircle size={16} /> Reject Product
-          </button>
+          {/* Approve — only when not already active/approved */}
+          {currentStatus !== 'active' && (
+            <button
+              onClick={handleApprove}
+              disabled={busy}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-60 transition"
+            >
+              <CheckCircle2 size={16} /> {busy ? 'Approving…' : 'Approve Product'}
+            </button>
+          )}
+          {/* Reject — only when not already rejected/removed */}
+          {currentStatus !== 'rejected' && currentStatus !== 'removed' && (
+            <button
+              onClick={() => setRejecting(true)}
+              disabled={busy}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 hover:bg-red-100 disabled:opacity-60 transition"
+            >
+              <XCircle size={16} /> Reject Product
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-3">

@@ -34,11 +34,6 @@ export type AdminShopRow = {
   plan_expires_at?: string | null;
 };
 
-const POLICY_LABEL: Record<string, string> = {
-  inherit: 'Standard',
-  free: 'Free posting',
-  blocked: 'Blocked',
-};
 
 export function ShopsTableClient({ initialRows }: { initialRows: AdminShopRow[] }) {
   const router = useRouter();
@@ -69,21 +64,6 @@ export function ShopsTableClient({ initialRows }: { initialRows: AdminShopRow[] 
         body: { password },
       });
       toast.success('Password updated');
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Action failed');
-    } finally { setBusyId(null); }
-  };
-
-  const setPolicy = async (r: AdminShopRow, post_policy: 'inherit' | 'free' | 'blocked') => {
-    setBusyId(r.id);
-    try {
-      await api(`/admin/users/${r.id}`, {
-        method: 'PATCH', token: readToken(),
-        body: { post_policy },
-      });
-      toast.success(`Posting: ${POLICY_LABEL[post_policy]}`);
-      setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, post_policy } : x)));
-      start(() => router.refresh());
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Action failed');
     } finally { setBusyId(null); }
@@ -197,33 +177,6 @@ export function ShopsTableClient({ initialRows }: { initialRows: AdminShopRow[] 
       size: 140,
     },
     {
-      id: 'posting', header: 'Posting',
-      cell: (info) => {
-        const r = info.row.original;
-        const policy = (r.post_policy as string) || 'inherit';
-        const tone = policy === 'blocked'
-          ? { background: '#FEE2E2', color: '#B91C1C' }
-          : policy === 'free'
-            ? { background: '#DCFCE7', color: '#15803D' }
-            : { background: 'var(--adm-brand-soft)', color: 'var(--adm-brand)' };
-        return (
-          <select
-            aria-label={`Posting policy for ${r.shop_name || r.username}`}
-            value={policy}
-            disabled={busyId === r.id}
-            onChange={(e) => void setPolicy(r, e.target.value as 'inherit' | 'free' | 'blocked')}
-            className="h-8 rounded-lg border px-1.5 text-xs font-semibold outline-none"
-            style={{ borderColor: 'var(--adm-border)', ...tone }}
-          >
-            <option value="inherit">Standard</option>
-            <option value="free">Free posting</option>
-            <option value="blocked">Blocked</option>
-          </select>
-        );
-      },
-      size: 140,
-    },
-    {
       id: 'joined', accessorKey: 'created_at', header: 'Joined',
       cell: (info) => {
         const v = info.getValue() as string | null;
@@ -232,7 +185,7 @@ export function ShopsTableClient({ initialRows }: { initialRows: AdminShopRow[] 
       size: 110,
     },
     {
-      id: 'actions', header: '', enableSorting: false,
+      id: 'actions', header: '', enableSorting: false, meta: { sticky: 'right' },
       cell: (info) => {
         const r = info.row.original;
         const isVerified = !!r.shop_verified_at;

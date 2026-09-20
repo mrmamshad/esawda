@@ -189,8 +189,6 @@ function LatestUsersTable({ rows }: { rows: AdminRecentUser[] }) {
         </div>
       </div>
     )},
-    { key: 'type',   header: 'Type',   render: (r) => <span className="capitalize">{r.user_type}</span> },
-    { key: 'status', header: 'Status', align: 'right', render: (r) => <StatusBadge value={r.status === '1' ? 'active' : 'inactive'} /> },
   ];
   return (
     <DataTableV2

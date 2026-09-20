@@ -106,8 +106,8 @@ export default async function AdminAdDetailPage({ params }: { params: Promise<{ 
             <div className="rounded-2xl border border-line bg-white p-5">
               <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-ink-muted">Product Details</h2>
               <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                {ad.custom_fields!.map((cf) => (
-                  <div key={cf.field_id} className="border-b border-line pb-2">
+                {ad.custom_fields!.map((cf, i) => (
+                  <div key={`${cf.field_id}-${i}`} className="border-b border-line pb-2">
                     <dt className="text-xs text-ink-muted capitalize">{cf.type}</dt>
                     <dd className="mt-0.5 font-medium text-ink">{cf.value}</dd>
                   </div>

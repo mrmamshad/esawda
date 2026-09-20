@@ -191,7 +191,7 @@ export function AdsTableClient({ initialRows }: { initialRows: AdminAdRow[] }) {
 
   return (
     <AdminTable
-      title="Ads"
+      title="Products"
       description={`${rows.length} listing${rows.length === 1 ? '' : 's'} shown`}
       columns={columns}
       data={rows}

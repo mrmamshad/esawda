@@ -150,7 +150,7 @@ export default async function SellerProfilePage({ params, searchParams }: {
                     )}
                   </div>
                   <div className="mt-2 flex items-center justify-center gap-1.5">
-                    <h1 className="text-lg font-bold leading-tight text-ink line-clamp-2">{s.name}</h1>
+                    <h1 className="text-lg font-bold leading-tight text-ink line-clamp-2">{s.shop_name || s.name}</h1>
                     {s.shop_verified === true && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-brand-700">
                         <BadgeCheck size={12} /> Verified

@@ -5,6 +5,13 @@ import {
   useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel,
   flexRender, type ColumnDef, type SortingState,
 } from '@tanstack/react-table';
+
+declare module '@tanstack/react-table' {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface ColumnMeta<TData, TValue> {
+    sticky?: 'right' | 'left';
+  }
+}
 import { ArrowUpDown, ArrowUp, ArrowDown, Search, X } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
@@ -124,8 +131,14 @@ export function AdminTable<T>({
                         className={cn(
                           'px-5 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-widest',
                           canSort && 'cursor-pointer select-none hover:bg-[color:var(--adm-bg)]',
+                          header.column.columnDef.meta?.sticky === 'right' && 'sticky right-0 z-10',
+                          header.column.columnDef.meta?.sticky === 'left'  && 'sticky left-0 z-10',
                         )}
-                        style={{ color: 'var(--adm-fg-faint)', width: header.getSize() === 150 ? undefined : header.getSize() }}
+                        style={{
+                          color: 'var(--adm-fg-faint)',
+                          width: header.getSize() === 150 ? undefined : header.getSize(),
+                          background: 'var(--adm-surface)',
+                        }}
                       >
                         <span className="inline-flex items-center gap-1">
                           {header.isPlaceholder
@@ -153,8 +166,12 @@ export function AdminTable<T>({
                   {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
-                      className="px-5 py-3 text-[13px] align-middle"
-                      style={{ color: 'var(--adm-fg)' }}
+                      className={cn(
+                        'px-5 py-3 text-[13px] align-middle',
+                        cell.column.columnDef.meta?.sticky === 'right' && 'sticky right-0 z-10',
+                        cell.column.columnDef.meta?.sticky === 'left'  && 'sticky left-0 z-10',
+                      )}
+                      style={{ color: 'var(--adm-fg)', background: 'inherit' }}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
