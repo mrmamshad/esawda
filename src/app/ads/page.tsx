@@ -38,7 +38,8 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
   const [cats, ads] = await Promise.all([
     api<Category[]>('/categories?with_counts=true&with_subs=true', { revalidate: 300 }),
     api<Ad[]>('/ads?' + toQueryString({
-      per_page: 12,
+      per_page: 24,
+      page: typeof sp.page === 'string' ? sp.page : 1,
       filter: {
         category:     sp['filter[category]']     as string | undefined,
         sub_category: sp['filter[sub_category]'] as string | undefined,
@@ -47,7 +48,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
       },
       q:    typeof sp.q    === 'string' ? sp.q    : undefined,
       sort: typeof sp.sort === 'string' ? sp.sort : undefined,
-    }), { revalidate: 60 }).catch(() => ({ data: [] as Ad[] })),
+    }), { revalidate: 60 }).catch(() => ({ data: [] as Ad[], meta: { current_page: 1, last_page: 1, total: 0 } })),
   ]);
 
   const activeCat = sp['filter[category]'] ? Number(sp['filter[category]']) : undefined;
@@ -152,6 +153,35 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
           ) : (
             <BrowseGrid ads={ads.data} />
           )}
+
+          {/* Pagination */}
+          {ads.meta && (ads.meta as { last_page: number; current_page: number }).last_page > 1 && (() => {
+            const meta = ads.meta as { current_page: number; last_page: number };
+            const currentPage = meta.current_page;
+            const lastPage = meta.last_page;
+            const buildPageHref = (p: number) => {
+              const params = new URLSearchParams();
+              Object.entries(sp).forEach(([k, v]) => { if (typeof v === 'string' && k !== 'page') params.set(k, v); });
+              if (p > 1) params.set('page', String(p));
+              return '/ads' + (params.toString() ? '?' + params.toString() : '');
+            };
+            return (
+              <div className="flex items-center justify-center gap-2 pt-4">
+                {currentPage > 1 && (
+                  <a href={buildPageHref(currentPage - 1)} className="rounded-pill border border-line px-4 py-2 text-sm hover:border-brand-500 hover:text-brand-700">← Prev</a>
+                )}
+                {Array.from({ length: Math.min(lastPage, 7) }, (_, i) => {
+                  const p = i + 1;
+                  return (
+                    <a key={p} href={buildPageHref(p)} className={`rounded-pill border px-4 py-2 text-sm ${p === currentPage ? 'border-brand-700 bg-brand-700 text-white' : 'border-line hover:border-brand-500 hover:text-brand-700'}`}>{p}</a>
+                  );
+                })}
+                {currentPage < lastPage && (
+                  <a href={buildPageHref(currentPage + 1)} className="rounded-pill border border-line px-4 py-2 text-sm hover:border-brand-500 hover:text-brand-700">Next →</a>
+                )}
+              </div>
+            );
+          })()}
 
           {/* AD SLOT — wide, results-bottom (pre-pagination). */}
           {ads.data.length > 0 && (
