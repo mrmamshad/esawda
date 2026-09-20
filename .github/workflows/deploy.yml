@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: '24'
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
       - name: Typecheck
         run: npx tsc --noEmit
       # NOTE: `npm run lint` (next lint) is interactive in Next 15 and has no
