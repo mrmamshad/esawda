@@ -3,6 +3,15 @@ name: Deploy Frontend App
 on:
   push:
     branches: [main]
+    paths:
+      - 'frontend/src/**'
+      - 'frontend/public/**'
+      - 'frontend/package.json'
+      - 'frontend/package-lock.json'
+      - 'frontend/next.config.mjs'
+      - 'frontend/tailwind.config.ts'
+      - 'frontend/tsconfig.json'
+      - 'frontend/.github/workflows/deploy.yml'
   workflow_dispatch:
 
 jobs:
@@ -10,19 +19,18 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: .
+        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
       - name: Install dependencies
         run: npm ci --ignore-scripts
       - name: Typecheck
         run: npx tsc --noEmit
-      # NOTE: `npm run lint` (next lint) is interactive in Next 15 and has no
-      # config in this repo yet — enable this step once flat ESLint config
-      # lands, otherwise CI would hang on the setup prompt.
 
   deploy:
     needs: test
@@ -55,13 +63,13 @@ jobs:
               git fetch origin main
               git reset --hard origin/main
               echo "==> after pull:"; git log --oneline -1
-              npm ci
+              npm ci --ignore-scripts
               npm run build
               pm2 reload esawda-frontend --update-env || pm2 start npm --name esawda-frontend -- start
               pm2 save
               for i in $(seq 1 18); do
                 sleep 5
-                if curl -sf -o /dev/null https://esawda.com/; then
+                if curl -sf -o /dev/null https://demo.esawda.com/; then
                   echo "==> health OK after ${i}x5s"
                   break
                 fi

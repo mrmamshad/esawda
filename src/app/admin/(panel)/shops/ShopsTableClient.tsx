@@ -10,7 +10,6 @@ import { StatusBadge } from '@/components/admin/v2/StatusBadge';
 import { RowActionsMenu, type RowAction } from '@/components/admin/v2/RowActionsMenu';
 import { api } from '@/lib/api';
 import { readToken } from '@/lib/auth';
-import { ShopModal } from './ShopModal';
 
 export type AdminShopRow = {
   id: number;
@@ -42,12 +41,6 @@ export function ShopsTableClient({ initialRows }: { initialRows: AdminShopRow[] 
   useEffect(() => { setRows(initialRows); }, [initialRows]);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [pending, start] = useTransition();
-  const [modalShop, setModalShop] = useState<AdminShopRow | null>(null);
-  const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
-
-  const openView = (r: AdminShopRow) => { setModalShop(r); setModalMode('view'); };
-  const openEdit = (r: AdminShopRow) => { setModalShop(r); setModalMode('edit'); };
-  const closeModal = () => setModalShop(null);
 
   const call = async (id: number, path: string, success = 'Done') => {
     setBusyId(id);
@@ -197,8 +190,8 @@ export function ShopsTableClient({ initialRows }: { initialRows: AdminShopRow[] 
         const isVerified = !!r.shop_verified_at;
         const isActive = (r.shop_status ?? 'active') === 'active';
         const actions: RowAction[] = [
-          { label: 'View', icon: <Eye size={13} />, onClick: () => openView(r) },
-          { label: 'Edit', icon: <Pencil size={13} />, onClick: () => openEdit(r) },
+          { label: 'View', icon: <Eye size={13} />, onClick: () => router.push(`/admin/shops/${r.id}`) },
+          { label: 'Edit', icon: <Pencil size={13} />, onClick: () => router.push(`/admin/shops/${r.id}?edit=1`) },
           isVerified
             ? { label: 'Unverify', icon: <BadgeX size={13} />, danger: true, disabled: busyId === r.id || pending,
               onClick: () => call(r.id, '/unverify-shop', 'Verification removed') }
@@ -219,18 +212,15 @@ export function ShopsTableClient({ initialRows }: { initialRows: AdminShopRow[] 
   ], [busyId, pending, router]);
 
   return (
-    <>
-      <AdminTable
-        title="Shops"
-        description={`${rows.length} shop${rows.length === 1 ? '' : 's'} total`}
-        columns={columns}
-        data={rows}
-        searchable
-        searchPlaceholder="Search shop name / username…"
-        emptyTitle="No shops on the platform yet"
-        emptyDescription="Shop accounts appear here once sellers open a shop."
-      />
-      <ShopModal shop={modalShop} mode={modalMode} onClose={closeModal} />
-    </>
+    <AdminTable
+      title="Shops"
+      description={`${rows.length} shop${rows.length === 1 ? '' : 's'} total`}
+      columns={columns}
+      data={rows}
+      searchable
+      searchPlaceholder="Search shop name / username…"
+      emptyTitle="No shops on the platform yet"
+      emptyDescription="Shop accounts appear here once sellers open a shop."
+    />
   );
 }
