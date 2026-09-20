@@ -162,7 +162,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
             <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
               {ads.data.map((ad, i) => (
                 <Fragment key={ad.id}>
-                  <ListingCard ad={ad} variant="featured" />
+                  <ListingCard ad={ad} />
                 </Fragment>
               ))}
             </div>
