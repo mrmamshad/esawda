@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import type { Route } from 'next';
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { SectionHeader } from './SectionHeader';
 import { CategoryConditionGrid, CategorySectionHeader, ConditionToggle, type Condition } from './CategoryConditionGrid';
@@ -116,12 +116,12 @@ export function HomeSections({
               </Link>
             </div>
             <div className={`mt-12 ${GRID}`}>
-              {stripTestAds(pick(featured)).slice(0, 11).map((ad, i) => (
-                <Fragment key={ad.id}>
-                  {/* First row (4 cards) is above the fold → priority for LCP. */}
-                  <ListingCard ad={ad} variant="featured" priority={i < 4} />
-                  {i === 2 && <AdSlot placement="home.sponsored_infeed" size="infeed" />}
-                </Fragment>
+              {stripTestAds(pick(featured)).slice(0, 12).map((ad, i) => (
+                // Clean 4×3 grid of 12 featured products. (The in-feed ad slot
+                // was removed from here because its portrait aspect ratio broke
+                // the row alignment and left gaps; it lives in its own full-width
+                // slot elsewhere on the page.)
+                <ListingCard key={ad.id} ad={ad} variant="featured" priority={i < 4} />
               ))}
             </div>
           </div>
