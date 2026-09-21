@@ -44,33 +44,31 @@ jobs:
           command_timeout: 15m
           script: |
             set -eo pipefail
+            # We already SSH in as esawda-demo (the owner of the app dir), so
+            # run everything directly — no cross-user `sudo -u` (which the
+            # server's sudoers does not allow and which is unnecessary here).
             echo "==> whoami: $(whoami)  pwd: $(pwd)"
-            # Fix ownership of .next so esawda-demo can write during build
-            chown -R esawda-demo:esawda-demo /home/esawda-demo/htdocs/demo.esawda.com/.next 2>/dev/null || true
-            sudo -u esawda-demo bash -lc '
-              set -eo pipefail
-              export NVM_DIR="$HOME/.nvm"
-              if [ -s "$NVM_DIR/nvm.sh" ]; then . "$NVM_DIR/nvm.sh"; fi
-              echo "==> node: $(node -v 2>/dev/null || echo MISSING)"
-              echo "==> npm:  $(npm -v 2>/dev/null || echo MISSING)"
-              echo "==> pm2:  $(pm2 -v 2>/dev/null || echo MISSING)"
-              cd /home/esawda-demo/htdocs/demo.esawda.com
-              echo "==> before pull:"; git log --oneline -1
-              export GIT_SSH_COMMAND="ssh -i /home/esawda-demo/.ssh/github_actions_deploy -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-              git fetch origin main
-              git reset --hard origin/main
-              echo "==> after pull:"; git log --oneline -1
-              npm ci --ignore-scripts
-              npm run build
-              pm2 reload esawda-frontend --update-env || pm2 start npm --name esawda-frontend -- start
-              pm2 save
-              for i in $(seq 1 18); do
-                sleep 5
-                if curl -sf -o /dev/null https://demo.esawda.com/; then
-                  echo "==> health OK after ${i}x5s"
-                  break
-                fi
-                if [ "$i" = 18 ]; then echo "==> health check FAILED"; exit 1; fi
-              done
-              echo "==> deploy complete on $(git rev-parse --short HEAD)"
-            '
+            export NVM_DIR="$HOME/.nvm"
+            if [ -s "$NVM_DIR/nvm.sh" ]; then . "$NVM_DIR/nvm.sh"; fi
+            echo "==> node: $(node -v 2>/dev/null || echo MISSING)"
+            echo "==> npm:  $(npm -v 2>/dev/null || echo MISSING)"
+            echo "==> pm2:  $(pm2 -v 2>/dev/null || echo MISSING)"
+            cd /home/esawda-demo/htdocs/demo.esawda.com
+            echo "==> before pull:"; git log --oneline -1
+            export GIT_SSH_COMMAND="ssh -i /home/esawda-demo/.ssh/github_actions_deploy -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+            git fetch origin main
+            git reset --hard origin/main
+            echo "==> after pull:"; git log --oneline -1
+            npm ci --ignore-scripts
+            npm run build
+            pm2 reload esawda-frontend --update-env || pm2 start npm --name esawda-frontend -- start
+            pm2 save
+            for i in $(seq 1 18); do
+              sleep 5
+              if curl -sf -o /dev/null https://demo.esawda.com/; then
+                echo "==> health OK after ${i}x5s"
+                break
+              fi
+              if [ "$i" = 18 ]; then echo "==> health check FAILED"; exit 1; fi
+            done
+            echo "==> deploy complete on $(git rev-parse --short HEAD)"
