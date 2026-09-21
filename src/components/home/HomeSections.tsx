@@ -54,9 +54,15 @@ export function HomeSections({
   highlights: ConditionedSection;
 }) {
   const [condition, setCondition] = useState<Condition>('all');
-  const pick = (section: ConditionedSection) => newestFirst(
-    condition === 'all' ? [...section.used, ...section.new] : section[condition],
-  );
+  const pick = (section: ConditionedSection) => {
+    const combined = condition === 'all'
+      ? [...section.used, ...section.new]
+      : section[condition];
+    // Deduplicate by id (same ad can appear in both used & new lists)
+    const seen = new Set<number>();
+    const unique = combined.filter((a) => { if (seen.has(a.id)) return false; seen.add(a.id); return true; });
+    return newestFirst(unique);
+  };
 
   return (
     <>
