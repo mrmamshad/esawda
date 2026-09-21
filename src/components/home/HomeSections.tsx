@@ -110,7 +110,7 @@ export function HomeSections({
               </Link>
             </div>
             <div className={`mt-12 ${GRID}`}>
-              {stripTestAds(pick(featured)).slice(0, 8).map((ad, i) => (
+              {stripTestAds(pick(featured)).slice(0, 11).map((ad, i) => (
                 <Fragment key={ad.id}>
                   {/* First row (4 cards) is above the fold → priority for LCP. */}
                   <ListingCard ad={ad} variant="featured" priority={i < 4} />
