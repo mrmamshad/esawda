@@ -7,7 +7,7 @@ import {
   CheckCircle2, XCircle,
 } from 'lucide-react';
 import { apiFromServer } from '@/lib/api';
-import { StatusBadge } from '@/components/admin/v2/StatusBadge';
+import { StatusBadge } from '@/components/admin/StatusBadge';
 import { AdApproveRejectClient } from './AdApproveRejectClient';
 
 export const dynamic = 'force-dynamic';

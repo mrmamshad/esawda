@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { apiFromServer, ApiError } from '@/lib/api';
-import { PageHeader } from '@/components/admin/v2/PageHeader';
+import { PageHeader } from '@/components/admin/PageHeader';
 import { OrdersTableClient, type AdminOrderRow } from './OrdersTableClient';
 import { ShopOrdersSummary, type ShopOrderSummaryRow } from './ShopOrdersSummary';
 

@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import { apiFromServer, ApiError } from '@/lib/api';
-import { PageHeader } from '@/components/admin/v2/PageHeader';
+import { PageHeader } from '@/components/admin/PageHeader';
 import { ShopDetailClient } from './ShopDetailClient';
 import type { AdminShopRow } from '../ShopsTableClient';
 

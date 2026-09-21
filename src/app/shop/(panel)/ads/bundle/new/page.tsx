@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { requireUser } from '@/lib/session';
-import { PageHeader } from '@/components/shop/v2/PageHeader';
+import { PageHeader } from '@/components/shop/PageHeader';
 import { BundleForm } from './BundleForm';
 
 export const metadata: Metadata = { title: 'Create Bundle' };

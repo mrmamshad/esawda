@@ -3,7 +3,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { ArrowLeft } from 'lucide-react';
 import { redirect } from 'next/navigation';
-import { PageHeader } from '@/components/shop/v2/PageHeader';
+import { PageHeader } from '@/components/shop/PageHeader';
 import { apiFromServer, ApiError } from '@/lib/api';
 import { requireUser } from '@/lib/session';
 import type { Category } from '@/types/api';

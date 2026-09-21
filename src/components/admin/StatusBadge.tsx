@@ -1,25 +1,37 @@
 import { cn } from '@/lib/cn';
 
-const TONES: Record<string, string> = {
-  success:  'bg-emerald-100 text-emerald-800',
-  paid:     'bg-emerald-100 text-emerald-800',
-  active:   'bg-emerald-100 text-emerald-800',
-  pending:  'bg-amber-100 text-amber-800',
-  expire:   'bg-slate-200 text-slate-700',
-  expired:  'bg-slate-200 text-slate-700',
-  failed:   'bg-rose-100 text-rose-800',
-  cancel:   'bg-rose-100 text-rose-800',
-  refunded: 'bg-slate-200 text-slate-700',
-  '0':      'bg-rose-100 text-rose-800',
-  '1':      'bg-emerald-100 text-emerald-800',
+/**
+ * Consistent status pill used across every table + card.
+ * The tone → colour map is centralised so all pages agree.
+ */
+const MAP: Record<string, { bg: string; fg: string; label?: string }> = {
+  active:    { bg: 'var(--adm-success-soft)', fg: 'var(--adm-success)' },
+  succeeded: { bg: 'var(--adm-success-soft)', fg: 'var(--adm-success)' },
+  success:   { bg: 'var(--adm-success-soft)', fg: 'var(--adm-success)' },
+  paid:      { bg: 'var(--adm-success-soft)', fg: 'var(--adm-success)' },
+  pending:   { bg: 'var(--adm-warning-soft)', fg: 'var(--adm-warning)' },
+  expired:   { bg: 'var(--adm-danger-soft)',  fg: 'var(--adm-danger)' },
+  expire:    { bg: 'var(--adm-danger-soft)',  fg: 'var(--adm-danger)' },
+  failed:    { bg: 'var(--adm-danger-soft)',  fg: 'var(--adm-danger)' },
+  cancel:    { bg: 'var(--adm-danger-soft)',  fg: 'var(--adm-danger)' },
+  refunded:  { bg: 'var(--adm-info-soft)',    fg: 'var(--adm-info)' },
+  draft:     { bg: 'var(--adm-info-soft)',    fg: 'var(--adm-info)' },
+  sold_out:  { bg: 'var(--adm-danger-soft)',  fg: 'var(--adm-danger)' },
+  removed:   { bg: 'var(--adm-danger-soft)',  fg: 'var(--adm-danger)', label: 'Removed' },
+  rejected:  { bg: 'var(--adm-danger-soft)',  fg: 'var(--adm-danger)' },
+  inactive:  { bg: 'var(--adm-bg)',           fg: 'var(--adm-fg-muted)', label: 'Inactive' },
 };
 
-export function StatusBadge({ value }: { value: string | number | null | undefined }) {
+export function StatusBadge({ value, className }: { value: string | number | null | undefined; className?: string }) {
   const key = String(value ?? '').toLowerCase();
-  const tone = TONES[key] ?? 'bg-slate-100 text-slate-700';
+  const spec = MAP[key] ?? { bg: 'var(--adm-bg)', fg: 'var(--adm-fg-muted)' };
   return (
-    <span className={cn('inline-flex items-center rounded-pill px-2 py-0.5 text-xs font-semibold', tone)}>
-      {value ?? '—'}
+    <span
+      className={cn('inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize', className)}
+      style={{ background: spec.bg, color: spec.fg }}
+    >
+      <span className="h-1 w-1 rounded-full" style={{ background: spec.fg }} />
+      {spec.label ?? (String(value ?? '—').replace(/_/g, ' '))}
     </span>
   );
 }

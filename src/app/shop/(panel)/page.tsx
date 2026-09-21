@@ -8,13 +8,13 @@ import {
 } from 'lucide-react';
 import { requireUser } from '@/lib/session';
 import { apiFromServer } from '@/lib/api';
-import { PageHeader } from '@/components/shop/v2/PageHeader';
-import { StoreHero } from '@/components/shop/v2/StoreHero';
-import { ProfileMediaUpload } from '@/components/shop/v2/ProfileMediaUpload';
-import { StatCard } from '@/components/shop/v2/StatCard';
-import { SalesPanel } from '@/components/shop/v2/SalesPanel';
-import { MessagesWidget } from '@/components/shop/v2/MessagesWidget';
-import { MarketingCard } from '@/components/shop/v2/MarketingCard';
+import { PageHeader } from '@/components/shop/PageHeader';
+import { StoreHero } from '@/components/shop/StoreHero';
+import { ProfileMediaUpload } from '@/components/shop/ProfileMediaUpload';
+import { StatCard } from '@/components/shop/StatCard';
+import { SalesPanel } from '@/components/shop/SalesPanel';
+import { MessagesWidget } from '@/components/shop/MessagesWidget';
+import { MarketingCard } from '@/components/shop/MarketingCard';
 
 export const metadata: Metadata = { title: 'Shop Dashboard' };
 export const dynamic = 'force-dynamic';

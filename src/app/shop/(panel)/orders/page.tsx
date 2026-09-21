@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { ShoppingCart } from 'lucide-react';
-import { ShopOrdersClient } from '@/components/shop/v2/ShopOrdersClient';
+import { ShopOrdersClient } from '@/components/shop/ShopOrdersClient';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Pagination } from '@/components/ui/Pagination';
 import { apiFromServer, ApiError } from '@/lib/api';

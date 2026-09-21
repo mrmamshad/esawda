@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { requireAdmin } from '@/lib/session';
-import { AdminShellV2 } from '@/components/admin/v2/AdminShellV2';
+import { AdminShellV2 } from '@/components/admin/AdminShellV2';
 
 export const dynamic = 'force-dynamic';
 

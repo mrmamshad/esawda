@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { CalendarDays, CheckCircle2, Crown, Layers3, ReceiptText, ShieldCheck, Sparkles } from 'lucide-react';
-import { PageHeader } from '@/components/shop/v2/PageHeader';
+import { PageHeader } from '@/components/shop/PageHeader';
 import { requireUser } from '@/lib/session';
 import { apiFromServer, ApiError } from '@/lib/api';
 import type { Plan } from '@/types/api';

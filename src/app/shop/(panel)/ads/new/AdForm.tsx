@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { generateIdempotencyKey } from '@/lib/idempotency';
 import { isSafePaymentRedirect } from '@/lib/paymentRedirect';
-import { RichTextEditor } from '@/components/shop/v2/RichTextEditor';
+import { RichTextEditor } from '@/components/shop/RichTextEditor';
 import { PasswordInput } from '@/components/forms/PasswordInput';
 import { GeocodeAddress } from '@/components/interactive/GeocodeAddress';
-import { LocationMap } from '@/components/shop/v2/LocationMap';
+import { LocationMap } from '@/components/shop/LocationMap';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -16,8 +16,10 @@ import { isValidBdMobile, normalizeBdMobile } from '@/lib/phone';
 import { clearToken, readToken, saveToken } from '@/lib/auth';
 import type { User } from '@/types/api';
 import { Button } from '@/components/ui/Button';
-import { ArrowRight, Crown, LockKeyhole, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import type { Ad, Category } from '@/types/api';
+import { SubscriptionGate } from './SubscriptionGate';
+import { inp, Card, Row, FieldSet, Radio, Tip, UpgradeRow } from './AdFormFields';
 
 /**
  * Post-Ad screen — long-form composer that mirrors the classified-ads
@@ -990,180 +992,5 @@ function validateImages(files: File[]): string | null {
         </form>
       </div>
     </div>
-  );
-}
-
-function SubscriptionGate({
-  hasActivePlan,
-  adsRemaining,
-  planName,
-  planExpiresAt,
-  subscribeHref = '/membership',
-}: {
-  hasActivePlan: boolean;
-  adsRemaining: number;
-  planName: string;
-  planExpiresAt: string | null;
-  /** Where "Subscribe now" sends the seller (shop panel → /shop/plan) */
-  subscribeHref?: string;
-}) {
-  const quotaExhausted = hasActivePlan && adsRemaining <= 0;
-  const expiryLabel = planExpiresAt
-    ? new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(planExpiresAt))
-    : null;
-
-  return (
-    <section className="relative mt-6 overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-[0_18px_50px_-28px_rgba(255,0,63,0.45)]">
-      <div aria-hidden className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-brand-100 blur-3xl" />
-      <div aria-hidden className="absolute bottom-0 right-1/3 h-20 w-40 rounded-full bg-amber-100/70 blur-3xl" />
-
-      <div className="relative grid gap-6 p-6 md:grid-cols-[1fr_auto] md:items-center md:p-8">
-        <div className="flex items-start gap-4">
-          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand-700 text-white shadow-lg shadow-brand-700/20">
-            <LockKeyhole size={25} />
-          </span>
-          <div>
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-brand-700">
-                <Crown size={12} /> Subscription required
-              </span>
-              {quotaExhausted && (
-                <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-amber-800">
-                  Listing limit reached
-                </span>
-              )}
-            </div>
-            <h2 className="max-w-2xl text-xl font-bold tracking-tight text-ink md:text-2xl">
-              {quotaExhausted
-                ? 'Your current package has run out of product listings.'
-                : 'Subscribe first — then you can post products.'}
-            </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-muted">
-              {quotaExhausted
-                ? 'Renew or upgrade your package to keep posting more products.'
-                : 'Choose a seller package and the form below unlocks so you can create your product listing right away.'}
-            </p>
-
-            <div className="mt-4 flex flex-wrap gap-2 text-xs">
-              <span className="rounded-lg border border-line bg-surface-muted px-3 py-2 text-ink-muted">
-                Current plan: <strong className="capitalize text-ink">{hasActivePlan ? planName : 'No active plan'}</strong>
-              </span>
-              <span className="rounded-lg border border-line bg-surface-muted px-3 py-2 text-ink-muted">
-                Listings remaining: <strong className="text-ink">{adsRemaining}</strong>
-              </span>
-              {expiryLabel && (
-                <span className="rounded-lg border border-line bg-surface-muted px-3 py-2 text-ink-muted">
-                  Expires: <strong className="text-ink">{expiryLabel}</strong>
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex min-w-[210px] flex-col gap-2 md:items-stretch">
-          <Link
-            href={subscribeHref as Route}
-            className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand-700 px-6 text-sm font-bold text-white shadow-lg shadow-brand-700/20 transition hover:-translate-y-0.5 hover:bg-brand-600"
-          >
-            <Sparkles size={16} />
-            {quotaExhausted ? 'Upgrade package' : 'Subscribe now'}
-            <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-          </Link>
-          <p className="text-center text-[11px] text-ink-faint">Secure payment via online payment</p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ────────────────────────────────────────────────────────────────────
- * Small building blocks — kept local so this page reads top-to-bottom
- * without hopping through the component tree. All colour/spacing tokens
- * come from Tailwind + the design system defined in tailwind.config.ts.
- * ──────────────────────────────────────────────────────────────────── */
-
-const inp =
-  'mt-1 h-11 w-full rounded-lg border border-line bg-white px-3 text-ink placeholder:text-ink-faint outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100';
-
-function Card({
-  title, icon, iconRight, children,
-}: { title: string; icon?: string; iconRight?: string; children: React.ReactNode }) {
-  return (
-    <section className="surface-card space-y-4 p-6">
-      <header className="flex items-center gap-2 border-b border-brand-100 pb-3">
-        {icon && <span className="text-brand-700">{icon}</span>}
-        <h2 className="text-base font-semibold text-ink">{title}</h2>
-        {iconRight && <span className="ml-auto text-brand-700">{iconRight}</span>}
-      </header>
-      {children}
-    </section>
-  );
-}
-
-function Row({
-  label, error, hint, children,
-}: { label: string; error?: string; hint?: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="text-sm font-medium text-ink">{label}</span>
-      {children}
-      {error && <span className="mt-1 block text-xs text-danger">{error}</span>}
-      {hint && <span className="mt-1 block text-xs text-ink-muted">{hint}</span>}
-    </label>
-  );
-}
-
-function FieldSet({ legend, children }: { legend: string; children: React.ReactNode }) {
-  return (
-    <fieldset className="rounded-field border border-brand-100 bg-white p-3">
-      <legend className="px-1 text-xs font-medium text-ink-muted">{legend}</legend>
-      <div className="flex items-center gap-4">{children}</div>
-    </fieldset>
-  );
-}
-
-function Radio({
-  name, value, checked, onChange, children,
-}: {
-  name: string; value: string; checked: boolean;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void; children: React.ReactNode;
-}) {
-  return (
-    <label className="flex items-center gap-2 text-sm text-ink">
-      <input type="radio" name={name} value={value} checked={checked} onChange={onChange} />
-      {children}
-    </label>
-  );
-}
-
-function Tip({ children }: { children: React.ReactNode }) {
-  return (
-    <li className="flex items-start gap-2">
-      <span className="mt-0.5 text-brand-700">✓</span>
-      <span>{children}</span>
-    </li>
-  );
-}
-
-/**
- * "Rich-text" toolbar — visual only for now. The description is a plain
- * textarea; the toolbar exists so the layout matches the reference design
- * and can be swapped for a real editor (Tiptap / Lexical) later without
- * changing the surrounding markup.
- */
-function UpgradeRow({
-  tag, tagClass, price, checked, onChange, copy,
-}: {
-  tag: string; tagClass: string; price: string;
-  checked: boolean; onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  copy: string;
-}) {
-  return (
-    <label className="flex cursor-pointer items-start gap-3 rounded-field border border-brand-100 bg-white px-4 py-3">
-      <input type="checkbox" className="mt-1" checked={checked} onChange={onChange} />
-      <span className={`rounded-pill px-2 py-0.5 text-xs font-medium ${tagClass}`}>{tag}</span>
-      <span className="flex-1 text-sm text-ink-muted">{copy}</span>
-      <span className="text-sm font-semibold text-ink">{price}</span>
-    </label>
   );
 }

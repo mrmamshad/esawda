@@ -5,15 +5,15 @@ import {
   Users, PackageCheck, Wallet, ShoppingBag, ArrowRight,
 } from 'lucide-react';
 import { apiFromServer, ApiError } from '@/lib/api';
-import { PageHeader } from '@/components/admin/v2/PageHeader';
-import { DateRangeFilter } from '@/components/admin/v2/DateRangeFilter';
-import { StatCard } from '@/components/admin/v2/StatCard';
-import { RevenueChart } from '@/components/admin/v2/RevenueChart';
-import { CategoryDonut } from '@/components/admin/v2/CategoryDonut';
-import { TopCategoriesBar } from '@/components/admin/v2/TopCategoriesBar';
-import { ActivityFeed, type ActivityEvent } from '@/components/admin/v2/ActivityFeed';
-import { DataTableV2, type ColumnV2 } from '@/components/admin/v2/DataTableV2';
-import { StatusBadge } from '@/components/admin/v2/StatusBadge';
+import { PageHeader } from '@/components/admin/PageHeader';
+import { DateRangeFilter } from '@/components/admin/DateRangeFilter';
+import { StatCard } from '@/components/admin/StatCard';
+import { RevenueChart } from '@/components/admin/RevenueChart';
+import { CategoryDonut } from '@/components/admin/CategoryDonut';
+import { TopCategoriesBar } from '@/components/admin/TopCategoriesBar';
+import { ActivityFeed, type ActivityEvent } from '@/components/admin/ActivityFeed';
+import { DataTableV2, type ColumnV2 } from '@/components/admin/DataTableV2';
+import { StatusBadge } from '@/components/admin/StatusBadge';
 import type { AdminDashboardData, AdminRecentAd, AdminRecentUser, AdminRecentTx, TrendPoint } from '@/types/admin';
 
 export const metadata: Metadata = { title: 'Dashboard' };

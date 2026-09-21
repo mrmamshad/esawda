@@ -7,7 +7,7 @@ import { X, ImagePlus } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
 import { readToken } from '@/lib/auth';
 import { Button } from '@/components/ui/Button';
-import { RichTextEditor } from '@/components/shop/v2/RichTextEditor';
+import { RichTextEditor } from '@/components/shop/RichTextEditor';
 import type { AdDetail } from '@/types/api';
 
 const MAX_IMAGES = 4;

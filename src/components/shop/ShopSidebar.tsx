@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/cn';
-import { useClickOutside } from '@/components/admin/v2/useClickOutside';
+import { useClickOutside } from '@/components/admin/useClickOutside';
 import { ShopLogo } from './ShopLogo';
 import type { User } from '@/types/api';
 

@@ -8,7 +8,7 @@ import {
   Menu, Search, PlusSquare, ChevronRight, LogOut, User as UserIcon, ExternalLink,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useClickOutside } from '@/components/admin/v2/useClickOutside';
+import { useClickOutside } from '@/components/admin/useClickOutside';
 import type { User } from '@/types/api';
 
 /**

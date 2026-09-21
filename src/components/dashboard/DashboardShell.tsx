@@ -10,7 +10,7 @@
  * that pass counts still work.
  */
 import type { ReactNode } from 'react';
-import { ShopShellV2, type ShopCounts } from '@/components/shop/v2/ShopShellV2';
+import { ShopShellV2, type ShopCounts } from '@/components/shop/ShopShellV2';
 import type { User } from '@/types/api';
 
 export type DashboardCounts = ShopCounts & {

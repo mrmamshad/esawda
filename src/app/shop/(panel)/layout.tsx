@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/lib/session';
 import { apiFromServer } from '@/lib/api';
-import { ShopShellV2, type ShopCounts } from '@/components/shop/v2/ShopShellV2';
+import { ShopShellV2, type ShopCounts } from '@/components/shop/ShopShellV2';
 
 export const dynamic = 'force-dynamic';
 

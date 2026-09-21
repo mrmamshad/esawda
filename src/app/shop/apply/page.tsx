@@ -5,7 +5,7 @@ import { Header, HeaderSpacer } from '@/components/layout/Header';
 import { getSessionUser } from '@/lib/session';
 import { apiFromServer } from '@/lib/api';
 import type { Category } from '@/types/api';
-import { ShopApplyForm } from '@/components/shop/v2/ShopApplyForm';
+import { ShopApplyForm } from '@/components/shop/ShopApplyForm';
 
 export const metadata: Metadata = { title: 'Open your shop' };
 export const dynamic = 'force-dynamic';

@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { ColumnDef } from '@tanstack/react-table';
 import { BadgeCheck, BadgeX, Ban, Eye, KeyRound, Pencil, ShieldCheck } from 'lucide-react';
-import { AdminTable } from '@/components/admin/v2/AdminTable';
-import { StatusBadge } from '@/components/admin/v2/StatusBadge';
-import { RowActionsMenu, type RowAction } from '@/components/admin/v2/RowActionsMenu';
+import { AdminTable } from '@/components/admin/AdminTable';
+import { StatusBadge } from '@/components/admin/StatusBadge';
+import { RowActionsMenu, type RowAction } from '@/components/admin/RowActionsMenu';
 import { api } from '@/lib/api';
 import { readToken } from '@/lib/auth';
 

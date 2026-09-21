@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { apiFromServer, ApiError } from '@/lib/api';
-import { PageHeader } from '@/components/admin/v2/PageHeader';
+import { PageHeader } from '@/components/admin/PageHeader';
 import { ShopsTableClient, type AdminShopRow } from './ShopsTableClient';
 
 export const metadata: Metadata = { title: 'Shops' };
