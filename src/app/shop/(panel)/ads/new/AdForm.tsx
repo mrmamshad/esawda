@@ -678,11 +678,11 @@ function validateImages(files: File[]): string | null {
               </Row>
 
               <Row label="Description *" error={errors.description?.[0]}>
-                <textarea
-                  required minLength={10} rows={6}
-                  placeholder="Tell us more about your listing"
-                  value={form.description} onChange={set('description')}
-                  className={`${inp} h-auto py-3`}
+                <RichTextEditor
+                  value={form.description}
+                  onChange={(html) => setForm((s) => ({ ...s, description: html }))}
+                  placeholder="Tell buyers about your item — use bullet points, headings and bold text to make it easy to scan."
+                  minHeight={220}
                 />
               </Row>
             </Card>

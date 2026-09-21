@@ -7,6 +7,7 @@ import { X, ImagePlus } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
 import { readToken } from '@/lib/auth';
 import { Button } from '@/components/ui/Button';
+import { RichTextEditor } from '@/components/shop/v2/RichTextEditor';
 import type { AdDetail } from '@/types/api';
 
 const MAX_IMAGES = 4;
@@ -185,7 +186,12 @@ export function EditAdForm({ ad }: { ad: AdDetail }) {
 
       <div>
         <label className="block text-xs uppercase tracking-widest text-ink-muted">Description *</label>
-        <textarea required rows={6} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={inp} />
+        <RichTextEditor
+          value={form.description}
+          onChange={(html) => setForm({ ...form, description: html })}
+          placeholder="Tell buyers about your item — use bullet points, headings and bold text to make it easy to scan."
+          minHeight={220}
+        />
       </div>
 
       <div>
