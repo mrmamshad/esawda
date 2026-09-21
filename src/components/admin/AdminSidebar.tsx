@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import {
   LayoutDashboard, Users, Store, Megaphone, PackageCheck, FolderTree, CreditCard, PackageOpen,
-  Receipt, Newspaper, Settings, ChevronsLeft, ChevronsRight, LogOut, ChevronDown, Zap,
+  Receipt, Newspaper, Settings, ChevronsLeft, ChevronsRight, LogOut, ChevronDown, Zap, KeyRound,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/cn';
@@ -68,6 +68,7 @@ const GROUPS: NavGroup[] = [
   {
     title: 'System',
     items: [
+      { href: '/admin/licenses' as Route, label: 'Licenses', icon: <KeyRound size={17} /> },
       { href: '/admin/settings' as Route, label: 'Settings', icon: <Settings size={17} /> },
     ],
   },
