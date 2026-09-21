@@ -10,6 +10,7 @@ import { api } from '@/lib/api';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
 import { PageSurface } from '@/components/layout/PageSurface';
 import { Avatar } from '@/components/ui/Avatar';
+import { CoverImage } from '@/components/ui/CoverImage';
 import { OnlineDot } from '@/components/ui/OnlineDot';
 import { SocialRow } from '@/components/ui/SocialRow';
 import { Button } from '@/components/ui/Button';
@@ -256,11 +257,11 @@ export default async function SellerProfilePage({ params, searchParams }: {
                   recommended 1920×600 (16:5) shape, matching the upload hint. */}
               {s.shop_banner_url && (
                 <div className="relative aspect-[16/5] w-full overflow-hidden rounded-xl bg-ink">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <CoverImage
                     src={s.shop_banner_url}
                     alt={`${s.shop_name || s.name} banner`}
-                    className="h-full w-full object-cover"
+                    sizes="(max-width: 1024px) 100vw, 800px"
+                    priority
                   />
                 </div>
               )}

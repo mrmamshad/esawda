@@ -12,6 +12,7 @@ import { SellerCard } from '@/components/seller/SellerCard';
 import { PlaceOrderCard } from '@/components/seller/PlaceOrderCard';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { PriceTag } from '@/components/ui/PriceTag';
+import { CoverImage } from '@/components/ui/CoverImage';
 import { Badge } from '@/components/ui/Badge';
 import { AdActions } from '@/components/interactive/AdActions';
 import { ReviewsSection } from '@/components/interactive/ReviewsSection';
@@ -137,9 +138,9 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
                 <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {ad.bundle_items.map((item) => (
                     <li key={item.id} className="flex items-center gap-3 rounded-card border border-line p-3">
-                      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-md bg-surface-muted">
+                      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-surface-muted">
                         {item.thumbnail
-                          ? <img src={item.thumbnail} alt="" className="h-full w-full object-cover" />
+                          ? <CoverImage src={item.thumbnail} sizes="48px" />
                           : <div className="flex h-full w-full items-center justify-center text-xs text-ink-faint">img</div>}
                       </div>
                       <div className="min-w-0">

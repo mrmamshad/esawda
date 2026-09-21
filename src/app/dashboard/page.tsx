@@ -10,6 +10,7 @@ import type { Thread } from '@/types/api';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PublicProfileEditor } from '@/components/dashboard/PublicProfileEditor';
 import { PriceTag } from '@/components/ui/PriceTag';
+import { CoverImage } from '@/components/ui/CoverImage';
 import { Badge } from '@/components/ui/Badge';
 
 export const metadata: Metadata = { title: 'My Dashboard' };
@@ -128,9 +129,9 @@ export default async function BuyerDashboardPage() {
               <ul className="mt-4 divide-y divide-line">
                 {listings.map(a => (
                   <li key={a.id} className="flex items-center gap-4 py-4">
-                    <div className="h-14 w-14 shrink-0 overflow-hidden rounded-md bg-surface-muted">
+                    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-md bg-surface-muted">
                       {a.thumbnail ? (
-                        <img src={a.thumbnail} alt="" className="h-full w-full object-cover" />
+                        <CoverImage src={a.thumbnail} sizes="56px" />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-ink-faint text-xs">img</div>
                       )}
@@ -217,9 +218,9 @@ export default async function BuyerDashboardPage() {
               <ul className="mt-4 divide-y divide-line">
                 {purchases.map(p => (
                   <li key={p.id} className="flex items-center gap-4 py-4">
-                    <div className="h-14 w-14 shrink-0 overflow-hidden rounded-md bg-surface-muted">
+                    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-md bg-surface-muted">
                       {p.product_image ? (
-                        <img src={p.product_image} alt="" className="h-full w-full object-cover" />
+                        <CoverImage src={p.product_image} sizes="56px" />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-ink-faint text-xs">img</div>
                       )}
