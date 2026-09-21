@@ -115,7 +115,7 @@ export function HomeSections({
                 </button>
               </Link>
             </div>
-            <div className={`mt-12 ${GRID}`}>
+            <div data-featured-debug={`used=${featured.used.length} new=${featured.new.length} picked=${pick(featured).length} stripped=${stripTestAds(pick(featured)).length}`} className={`mt-12 ${GRID}`}>
               {stripTestAds(pick(featured)).slice(0, 12).map((ad, i) => (
                 // Clean 4×3 grid of 12 featured products. (The in-feed ad slot
                 // was removed from here because its portrait aspect ratio broke
