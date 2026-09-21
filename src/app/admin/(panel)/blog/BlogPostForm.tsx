@@ -5,12 +5,17 @@ import { ImageUp } from 'lucide-react';
 import { env } from '@/lib/env';
 import { Button } from '@/components/ui/Button';
 import { ApiError } from '@/lib/api';
+import { RichTextEditor } from '@/components/shop/RichTextEditor';
+
+/** Matches the ad_blog.status enum column. */
+export type BlogStatus = 'published' | 'draft' | 'unpublished';
 
 export type BlogPostValues = {
   title: string;
+  slug: string;
   description: string;
   tags: string;
-  status: 'publish' | 'pending';
+  status: BlogStatus;
   imageUrl: string;
   imageFile: File | null;
   removeImage: boolean;
@@ -18,11 +23,22 @@ export type BlogPostValues = {
 
 export type BlogPostInitial = {
   title?: string;
+  slug?: string | null;
   description?: string;
   tags?: string | null;
   status?: string | null;
   image?: string | null;
 };
+
+const STATUS_OPTIONS: { value: BlogStatus; label: string }[] = [
+  { value: 'published', label: 'Published' },
+  { value: 'draft', label: 'Draft' },
+  { value: 'unpublished', label: 'Unpublished' },
+];
+
+function normalizeStatus(s: string | null | undefined): BlogStatus {
+  return s === 'draft' || s === 'unpublished' ? s : 'published';
+}
 
 /** Backend stores either a remote URL or a `blog/` filename on the public disk. */
 export function resolveBlogImage(image: string | null | undefined): string | null {
@@ -53,11 +69,10 @@ export function BlogPostForm({
   onSubmit: (values: BlogPostValues) => Promise<void>;
 }) {
   const [title, setTitle] = useState(initial.title ?? '');
+  const [slug, setSlug] = useState(initial.slug ?? '');
   const [description, setDescription] = useState(initial.description ?? '');
   const [tags, setTags] = useState(initial.tags ?? '');
-  const [status, setStatus] = useState<'publish' | 'pending'>(
-    initial.status === 'pending' ? 'pending' : 'publish',
-  );
+  const [status, setStatus] = useState<BlogStatus>(normalizeStatus(initial.status));
   const [imageUrl, setImageUrl] = useState(
     initial.image && /^https?:\/\//i.test(initial.image) ? initial.image : '',
   );
@@ -79,7 +94,7 @@ export function BlogPostForm({
     setBusy(true);
     setErr(null);
     try {
-      await onSubmit({ title: title.trim(), description, tags: tags.trim(), status, imageUrl: imageUrl.trim(), imageFile, removeImage });
+      await onSubmit({ title: title.trim(), slug: slug.trim(), description, tags: tags.trim(), status, imageUrl: imageUrl.trim(), imageFile, removeImage });
     } catch (e2) {
       setErr(e2 instanceof ApiError ? e2.message : 'Save failed. Please try again.');
     } finally {
@@ -129,12 +144,13 @@ export function BlogPostForm({
           />
           <div className="flex-1 space-y-2">
             <div>
-              <label className={label}>…or image URL</label>
+              <label className={label}>Slug</label>
               <input
-                value={imageUrl} onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="https://…"
+                value={slug} onChange={(e) => setSlug(e.target.value)}
+                placeholder="auto-generated from title"
                 className={field}
               />
+              <p className="mt-1 text-[11px] text-ink-faint">Leave blank to auto-generate from the title.</p>
             </div>
             {(preview || imageFile) && (
               <button
@@ -159,17 +175,24 @@ export function BlogPostForm({
         </div>
         <div>
           <label className={label}>Status</label>
-          <select value={status} onChange={(e) => setStatus(e.target.value as 'publish' | 'pending')} className={field}>
-            <option value="publish">Published</option>
-            <option value="pending">Draft (pending)</option>
+          <select value={status} onChange={(e) => setStatus(e.target.value as BlogStatus)} className={field}>
+            {STATUS_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
           </select>
         </div>
       </div>
 
       <div>
-        <label className={label}>Body (HTML)</label>
-        <textarea required rows={12} value={description} onChange={(e) => setDescription(e.target.value)}
-          className={`${field} font-mono`} />
+        <label className={label}>Body</label>
+        <div className="mt-1">
+          <RichTextEditor
+            value={description}
+            onChange={setDescription}
+            placeholder="Write the blog post…"
+            minHeight={280}
+          />
+        </div>
       </div>
 
       <div className="flex justify-end gap-2">

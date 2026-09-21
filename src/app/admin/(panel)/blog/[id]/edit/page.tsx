@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic';
 type AdminBlog = {
   id: number;
   title: string;
+  slug?: string | null;
   description?: string | null;
   tags?: string | null;
   status?: string | null;
@@ -34,9 +35,10 @@ export default async function AdminBlogEditPage({ params }: { params: Promise<{ 
           id={blog.id}
           initial={{
             title: blog.title ?? '',
+            slug: blog.slug ?? '',
             description: blog.description ?? '',
             tags: blog.tags ?? '',
-            status: blog.status ?? 'publish',
+            status: blog.status ?? 'published',
             image: blog.image ?? null,
           }}
         />

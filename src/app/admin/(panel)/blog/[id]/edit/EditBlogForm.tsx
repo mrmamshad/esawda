@@ -14,6 +14,7 @@ export function EditBlogForm({ id, initial }: { id: number; initial: BlogPostIni
     // Multipart PUT: Laravel reads the override on POST.
     fd.append('_method', 'PUT');
     fd.append('title', v.title);
+    fd.append('slug', v.slug);
     fd.append('description', v.description);
     fd.append('tags', v.tags);
     fd.append('status', v.status);

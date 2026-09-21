@@ -9,6 +9,7 @@ import { BlogPostForm, type BlogPostValues } from '../BlogPostForm';
 function toFormData(v: BlogPostValues): FormData {
   const fd = new FormData();
   fd.append('title', v.title);
+  if (v.slug) fd.append('slug', v.slug);
   fd.append('description', v.description);
   if (v.tags) fd.append('tags', v.tags);
   fd.append('status', v.status);
