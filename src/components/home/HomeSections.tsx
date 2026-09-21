@@ -116,13 +116,18 @@ export function HomeSections({
               </Link>
             </div>
             <div className={`mt-12 ${GRID}`}>
-              {stripTestAds(pick(featured)).slice(0, 12).map((ad, i) => (
-                // Clean 4×3 grid of 12 featured products. (The in-feed ad slot
-                // was removed from here because its portrait aspect ratio broke
-                // the row alignment and left gaps; it lives in its own full-width
-                // slot elsewhere on the page.)
+              {/* 11 featured products + 1 in-grid ad slot = a full 4×3 grid.
+                  The ad slot is wrapped so it occupies exactly ONE grid cell
+                  and matches the product-card footprint (image area + details),
+                  which keeps every row perfectly aligned. */}
+              {stripTestAds(pick(featured)).slice(0, 11).map((ad, i) => (
                 <ListingCard key={ad.id} ad={ad} variant="featured" priority={i < 4} />
               ))}
+              <AdSlot
+                placement="home.sponsored_infeed"
+                size="infeed"
+                className="!aspect-auto !w-full !max-w-none h-full min-h-[280px]"
+              />
             </div>
           </div>
         </section>
