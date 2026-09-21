@@ -97,7 +97,10 @@ export default async function AdminAdDetailPage({ params }: { params: Promise<{ 
           {ad.description && (
             <div className="rounded-2xl border border-line bg-white p-5">
               <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-ink-muted">Description</h2>
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink">{ad.description}</p>
+              <div
+                className="prose prose-sm max-w-none text-ink [&_h2]:text-base [&_h3]:text-sm [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_blockquote]:border-l-4 [&_blockquote]:border-brand-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_strong]:font-semibold"
+                dangerouslySetInnerHTML={{ __html: ad.description }}
+              />
             </div>
           )}
 
