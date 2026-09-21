@@ -126,7 +126,8 @@ export function BlogPostForm({
               <>
                 <ImageUp size={22} className="text-ink-faint" />
                 <span className="text-xs font-semibold text-ink">Upload thumbnail</span>
-                <span className="text-[11px] text-ink-faint">JPG, PNG or WebP up to 5MB</span>
+                <span className="text-[11px] text-ink-faint">1600 × 1000 px (16:10)</span>
+                <span className="text-[11px] text-ink-faint">JPG, PNG or WebP · up to 5MB</span>
               </>
             )}
           </button>
@@ -162,6 +163,9 @@ export function BlogPostForm({
               </button>
             )}
             {imageFile && <p className="text-[11px] text-ink-faint">Picked file will be uploaded on save.</p>}
+            <p className="text-[11px] text-ink-faint">
+              Recommended <strong>1600 × 1000 px</strong> (16:10). Cards crop to fill, so use a 16:10 image to avoid cut-off.
+            </p>
           </div>
         </div>
       </div>
