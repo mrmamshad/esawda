@@ -74,7 +74,7 @@ async function loadLegacy(): Promise<HomeData> {
     safe(      api<Category[]>('/categories?with_counts=true', { revalidate: 300, tags: ['categories'] }),                                  { data: [] as Category[] }),
     safe(Promise.all([
       api<Ad[]>('/ads?per_page=12&filter[featured]=1&sort=-created_at&filter[condition]=used', { revalidate: 120, tags: ['ads'] }),
-      api<Ad[]>('/ads?per_page=12&filter[featured]=1&sort=-created_at&filter[condition]=new', { revalidate: 120, tags: ['ads'] }),
+      api<Ad[]>('/ads?per_page=12&filter[featured]=1&sort=-created_at&filter[condition]=new', { revalidate: 120, tags: ['ads'] }).then(r => { console.log('[FEATURED_NEW_DEBUG] url=/ads?per_page=12&featured=1&condition=new returned', (r.data as Ad[])?.length, 'ids=', (r.data as Ad[])?.map(a=>a.id)); return r; }),
       api<Ad[]>('/ads?per_page=8&filter[urgent]=1&sort=-created_at&filter[condition]=used', { revalidate: 120, tags: ['ads'] }),
       api<Ad[]>('/ads?per_page=8&filter[urgent]=1&sort=-created_at&filter[condition]=new', { revalidate: 120, tags: ['ads'] }),
       api<Ad[]>('/ads?per_page=8&since_hours=24&sort=-created_at&filter[condition]=used', { revalidate: 120, tags: ['ads'] }),
