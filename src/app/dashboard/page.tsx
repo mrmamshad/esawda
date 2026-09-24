@@ -165,11 +165,7 @@ export default async function BuyerDashboardPage() {
                       ) : (
                         <Badge tone="urgent">Pending review</Badge>
                       )}
-                      <ListingActions
-                        adId={a.id}
-                        status={a.status}
-                        hidden={a.hide === '1' || a.hide === 1 || a.hide === true}
-                      />
+                      <ListingActions adId={a.id} status={a.status} />
                     </div>
                   </li>
                 ))}

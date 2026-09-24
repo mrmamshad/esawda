@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, RotateCcw, EyeOff, Eye, Loader2 } from 'lucide-react';
+import { CheckCircle2, RotateCcw, Loader2 } from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
 import { readToken } from '@/lib/auth';
 
@@ -10,21 +10,19 @@ import { readToken } from '@/lib/auth';
  * Inline actions for a single listing on the personal dashboard.
  *
  * Lets a seller manage their own product without leaving the dashboard:
- *   - active   → Mark as sold / Hide
+ *   - active   → Mark as sold
  *   - sold_out → Restock (back to active)
- *   - hidden   → Unhide
  *
- * All actions hit POST /api/v1/ads/{id}/{action} (backend already supports
- * sold-out / restock / hide / unhide) and then refresh the server component.
+ * Actions hit POST /api/v1/ads/{id}/{action} and then refresh the server
+ * component. (Hide/unhide was removed from the UI — an accidental click there
+ * would silently pull a live product off the marketplace.)
  */
 export function ListingActions({
   adId,
   status,
-  hidden,
 }: {
   adId: number;
   status: string;
-  hidden?: boolean;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -61,24 +59,14 @@ export function ListingActions({
             <RotateCcw size={13} /> Restock
           </button>
         ) : status === 'active' ? (
-          <>
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => run('sold-out', 'Mark this product as sold? It will be removed from the marketplace.')}
-              className={`${btn} border-emerald-200 text-emerald-700 hover:bg-emerald-50`}
-            >
-              <CheckCircle2 size={13} /> Mark as sold
-            </button>
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => run(hidden ? 'unhide' : 'hide')}
-              className={`${btn} border-line text-ink-muted hover:bg-surface-muted`}
-            >
-              {hidden ? <><Eye size={13} /> Unhide</> : <><EyeOff size={13} /> Hide</>}
-            </button>
-          </>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => run('sold-out', 'Mark this product as sold? It will be removed from the marketplace.')}
+            className={`${btn} border-emerald-200 text-emerald-700 hover:bg-emerald-50`}
+          >
+            <CheckCircle2 size={13} /> Mark as sold
+          </button>
         ) : null}
       </div>
       {error && <span className="text-[11px] text-danger">{error}</span>}
