@@ -12,6 +12,7 @@ import { PublicProfileEditor } from '@/components/dashboard/PublicProfileEditor'
 import { PriceTag } from '@/components/ui/PriceTag';
 import { CoverImage } from '@/components/ui/CoverImage';
 import { Badge } from '@/components/ui/Badge';
+import { ListingActions } from '@/components/dashboard/ListingActions';
 
 export const metadata: Metadata = { title: 'My Dashboard' };
 export const dynamic = 'force-dynamic';
@@ -36,6 +37,7 @@ type MyAd = {
   status: string;
   price: number;
   thumbnail?: string | null;
+  hide?: string | number | boolean;
 };
 
 const FALLBACK_PURCHASES: Purchase[] = [];
@@ -54,19 +56,20 @@ export default async function BuyerDashboardPage() {
   if (user.is_admin || user.user_type === 'admin') redirect('/admin');
   if (user.is_shop || user.user_type === 'seller') redirect('/shop');
 
-  const [purchases, favourites, threads, pendingAds, activeAds] = await Promise.all([
+  const [purchases, favourites, threads, pendingAds, activeAds, soldAds] = await Promise.all([
     safe(() => apiFromServer<Purchase[]>('/me/purchases?per_page=5', { cache: 'no-store' }).then(r => r.data), FALLBACK_PURCHASES),
     safe(() => apiFromServer<Favourite[]>('/me/favourites?per_page=5', { cache: 'no-store' }).then(r => r.data), FALLBACK_FAVOURITES),
     safe(() => apiFromServer<Thread[]>('/me/threads?limit=5', { cache: 'no-store' }).then(r => r.data), []),
     safe(() => apiFromServer<MyAd[]>('/me/ads?status=pending&per_page=5', { cache: 'no-store' }).then(r => r.data), FALLBACK_ADS),
-    safe(() => apiFromServer<MyAd[]>('/me/ads?status=active&per_page=5', { cache: 'no-store' }).then(r => r.data), FALLBACK_ADS),
+    safe(() => apiFromServer<MyAd[]>('/me/ads?status=active&per_page=10', { cache: 'no-store' }).then(r => r.data), FALLBACK_ADS),
+    safe(() => apiFromServer<MyAd[]>('/me/ads?status=sold_out&per_page=10', { cache: 'no-store' }).then(r => r.data), FALLBACK_ADS),
   ]);
 
   const unread = threads.reduce((n, t) => n + (t.unread_count ?? 0), 0);
 
-  // My listings = active (approved, live on public pages) + pending (awaiting
-  // admin review). Sorted newest first.
-  const listings = [...activeAds, ...pendingAds];
+  // My listings = active (live) + pending (under review) + sold (so the seller
+  // can restock). Active first, then pending, then sold.
+  const listings = [...activeAds, ...pendingAds, ...soldAds];
 
   const statusLabel = (s: string) => ({
     pending: 'Pending', processing: 'Processing', shipped: 'Shipped',
@@ -147,14 +150,27 @@ export default async function BuyerDashboardPage() {
                       )}
                       <div className="mt-0.5 text-xs text-ink-muted">
                         <PriceTag amount={a.price} />
-                        {a.status === 'active' ? ' · Live on marketplace' : ' · awaiting admin review'}
+                        {a.status === 'active'
+                          ? ' · Live on marketplace'
+                          : a.status === 'sold_out'
+                            ? ' · Sold'
+                            : ' · awaiting admin review'}
                       </div>
                     </div>
-                    {a.status === 'active' ? (
-                      <Badge tone="success">Approved</Badge>
-                    ) : (
-                      <Badge tone="urgent">Pending review</Badge>
-                    )}
+                    <div className="flex flex-col items-end gap-2">
+                      {a.status === 'active' ? (
+                        <Badge tone="success">Approved</Badge>
+                      ) : a.status === 'sold_out' ? (
+                        <Badge tone="muted">Sold</Badge>
+                      ) : (
+                        <Badge tone="urgent">Pending review</Badge>
+                      )}
+                      <ListingActions
+                        adId={a.id}
+                        status={a.status}
+                        hidden={a.hide === '1' || a.hide === 1 || a.hide === true}
+                      />
+                    </div>
                   </li>
                 ))}
               </ul>
