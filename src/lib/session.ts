@@ -50,3 +50,16 @@ export async function requireAdmin(redirectTo: string): Promise<User> {
   }
   return user;
 }
+
+/**
+ * Like requireAdmin, but also blocks "limited" admins — used to guard the
+ * Users and Transactions areas via direct URL (the nav already hides them).
+ * Limited admins are bounced back to the dashboard.
+ */
+export async function requireFullAdmin(redirectTo: string): Promise<User> {
+  const user = await requireAdmin(redirectTo);
+  if (user.admin_role === 'limited') {
+    redirect('/admin');
+  }
+  return user;
+}

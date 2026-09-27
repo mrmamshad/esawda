@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { apiFromServer, ApiError } from '@/lib/api';
+import { requireFullAdmin } from '@/lib/session';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { TxTableClient, type AdminTxRow } from './TxTableClient';
 
@@ -21,6 +22,7 @@ async function safe<T>(fn: () => Promise<T>, fb: T): Promise<T> {
 export default async function AdminTxPage({
   searchParams,
 }: { searchParams: Promise<{ status?: string; page?: string }> }) {
+  await requireFullAdmin('/admin/transactions'); // limited admins are bounced to /admin
   const { status = '', page = '1' } = await searchParams;
   const qs = new URLSearchParams({ per_page: '50', page });
   if (status) qs.set('status', status);

@@ -74,10 +74,21 @@ const GROUPS: NavGroup[] = [
   },
 ];
 
+// Nav destinations a "limited" admin must not see.
+const LIMITED_ADMIN_HIDDEN: string[] = ['/admin/users', '/admin/transactions'];
+
 export function AdminSidebar({
   user, collapsed, onToggle, open, onClose,
 }: { user: User; collapsed: boolean; onToggle: () => void; open: boolean; onClose: () => void }) {
   const pathname = usePathname();
+
+  // Limited admins get a trimmed nav (no Users / Transactions). Empty groups
+  // are dropped so we don't render a stray section header.
+  const groups = user.admin_role === 'limited'
+    ? GROUPS
+        .map((g) => ({ ...g, items: g.items.filter((i) => !LIMITED_ADMIN_HIDDEN.includes(i.href as string)) }))
+        .filter((g) => g.items.length > 0)
+    : GROUPS;
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useClickOutside<HTMLDivElement>(profileOpen, () => setProfileOpen(false));
 
@@ -120,7 +131,7 @@ export function AdminSidebar({
 
       {/* ── Nav ── */}
       <nav className="flex-1 overflow-y-auto px-2.5 pb-4">
-        {GROUPS.map((group) => (
+        {groups.map((group) => (
           <div key={group.title} className="mt-4 first:mt-1">
             {wide && (
               <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--adm-fg-faint)' }}>

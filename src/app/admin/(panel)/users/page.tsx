@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { apiFromServer, ApiError } from '@/lib/api';
+import { requireFullAdmin } from '@/lib/session';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { UsersTableClient, type AdminUserRow } from './UsersTableClient';
 
@@ -11,6 +12,7 @@ async function safe<T>(fn: () => Promise<T>, fb: T): Promise<T> {
 }
 
 export default async function AdminUsersPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  await requireFullAdmin('/admin/users'); // limited admins are bounced to /admin
   const { page = '1' } = await searchParams;
   const qs = new URLSearchParams({ per_page: '50', page });
   const res = await safe(

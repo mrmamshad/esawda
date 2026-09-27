@@ -5,6 +5,7 @@ import {
   Users, PackageCheck, Wallet, ShoppingBag, ArrowRight,
 } from 'lucide-react';
 import { apiFromServer, ApiError } from '@/lib/api';
+import { requireAdmin } from '@/lib/session';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { DateRangeFilter } from '@/components/admin/DateRangeFilter';
 import { StatCard } from '@/components/admin/StatCard';
@@ -54,6 +55,9 @@ export default async function AdminDashboardPage({
     () => apiFromServer<AdminDashboardData>(`/admin/dashboard?${qs.toString()}`, { cache: 'no-store' }),
     { data: FALLBACK },
   );
+  const admin = await requireAdmin('/admin');
+  const isLimited = admin.admin_role === 'limited';
+
   const d = res.data;
   const rev = d.revenue_series ?? FALLBACK.revenue_series!;
   const win = d.window;
@@ -72,13 +76,15 @@ export default async function AdminDashboardPage({
         title="Dashboard"
         description={`Welcome back — here's what's happening on eSawda today.`}
         actions={
-          <Link
-            href={'/admin/transactions' as Route}
-            className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-[12.5px] font-semibold transition hover:opacity-80"
-            style={{ borderColor: 'var(--adm-border)', color: 'var(--adm-fg)' }}
-          >
-            View reports <ArrowRight size={14} />
-          </Link>
+          isLimited ? null : (
+            <Link
+              href={'/admin/transactions' as Route}
+              className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-[12.5px] font-semibold transition hover:opacity-80"
+              style={{ borderColor: 'var(--adm-border)', color: 'var(--adm-fg)' }}
+            >
+              View reports <ArrowRight size={14} />
+            </Link>
+          )
         }
       />
 
@@ -88,39 +94,47 @@ export default async function AdminDashboardPage({
       </div>
 
       {/* ── Row 1: KPI cards ── */}
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Total users"    value={d.counts.users}         delta={d.trend?.users_delta}
-          icon={<Users size={17} />}       tone="info"
-          sparkline={usrSpark}
-        />
+      <section className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${isLimited ? 'xl:grid-cols-2' : 'xl:grid-cols-4'}`}>
+        {!isLimited && (
+          <StatCard
+            label="Total users"    value={d.counts.users}         delta={d.trend?.users_delta}
+            icon={<Users size={17} />}       tone="info"
+            sparkline={usrSpark}
+          />
+        )}
         <StatCard
           label="Active products" value={d.counts.ads_active}    delta={d.trend?.ads_delta}
           icon={<PackageCheck size={17} />} tone="warning"
           sparkline={revSpark}
         />
-        <StatCard
-          label="Revenue"        value={d.counts.revenue_total} delta={d.trend?.revenue_delta}
-          icon={<Wallet size={17} />}      tone="brand"
-          currency emphasis="hero"
-          sparkline={revSpark}
-        />
-        <StatCard
-          label="Transactions"   value={d.counts.tx_total}      delta={d.trend?.tx_delta}
-          icon={<ShoppingBag size={17} />} tone="success"
-          sparkline={txSpark}
-        />
+        {!isLimited && (
+          <StatCard
+            label="Revenue"        value={d.counts.revenue_total} delta={d.trend?.revenue_delta}
+            icon={<Wallet size={17} />}      tone="brand"
+            currency emphasis="hero"
+            sparkline={revSpark}
+          />
+        )}
+        {!isLimited && (
+          <StatCard
+            label="Transactions"   value={d.counts.tx_total}      delta={d.trend?.tx_delta}
+            icon={<ShoppingBag size={17} />} tone="success"
+            sparkline={txSpark}
+          />
+        )}
       </section>
 
       {/* ── Row 2: Revenue chart + category donut ── */}
       <section className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-5">
-        <div className="lg:col-span-3">
-          <RevenueChart
-            series={rev}
-            window={win ? { label: rangeLabel, points: win.revenue } : undefined}
-          />
-        </div>
-        <div className="lg:col-span-2">
+        {!isLimited && (
+          <div className="lg:col-span-3">
+            <RevenueChart
+              series={rev}
+              window={win ? { label: rangeLabel, points: win.revenue } : undefined}
+            />
+          </div>
+        )}
+        <div className={isLimited ? 'lg:col-span-5' : 'lg:col-span-2'}>
           <CategoryDonut data={d.category_breakdown ?? []} />
         </div>
       </section>
@@ -130,24 +144,28 @@ export default async function AdminDashboardPage({
         <div className="lg:col-span-1">
           <TopCategoriesBar data={d.top_categories ?? []} />
         </div>
-        <div className="lg:col-span-1">
-          <UserGrowthCard series={win ? win.users : (d.user_growth ?? [])} subtitle={win ? `New users · ${rangeLabel}` : undefined} />
-        </div>
+        {!isLimited && (
+          <div className="lg:col-span-1">
+            <UserGrowthCard series={win ? win.users : (d.user_growth ?? [])} subtitle={win ? `New users · ${rangeLabel}` : undefined} />
+          </div>
+        )}
         <div className="lg:col-span-1">
           <ActivityFeed events={buildActivityFeed(d)} />
         </div>
       </section>
 
       {/* ── Row 4: Latest ads + Latest users ── */}
-      <section className="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <section className={`mt-5 grid grid-cols-1 gap-4 ${isLimited ? '' : 'xl:grid-cols-2'}`}>
         <LatestAdsTable rows={d.recent.ads} />
-        <LatestUsersTable rows={d.recent.users} />
+        {!isLimited && <LatestUsersTable rows={d.recent.users} />}
       </section>
 
       {/* ── Row 5: Latest transactions (full width) ── */}
-      <section className="mt-5">
-        <LatestTransactionsTable rows={d.recent.transactions} />
-      </section>
+      {!isLimited && (
+        <section className="mt-5">
+          <LatestTransactionsTable rows={d.recent.transactions} />
+        </section>
+      )}
     </>
   );
 }

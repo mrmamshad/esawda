@@ -181,6 +181,7 @@ export type User = {
   group_id?: string | number | null;
   plan_id?: number | null;
   is_admin?: boolean;
+  admin_role?: 'full' | 'limited' | null;
   is_shop?: boolean;
   plan_active?: boolean;
   plan_expires_at?: string | null;
