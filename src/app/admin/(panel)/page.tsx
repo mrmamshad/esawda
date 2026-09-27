@@ -65,10 +65,11 @@ export default async function AdminDashboardPage({
   const sparkFrom = (series: TrendPoint[]) => series.slice(-14).map((p) => p.total);
 
   // When a master filter window is present, charts/sparklines follow it;
-  // otherwise fall back to the legacy trailing series.
-  const revSpark  = win ? win.revenue.map((p) => p.total)      : sparkFrom(rev['30D'] ?? []);
-  const usrSpark  = win ? win.users.map((p) => p.total)        : sparkFrom(d.user_growth ?? []);
-  const txSpark   = win ? win.transactions.map((p) => p.total) : sparkFrom(rev['30D'] ?? []);
+  // otherwise fall back to the legacy trailing series. Revenue/user/tx series
+  // are absent for limited admins (redacted server-side), so guard every read.
+  const revSpark  = win?.revenue      ? win.revenue.map((p) => p.total)      : sparkFrom(rev['30D'] ?? []);
+  const usrSpark  = win?.users        ? win.users.map((p) => p.total)        : sparkFrom(d.user_growth ?? []);
+  const txSpark   = win?.transactions ? win.transactions.map((p) => p.total) : sparkFrom(rev['30D'] ?? []);
 
   return (
     <>
@@ -288,13 +289,14 @@ function buildActivityFeed(d: AdminDashboardData): ActivityEvent[] {
     meta: `৳${new Intl.NumberFormat('en-IN').format(a.price ?? 0)}`,
     at: a.created_at ?? new Date().toISOString(),
   }));
-  d.recent.users.slice(0, 3).forEach((u) => events.push({
+  // users / transactions are redacted for limited admins — guard both.
+  (d.recent.users ?? []).slice(0, 3).forEach((u) => events.push({
     id: `u-${u.id}`, kind: 'user',
     title: `${u.username} joined the platform`,
     meta: u.email,
     at: u.created_at ?? new Date().toISOString(),
   }));
-  d.recent.transactions.slice(0, 3).forEach((t) => events.push({
+  (d.recent.transactions ?? []).slice(0, 3).forEach((t) => events.push({
     id: `t-${t.id}`, kind: 'tx',
     title: `Transaction TX-${t.id} ${t.status}`,
     meta: `৳${new Intl.NumberFormat('en-IN').format(t.amount)}`,
