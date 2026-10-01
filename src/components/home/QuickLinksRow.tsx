@@ -1,6 +1,5 @@
 'use client';
 
-import { useRef } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
 
@@ -11,57 +10,33 @@ export type QuickLink = {
 };
 
 /**
- * One-line horizontally scrollable quick-link row. Mouse users drag to
- * scroll (native scrollbar is hidden); keyboard users tab through the
- * links and arrows scroll the strip. A drag never fires the link —
- * clicks are suppressed once the pointer actually moved.
+ * Auto-scrolling quick-link marquee (notice-ticker style).
+ * The row loops infinitely with a CSS translateX(-50%) animation,
+ * pauses on hover / focus / touch-hold, and falls back to a normal
+ * horizontally scrollable strip when the user prefers reduced motion.
  */
 export function QuickLinksRow({ links }: { links: QuickLink[] }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const drag = useRef({ down: false, startX: 0, startScroll: 0, moved: false });
+  if (!links.length) return null;
 
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    drag.current = { down: true, startX: e.clientX, startScroll: trackRef.current?.scrollLeft ?? 0, moved: false };
-  };
+  // Ensure each half of the loop is wider than the viewport so the
+  // -50% wrap is seamless even with only 5-6 categories.
+  const repeatPerHalf = links.length < 8 ? 3 : 2;
+  const half: QuickLink[] = Array.from({ length: repeatPerHalf }).flatMap(() => links);
+  // Constant pixel speed: ~2.2s per item in one half.
+  const duration = Math.max(18, half.length * 2.2);
 
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const d = drag.current;
-    if (!d.down || !trackRef.current) return;
-    const dx = e.clientX - d.startX;
-    if (Math.abs(dx) > 6) d.moved = true;
-    trackRef.current.scrollLeft = d.startScroll - dx;
-  };
-
-  const endDrag = () => {
-    drag.current.down = false;
-  };
-
-  const onClickCapture = (e: React.SyntheticEvent) => {
-    if (drag.current.moved) {
-      e.preventDefault();
-      e.stopPropagation();
-      drag.current.moved = false;
-    }
-  };
-
-  return (
+  const renderHalf = (items: QuickLink[], hidden: boolean) => (
     <div
-      ref={trackRef}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={endDrag}
-      onPointerCancel={endDrag}
-      onPointerLeave={endDrag}
-      onClickCapture={onClickCapture}
-      className="mt-8 flex w-full max-w-[600px] cursor-grab gap-1 overflow-x-auto pb-1 select-none active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
-      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      className="flex shrink-0 items-start gap-1 pr-1"
+      aria-hidden={hidden || undefined}
     >
-      {links.map((c) => (
+      {items.map((c, i) => (
         <Link
-          key={c.label}
+          key={`${c.label}-${i}`}
           href={c.href}
           title={c.label}
           draggable={false}
+          tabIndex={hidden ? -1 : undefined}
           className="group flex w-24 shrink-0 flex-col items-center gap-2 text-center"
         >
           <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#0F1524] shadow-[0_10px_20px_-12px_rgba(15,20,40,0.25)] transition group-hover:-translate-y-0.5" style={{ color: '#FF003F' }}>
@@ -72,6 +47,41 @@ export function QuickLinksRow({ links }: { links: QuickLink[] }) {
           </span>
         </Link>
       ))}
+    </div>
+  );
+
+  return (
+    <div className="marquee-viewport mt-8 w-full max-w-[600px] overflow-hidden pb-1 [mask-image:linear-gradient(to_right,transparent,black_24px,black_calc(100%-24px),transparent)]">
+      <div
+        className="marquee-track flex w-max"
+        style={{ ['--marquee-duration' as string]: `${duration}s` }}
+      >
+        {renderHalf(half, false)}
+        {renderHalf(half, true)}
+      </div>
+      <style>{`
+        .marquee-track {
+          animation: esawda-marquee var(--marquee-duration, 30s) linear infinite;
+        }
+        .marquee-viewport:hover .marquee-track,
+        .marquee-viewport:focus-within .marquee-track,
+        .marquee-viewport:active .marquee-track {
+          animation-play-state: paused;
+        }
+        @keyframes esawda-marquee {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .marquee-track { animation: none; }
+          .marquee-viewport {
+            overflow-x: auto;
+            scrollbar-width: none;
+            mask-image: none;
+          }
+          .marquee-viewport::-webkit-scrollbar { display: none; }
+        }
+      `}</style>
     </div>
   );
 }
