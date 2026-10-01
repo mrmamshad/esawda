@@ -16,14 +16,16 @@ export function TestimonialCard(props: Props) {
   if (props.kind === 'testimonial') {
     const { item, rating = 5, quote } = props;
     return (
-      <article className="surface-card p-5">
-        <p className="text-sm font-medium text-ink">{quote ?? item.content}</p>
-        <RatingStars value={rating} className="mt-3" />
-        <div className="mt-4 flex items-center gap-3">
-          <Avatar src={item.avatar_url} alt={item.name} size="sm" />
-          <div>
-            <div className="text-sm font-semibold text-ink">{item.name}</div>
-            {item.designation && <div className="text-xs text-ink-muted">{item.designation}</div>}
+      <article className="surface-card flex h-full flex-col p-5">
+        <p className="flex-1 text-sm font-medium text-ink">{quote ?? item.content}</p>
+        <div className="mt-auto pt-3">
+          <RatingStars value={rating} />
+          <div className="mt-4 flex items-center gap-3">
+            <Avatar src={item.avatar_url} alt={item.name} size="sm" />
+            <div>
+              <div className="text-sm font-semibold text-ink">{item.name}</div>
+              {item.designation && <div className="text-xs text-ink-muted">{item.designation}</div>}
+            </div>
           </div>
         </div>
       </article>
@@ -39,7 +41,7 @@ export function TestimonialCard(props: Props) {
     'Anonymous';
 
   return (
-    <article className="surface-card p-5">
+    <article className="surface-card flex h-full flex-col p-5">
       <p className="text-sm font-medium text-ink line-clamp-4">{item.comment}</p>
       {item.image && (
         <div
@@ -49,12 +51,14 @@ export function TestimonialCard(props: Props) {
           <CoverImage src={item.image} alt="Review photo" sizes="(max-width: 640px) 100vw, 360px" />
         </div>
       )}
-      <RatingStars value={item.rating ?? 5} className="mt-3" />
-      <div className="mt-4 flex items-center gap-3">
-        <Avatar src={item.author?.avatar_url ?? null} alt={reviewer} size="sm" />
-        <div className="min-w-0">
-          <div className="truncate text-sm font-semibold text-ink">{reviewer}</div>
-          {item.author?.tagline && <div className="truncate text-xs text-ink-muted">{item.author.tagline}</div>}
+      <div className="mt-auto pt-3">
+        <RatingStars value={item.rating ?? 5} />
+        <div className="mt-4 flex items-center gap-3">
+          <Avatar src={item.author?.avatar_url ?? null} alt={reviewer} size="sm" />
+          <div className="min-w-0">
+            <div className="truncate text-sm font-semibold text-ink">{reviewer}</div>
+            {item.author?.tagline && <div className="truncate text-xs text-ink-muted">{item.author.tagline}</div>}
+          </div>
         </div>
       </div>
     </article>
