@@ -31,6 +31,7 @@ export function ListingGrid({
   lastPage,
   basePath,
   params,
+  conditionTabs,
   topSlot,
   midSlot,
   bottomSlot,
@@ -46,6 +47,7 @@ export function ListingGrid({
   lastPage: number;
   basePath: string;
   params?: Record<string, unknown>;
+  conditionTabs?: { current: 'all' | 'new' | 'used'; basePath: string };
   topSlot?: { placement: string; size: AdSlotSize };
   midSlot?: { placement: string; size: AdSlotSize };
   bottomSlot?: { placement: string; size: AdSlotSize };
@@ -65,6 +67,33 @@ export function ListingGrid({
         {topSlot && (
           <div className="mb-8">
             <AdSlot placement={topSlot.placement} size={topSlot.size} />
+          </div>
+        )}
+
+        {conditionTabs && (
+          <div className="mb-6 inline-flex items-center rounded-full border border-line bg-white p-1 shadow-sm" role="tablist" aria-label="Filter by product condition">
+            {([
+              { key: 'all', label: 'All' },
+              { key: 'used', label: 'Used' },
+              { key: 'new', label: 'New' },
+            ] as const).map((c) => {
+              const active = conditionTabs.current === c.key;
+              const href = c.key === 'all' ? conditionTabs.basePath : `${conditionTabs.basePath}?condition=${c.key}`;
+              return (
+                <Link
+                  key={c.key}
+                  href={href as Route}
+                  role="tab"
+                  aria-selected={active}
+                  className={
+                    'rounded-full px-6 py-2 text-sm font-semibold transition ' +
+                    (active ? 'bg-brand-700 text-white shadow-sm' : 'text-ink-muted hover:text-ink')
+                  }
+                >
+                  {c.label}
+                </Link>
+              );
+            })}
           </div>
         )}
 

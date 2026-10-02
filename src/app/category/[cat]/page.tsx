@@ -6,7 +6,7 @@ import { toQueryString } from '@/lib/queryString';
 import type { Ad, Category } from '@/types/api';
 
 type Params = Promise<{ cat: string }>;
-type Search = Promise<{ page?: string }>;
+type Search = Promise<{ page?: string; condition?: string }>;
 
 export const revalidate = 120;
 
@@ -19,6 +19,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
   const { cat } = await params;
   const sp   = await searchParams;
   const page = Math.max(1, parseInt(sp.page ?? '1', 10) || 1);
+  const condition = sp.condition === 'new' || sp.condition === 'used' ? sp.condition : 'all';
   const user = await getSessionUser();
 
   let items: Ad[] = [];
@@ -30,24 +31,31 @@ export default async function CategoryPage({ params, searchParams }: { params: P
     // Resolve category slug → id
     const catRes = await apiFromServer<Category>(`/categories/${cat}`);
     category = catRes.data;
-    const adsRes = await apiFromServer<Ad[]>(`/ads?${toQueryString({ page, per_page: 12, filter: { category: category.id } })}`);
+    const adsRes = await apiFromServer<Ad[]>(`/ads?${toQueryString({ page, per_page: 12, filter: { category: category.id, condition: condition === 'all' ? undefined : condition } })}`);
     items = (adsRes.data ?? []) as Ad[];
     meta  = { ...meta, ...(adsRes.meta as Partial<typeof meta>) };
   } catch (e) {
     error = e instanceof ApiError ? e.message : 'Could not load products.';
   }
 
+  const basePath = `/category/${cat}`;
+  const subtitle = condition === 'all'
+    ? `${meta.total} ad${meta.total === 1 ? '' : 's'}`
+    : `${meta.total} ${condition} ad${meta.total === 1 ? '' : 's'}`;
+
   return (
     <ListingGrid
       user={user}
       overline="Category"
       title={category?.name ?? cat}
-      subtitle={`${meta.total} ad${meta.total === 1 ? '' : 's'}`}
+      subtitle={subtitle}
       items={items}
       error={error}
       currentPage={meta.current_page}
       lastPage={meta.last_page}
-      basePath={`/category/${cat}`}
+      basePath={basePath}
+      params={condition === 'all' ? undefined : { condition }}
+      conditionTabs={{ current: condition, basePath }}
       topSlot={{ placement: `category.${cat}.filter_under`, size: 'large' }}
       midSlot={{ placement: `category.${cat}.mid_infeed`,    size: 'infeed' }}
       bottomSlot={{ placement: `category.${cat}.pre_pagination`, size: 'wide' }}
