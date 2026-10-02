@@ -54,6 +54,10 @@ export function HomeSections({
   highlights: ConditionedSection;
 }) {
   const [condition, setCondition] = useState<Condition>('all');
+  const withCondition = (href: string): Route =>
+    condition === 'all'
+      ? (href as Route)
+      : (`${href}${href.includes('?') ? '&' : '?'}condition=${condition}` as Route);
   const pick = (section: ConditionedSection) => {
     const combined = condition === 'all'
       ? [...section.used, ...section.new]
@@ -74,7 +78,7 @@ export function HomeSections({
 
       {/* ── 0. Popular categories ── */}
       <section className="reveal container-page pb-24 pt-6">
-        <CategorySectionHeader viewAllHref={'/ads' as Route} />
+        <CategorySectionHeader viewAllHref={withCondition('/ads')} />
         {categories.length === 0 ? (
           <div className="mt-12">
             <EmptyState title="No categories yet" description="Categories will appear once seeded." />
@@ -106,7 +110,7 @@ export function HomeSections({
                   Verified sellers, best-in-class prices, and buyer-safe messaging on every listing.
                 </p>
               </div>
-              <Link href={'/ads' as Route} className="contents">
+              <Link href={withCondition('/ads')} className="contents">
                 <button className="group inline-flex items-center gap-2 rounded-pill bg-ink pl-5 pr-2 py-2 text-body-md font-semibold text-white transition hover:bg-ink/90">
                   See all featured
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-500 text-white transition-transform group-hover:rotate-45">
@@ -141,7 +145,7 @@ export function HomeSections({
             title={<>Limited <span className="text-brand-700">Time Offers</span></>}
             description="Sellers marked these as urgent — expect quick replies."
             actionLabel="See all urgent"
-            actionHref={'/ads' as Route}
+            actionHref={withCondition('/ads')}
           />
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {stripTestAds(pick(urgent)).slice(0, 8).map((ad) => <ListingCard key={ad.id} ad={ad} variant="featured" />)}
@@ -192,7 +196,7 @@ export function HomeSections({
             title={<>Fresh from sellers, <span className="text-brand-700">in the last 24h.</span></>}
             description="Newly listed items across every category — updated every few minutes."
             actionLabel="Browse all"
-            actionHref={'/ads' as Route}
+            actionHref={withCondition('/ads')}
           />
           {pick(last24h).length === 0 ? (
             <div className="mt-12">
@@ -216,7 +220,7 @@ export function HomeSections({
             title={<>Hot <span className="text-brand-700">Listings</span></>}
             description="Listings sellers chose to spotlight."
             actionLabel="See all"
-            actionHref={'/ads' as Route}
+            actionHref={withCondition('/ads')}
           />
           <div className={`mt-12 ${GRID}`}>
             {stripTestAds(pick(highlights)).slice(0, 8).map((ad) => <ListingCard key={ad.id} ad={ad} variant="featured" />)}
