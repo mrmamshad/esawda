@@ -66,6 +66,7 @@ const GUEST_PRIMARY: NavLink[] = [
   { href: '/ads' as Route,         label: 'Browse ads' },
   { href: '/shops' as Route,       label: 'Browse shops' },
   { href: '/post/product' as Route, label: 'Post ad' },
+  { href: '/shop/apply' as Route,  label: 'Create a Shop' },
 ];
 
 const GUEST_OTHERS: NavLink[] = [
