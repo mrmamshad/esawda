@@ -3,6 +3,25 @@ import type { Route } from 'next';
 import { ArrowUpRight } from 'lucide-react';
 
 /**
+ * The single source of truth for the big "section heading" typography used
+ * across the marketing pages. Import this instead of copy-pasting the class
+ * string so every heading stays in visual lock-step.
+ */
+export const SECTION_HEADING_CLASS =
+  'text-[32px] leading-[1.08] font-bold tracking-[-0.02em] text-balance sm:text-4xl md:text-[48px] md:leading-[1.05]';
+
+/** Small orange "eyebrow" label used above every section heading. */
+export function Eyebrow({ children, tone = 'brand' }: { children: React.ReactNode; tone?: 'brand' | 'light' }) {
+  const color = tone === 'light' ? 'text-brand-500' : 'text-brand-700';
+  return (
+    <p className={`inline-flex items-center gap-2 text-body-sm font-semibold uppercase tracking-[0.2em] ${color}`}>
+      <span className="inline-block h-1.5 w-6 rounded-full bg-brand-700" />
+      {children}
+    </p>
+  );
+}
+
+/**
  * Shared Eris-style section header.
  *
  * A tiny orange "eyebrow" label sits above a chunky navy heading with
@@ -38,7 +57,7 @@ export function SectionHeader({
     return (
       <div className="mx-auto max-w-2xl text-center">
         <Eyebrow>{eyebrow}</Eyebrow>
-        <h2 className="mt-3 text-[32px] leading-[1.08] font-bold tracking-[-0.02em] text-balance text-ink sm:text-4xl md:text-[48px] md:leading-[1.05]">{title}</h2>
+        <h2 className={`mt-3 text-ink ${SECTION_HEADING_CLASS}`}>{title}</h2>
         {description && <p className="mt-4 text-body-md text-ink-muted">{description}</p>}
       </div>
     );
@@ -62,7 +81,7 @@ export function SectionHeader({
             </span>
           )}
         </div>
-        <h2 className="mt-3 text-[32px] leading-[1.08] font-bold tracking-[-0.02em] text-balance text-ink sm:text-4xl md:text-[48px] md:leading-[1.05]">
+        <h2 className={`mt-3 text-ink ${SECTION_HEADING_CLASS}`}>
           {title}
         </h2>
         {description && (
@@ -80,14 +99,5 @@ export function SectionHeader({
         </Link>
       )}
     </div>
-  );
-}
-
-function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="inline-flex items-center gap-2 text-body-sm font-semibold uppercase tracking-[0.2em] text-brand-700">
-      <span className="inline-block h-1.5 w-6 rounded-full bg-brand-700" />
-      {children}
-    </p>
   );
 }

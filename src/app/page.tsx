@@ -48,30 +48,23 @@ type HomeData = {
   blogs: { data: Blog[] };
 };
 
-export default async function HomePage() {
-  // One-shot `/home` (single backend round-trip, cached 120s both sides).
-  // Falls back to the legacy parallel fan-out if the endpoint is missing
-  // (e.g. backend not yet deployed) so the page never hard-fails.
-  let data: HomeData;
-  try {
-    const home = await api<HomePayload>('/home', { revalidate: 120, tags: ['home'] });
-    data = {
-      settings: { data: { settings: home.data.settings } },
-      cats: { data: home.data.categories },
-      sections: home.data.sections,
-      plans: { data: home.data.plans },
-      testimonials: { data: home.data.testimonials },
-      blogs: { data: home.data.blogs },
-    };
-  } catch {
-    data = await loadLegacy();
-  }
-  const { settings, cats, sections, plans, testimonials, blogs } = data;
+const EMPTY_SECTIONS: HomePayload['sections'] = {
+  featured: { used: [], new: [] },
+  urgent: { used: [], new: [] },
+  last24h: { used: [], new: [] },
+  highlights: { used: [], new: [] },
+  used: { used: [], new: [] },
+};
 
+/**
+ * Legacy fan-out loader — used only when the one-shot `/home` endpoint is
+ * unavailable (e.g. backend not yet deployed). Fires each section request in
+ * parallel and degrades gracefully to empty lists on any per-request failure.
+ */
 async function loadLegacy(): Promise<HomeData> {
   const [lSettings, lCats, lSections, lPlans, lTestimonials, lBlogs] = await Promise.all([
     api<{ settings: Record<string, string> }>('/settings', { revalidate: 300, tags: ['settings'] }),
-    safe(      api<Category[]>('/categories?with_counts=true', { revalidate: 300, tags: ['categories'] }),                                  { data: [] as Category[] }),
+    safe(api<Category[]>('/categories?with_counts=true', { revalidate: 300, tags: ['categories'] }), { data: [] as Category[] }),
     safe(Promise.all([
       api<Ad[]>('/ads?per_page=12&filter[featured]=1&sort=-created_at&filter[condition]=used', { revalidate: 120, tags: ['ads'] }),
       api<Ad[]>('/ads?per_page=12&filter[featured]=1&sort=-created_at&filter[condition]=new', { revalidate: 120, tags: ['ads'] }),
@@ -87,16 +80,15 @@ async function loadLegacy(): Promise<HomeData> {
       featUsed, featNew, urgentUsed, urgentNew,
       last24hUsed, last24hNew, hiUsed, hiNew, usedUsed, usedNew,
     ]) => ({
-      featured:   { used: featUsed.data as Ad[],   new: featNew.data as Ad[] },
-      urgent:     { used: urgentUsed.data as Ad[], new: urgentNew.data as Ad[] },
+      featured:   { used: featUsed.data as Ad[],    new: featNew.data as Ad[] },
+      urgent:     { used: urgentUsed.data as Ad[],  new: urgentNew.data as Ad[] },
       last24h:    { used: last24hUsed.data as Ad[], new: last24hNew.data as Ad[] },
       highlights: { used: hiUsed.data as Ad[],      new: hiNew.data as Ad[] },
       used:       { used: usedUsed.data as Ad[],    new: usedNew.data as Ad[] },
-    })),
-    { featured: { used: [], new: [] }, urgent: { used: [], new: [] }, last24h: { used: [], new: [] }, highlights: { used: [], new: [] }, used: { used: [], new: [] } }),
-    safe(api<Plan[]>('/plans', { revalidate: 300 }),                                                            { data: [] as Plan[] }),
-    safe(api<Testimonial[]>('/testimonials?limit=3', { revalidate: 600 }),                                      { data: [] as Testimonial[] }),
-    safe(api<Blog[]>('/blogs?per_page=3', { revalidate: 300 }),                                                 { data: [] as Blog[] }),
+    })), EMPTY_SECTIONS),
+    safe(api<Plan[]>('/plans', { revalidate: 300 }), { data: [] as Plan[] }),
+    safe(api<Testimonial[]>('/testimonials?limit=3', { revalidate: 600 }), { data: [] as Testimonial[] }),
+    safe(api<Blog[]>('/blogs?per_page=3', { revalidate: 300 }), { data: [] as Blog[] }),
   ]);
 
   return {
@@ -108,6 +100,27 @@ async function loadLegacy(): Promise<HomeData> {
     blogs: lBlogs,
   };
 }
+
+/** Loads home data via the one-shot `/home` endpoint, falling back to the
+ *  legacy fan-out so the page never hard-fails. */
+async function loadHomeData(): Promise<HomeData> {
+  try {
+    const home = await api<HomePayload>('/home', { revalidate: 120, tags: ['home'] });
+    return {
+      settings: { data: { settings: home.data.settings } },
+      cats: { data: home.data.categories },
+      sections: home.data.sections,
+      plans: { data: home.data.plans },
+      testimonials: { data: home.data.testimonials },
+      blogs: { data: home.data.blogs },
+    };
+  } catch {
+    return loadLegacy();
+  }
+}
+
+export default async function HomePage() {
+  const { settings, cats, sections, plans, testimonials, blogs } = await loadHomeData();
 
   // Prefer the human "site_name" (short brand) over the SEO "site_title".
   const siteName   = ((settings.data?.settings ?? {}) as Record<string, string>).site_name || 'eSawda';
@@ -174,18 +187,12 @@ async function loadLegacy(): Promise<HomeData> {
         {/* ── Testimonials — center-aligned, quote-first cards ── */}
         {testimonials.data.length > 0 && (
           <section className="reveal container-page py-24">
-            <div className="mx-auto max-w-2xl text-center">
-              <p className="inline-flex items-center gap-2 text-body-sm font-semibold uppercase tracking-[0.2em] text-brand-700">
-                <span className="inline-block h-1.5 w-6 rounded-full bg-brand-700" />
-                Loved by sellers
-              </p>
-              <h2 className="mt-3 text-[32px] leading-[1.08] font-bold tracking-[-0.02em] text-balance sm:text-4xl md:text-[48px] md:leading-[1.05] text-ink md:text-[48px]">
-                What our community <span className="text-brand-700">says.</span>
-              </h2>
-              <p className="mt-4 text-body-md text-ink-muted">
-                Real quotes from real sellers who grew their business on {siteName}.
-              </p>
-            </div>
+            <SectionHeader
+              align="center"
+              eyebrow="Loved by sellers"
+              title={<>What our community <span className="text-brand-700">says.</span></>}
+              description={`Real quotes from real sellers who grew their business on ${siteName}.`}
+            />
             <div className="mt-14 grid gap-6 md:grid-cols-3">
               {(testimonials.data as Testimonial[]).slice(0, 3).map((t) => (
                 <TestimonialCard key={t.id} kind="testimonial" item={t} />

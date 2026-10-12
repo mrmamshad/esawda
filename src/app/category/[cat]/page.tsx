@@ -56,9 +56,9 @@ export default async function CategoryPage({ params, searchParams }: { params: P
       basePath={basePath}
       params={condition === 'all' ? undefined : { condition }}
       conditionTabs={{ current: condition, basePath }}
-      topSlot={{ placement: `category.${cat}.filter_under`, size: 'large' }}
-      midSlot={{ placement: `category.${cat}.mid_infeed`,    size: 'infeed' }}
-      bottomSlot={{ placement: `category.${cat}.pre_pagination`, size: 'wide' }}
+      topSlot={{ placement: 'category.filter_under', size: 'large' }}
+      midSlot={{ placement: 'category.mid_infeed',    size: 'infeed' }}
+      bottomSlot={{ placement: 'category.pre_pagination', size: 'wide' }}
       midAfter={5}
     />
   );

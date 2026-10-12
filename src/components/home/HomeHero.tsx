@@ -121,7 +121,7 @@ export function HomeHero({ siteName = 'eSawda', categories = [] }: HomeHeroProps
 
         {/* ── RIGHT VISUAL COLUMN (desktop only — the phone mockup eats
             a full screen on phones with zero function, so it stays hidden
-            below lg and the trust strip below covers the social proof) ── */}
+            below lg) ── */}
         <div className="relative hidden h-[300px] w-full shrink-0 sm:h-[360px] lg:block lg:h-[400px] lg:w-[560px]">
           <Image
             src="/postar-01.webp"
@@ -134,13 +134,6 @@ export function HomeHero({ siteName = 'eSawda', categories = [] }: HomeHeroProps
           />
         </div>
 
-        {/* ── Mobile trust strip — the floating badges are desktop-only ── */}
-        <div className="flex flex-wrap items-center gap-2 lg:hidden">
-          <MobileTrust icon={<ArrowLeftRight size={13} />} label="Buy & Sell Anything" />
-          <MobileTrust icon={<Wallet size={13} />} label="Budget Friendly Deals" />
-          <MobileTrust icon={<Percent size={13} />} label="Zero Commission" />
-        </div>
-
         {/* ── TRUST BADGES COLUMN ─────────────────────────────
             Own flex column right of the PNG frame with margin-left
             so it never touches the PNG canvas. */}
@@ -151,17 +144,6 @@ export function HomeHero({ siteName = 'eSawda', categories = [] }: HomeHeroProps
         </div>
       </div>
     </section>
-  );
-}
-
-function MobileTrust({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[11px] font-semibold text-[#0F1524] shadow-[0_8px_18px_-12px_rgba(15,20,40,0.35)]">
-      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full text-white" style={{ backgroundColor: BRAND_RED }}>
-        {icon}
-      </span>
-      {label}
-    </span>
   );
 }
 
