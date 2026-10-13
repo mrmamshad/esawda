@@ -82,16 +82,18 @@ function getPlacement(p: string): Promise<PlacementAd | null> {
   });
 }
 
-const SIZE_SPEC: Record<AdSlotSize, { h: string; label: string }> = {
+const SIZE_SPEC: Record<AdSlotSize, { h: string; label: string; fit: string }> = {
   // Landscape banners collapse into unreadable slivers on phones
   // (970×90 at 350px wide = 32px tall), so every wide format carries a
-  // mobile min-height; object-cover center-crops instead of squishing.
-  leaderboard: { h: 'aspect-[4042/375] min-h-[90px] sm:min-h-0',  label: '728 × 90',  },
-  large:       { h: 'aspect-[2425/625] min-h-[110px] sm:min-h-0', label: '970 × 250', },
-  mpu:         { h: 'aspect-[1250/1042] w-full max-w-[320px] mx-auto', label: '300 × 250' },
-  infeed:      { h: 'aspect-[1250/1042] w-full max-w-[320px] mx-auto', label: 'In-feed native' },
-  wide:        { h: 'aspect-[4042/375] min-h-[96px] sm:min-h-0',  label: '970 × 90',  },
-  skyscraper:  { h: 'aspect-[160/600] w-full max-w-[160px] mx-auto', label: '160 × 600' },
+  // mobile min-height. On phones the full creative stays visible
+  // (object-contain); from sm up it fills the frame (object-cover).
+  // Square-ish formats keep cover everywhere (barely any crop).
+  leaderboard: { h: 'aspect-[4042/375] min-h-[90px] sm:min-h-0',  label: '728 × 90',  fit: 'object-contain sm:object-cover' },
+  large:       { h: 'aspect-[2425/625] min-h-[110px] sm:min-h-0', label: '970 × 250', fit: 'object-contain sm:object-cover' },
+  mpu:         { h: 'aspect-[1250/1042] w-full max-w-[320px] mx-auto', label: '300 × 250', fit: 'object-cover' },
+  infeed:      { h: 'aspect-[1250/1042] w-full max-w-[320px] mx-auto', label: 'In-feed native', fit: 'object-cover' },
+  wide:        { h: 'aspect-[4042/375] min-h-[96px] sm:min-h-0',  label: '970 × 90',  fit: 'object-contain sm:object-cover' },
+  skyscraper:  { h: 'aspect-[160/600] w-full max-w-[160px] mx-auto', label: '160 × 600', fit: 'object-cover' },
 };
 
 const FALLBACK_IMG: Partial<Record<AdSlotSize, string>> = {
@@ -131,7 +133,7 @@ export function AdSlot({
       sizes="100vw"
       priority={false}
       unoptimized
-      className="object-cover"
+      className={spec.fit}
     />
   ) : (
     <div className="flex h-full w-full items-center justify-center border-2 border-dashed border-ink/20 bg-[repeating-linear-gradient(135deg,rgba(0,0,0,0.025)_0_12px,transparent_12px_24px)]">
