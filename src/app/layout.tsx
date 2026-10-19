@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import { env } from '@/lib/env';
 import { AuthGate } from '@/components/interactive/AuthGate';
 import { SmoothScroll } from '@/components/interactive/SmoothScroll';
@@ -53,6 +54,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body className="min-h-screen antialiased" suppressHydrationWarning>
+        {env.analytics.gaId ? (
+          <>
+            {/* Google tag (gtag.js) — loaded once, applies to every route. */}
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${env.analytics.gaId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga-init" strategy="afterInteractive">
+              {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${env.analytics.gaId}');`}
+            </Script>
+          </>
+        ) : null}
         <ThemeProvider>
           <SmoothScroll />
           <AuthGate>{children}</AuthGate>
