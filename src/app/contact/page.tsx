@@ -42,6 +42,7 @@ export default async function ContactPage() {
                   <div>
                     <p className="text-ink-muted">Phone</p>
                     <a href="tel:01687488400" className="font-medium text-ink hover:text-brand-700">01687488400</a>
+                    <a href="tel:01352335223" className="block font-medium text-ink hover:text-brand-700">01352335223</a>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
