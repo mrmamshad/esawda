@@ -60,6 +60,10 @@ jobs:
             git reset --hard origin/main
             echo "==> after pull:"; git log --oneline -1
             npm ci --ignore-scripts
+            # Clean the previous build so prerendered pages (and the root
+            # layout's injected scripts) are always regenerated — without this
+            # Next's build cache can reuse a stale prerender for some routes.
+            rm -rf .next
             npm run build
             pm2 reload esawda-frontend --update-env || pm2 start npm --name esawda-frontend -- start
             pm2 save
