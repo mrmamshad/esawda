@@ -9,6 +9,9 @@ const _site = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 // Google Analytics 4 measurement ID (e.g. G-XXXXXXXXXX). When empty the
 // gtag snippet is skipped entirely, so dev/build never ships a broken tag.
 const _ga = process.env.NEXT_PUBLIC_GA_ID ?? '';
+// CookieYes consent banner client id (blocks cookies until the visitor
+// consents). Empty = banner not rendered.
+const _cy = process.env.NEXT_PUBLIC_COOKIEYES_ID ?? '';
 
 export const env = {
   api:  {
@@ -17,4 +20,5 @@ export const env = {
   },
   site: { base: _site.replace(/\/+$/, ''), name: 'eSawda' },
   analytics: { gaId: _ga },
+  consent: { cookieYesId: _cy },
 } as const;

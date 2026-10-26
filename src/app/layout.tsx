@@ -54,6 +54,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body className="min-h-screen antialiased" suppressHydrationWarning>
+        {env.consent.cookieYesId ? (
+          <>
+            {/* CookieYes consent banner. Loads before Google Analytics so it
+                can gate cookies until the visitor gives consent. */}
+            <Script
+              id="cookieyes"
+              type="text/javascript"
+              src={`https://cdn-cookieyes.com/client_data/${env.consent.cookieYesId}/script.js`}
+              strategy="beforeInteractive"
+            />
+          </>
+        ) : null}
         {env.analytics.gaId ? (
           <>
             {/* Google tag (gtag.js) — loaded once, applies to every route. */}
