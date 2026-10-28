@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Quote } from 'lucide-react';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { TestimonialCard } from '@/components/ui/TestimonialCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { apiFromServer, ApiError } from '@/lib/api';
@@ -44,6 +45,7 @@ export default async function TestimonialsPage() {
           </div>
         )}
       </main>
+      <Footer />
     </>
   );
 }

@@ -3,6 +3,7 @@ import type { Route } from 'next';
 import { Fragment } from 'react';
 import { ListChecks } from 'lucide-react';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { ListingCard } from '@/components/listing/ListingCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Pagination } from '@/components/ui/Pagination';
@@ -127,6 +128,7 @@ export function ListingGrid({
           </>
         )}
       </main>
+      <Footer />
     </>
   );
 }

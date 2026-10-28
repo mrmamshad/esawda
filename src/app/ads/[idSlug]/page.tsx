@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { Calendar, Tag, Car } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { ScrollToTopOnMount } from '@/components/layout/ScrollToTopOnMount';
 import { AdGallery } from '@/components/listing/AdGallery';
 import { ListingCard } from '@/components/listing/ListingCard';
@@ -213,6 +214,7 @@ export default async function AdDetailPage({ params }: { params: Promise<{ idSlu
           </aside>
         </div>
       </div>
+      <Footer />
       </>
     </ToastProvider>
   );

@@ -191,6 +191,17 @@ export function Footer({ siteName = 'eSawda' }: { siteName?: string }) {
           <p className="text-xs text-white/40">
             🔒 Payments securely processed by DGePay
           </p>
+          <p className="pt-2 text-center text-xs text-white/40">
+            Developed by{' '}
+            <a
+              href="https://takeoverads.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-white/60 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+            >
+              takeoverads.com
+            </a>
+          </p>
         </div>
       </div>
     </footer>

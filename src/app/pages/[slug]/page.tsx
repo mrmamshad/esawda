@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { apiFromServer, ApiError } from '@/lib/api';
 import { sanitizeHtml } from '@/lib/sanitize';
 import { getSessionUser } from '@/lib/session';
@@ -48,6 +49,7 @@ export default async function CmsPage({ params }: { params: Params }) {
           />
         </article>
       </main>
+      <Footer />
     </>
   );
 }

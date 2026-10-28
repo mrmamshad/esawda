@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 import { api } from '@/lib/api';
 import { toQueryString } from '@/lib/queryString';
 import { HeaderScrollAdapter } from '@/components/layout/HeaderScrollAdapter';
+import { Footer } from '@/components/layout/Footer';
 import { PageSurface } from '@/components/layout/PageSurface';
 import { HeroBanner } from '@/components/layout/HeroBanner';
 import { CategorySidebar } from '@/components/filter/CategorySidebar';
@@ -201,6 +202,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
           )}
         </main>
       </div>
+      <Footer />
     </PageSurface>
   );
 }

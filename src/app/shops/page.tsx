@@ -5,6 +5,7 @@ import { Search, Store } from 'lucide-react';
 import { api } from '@/lib/api';
 import { toQueryString } from '@/lib/queryString';
 import { HeaderScrollAdapter } from '@/components/layout/HeaderScrollAdapter';
+import { Footer } from '@/components/layout/Footer';
 import { PageSurface } from '@/components/layout/PageSurface';
 import { HeroBanner } from '@/components/layout/HeroBanner';
 import { MobileFilterToggle } from '@/components/filter/MobileFilterToggle';
@@ -167,6 +168,7 @@ export default async function ShopsPage({ searchParams }: { searchParams: Promis
           />
         </main>
       </div>
+      <Footer />
     </PageSurface>
   );
 }

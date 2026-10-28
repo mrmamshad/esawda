@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { PageSurface } from '@/components/layout/PageSurface';
 import { getSessionUser } from '@/lib/session';
 import { apiFromServer, ApiError } from '@/lib/api';
@@ -61,6 +62,7 @@ export default async function PublicPostPage() {
           canPostFree={Boolean(user?.can_post_free)}
         />
       </main>
+      <Footer />
     </PageSurface>
   );
 }

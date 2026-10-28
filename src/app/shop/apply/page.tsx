@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { getSessionUser } from '@/lib/session';
 import { apiFromServer } from '@/lib/api';
 import type { Category } from '@/types/api';
@@ -35,6 +36,7 @@ export default async function ShopApplyPage() {
             </Link>
           </div>
         </main>
+        <Footer />
       </>
     );
   }
@@ -58,6 +60,7 @@ export default async function ShopApplyPage() {
           />
         </div>
       </main>
+      <Footer />
     </>
   );
 }

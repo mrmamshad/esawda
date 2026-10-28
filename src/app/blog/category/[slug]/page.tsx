@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { FileText } from 'lucide-react';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { BlogCard } from '@/components/blog/BlogCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Pagination } from '@/components/ui/Pagination';
@@ -66,6 +67,7 @@ export default async function BlogCategoryPage({ params, searchParams }: { param
           </>
         )}
       </main>
+      <Footer />
     </>
   );
 }

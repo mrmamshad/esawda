@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Crown } from 'lucide-react';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { PlansGrid } from '@/components/membership/PlansGrid';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { apiFromServer, ApiError } from '@/lib/api';
@@ -44,6 +45,7 @@ export default async function MembershipPage() {
           )}
         </div>
       </main>
+      <Footer />
     </>
   );
 }

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Fragment } from 'react';
 import { FileText } from 'lucide-react';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { BlogHero } from '@/components/blog/BlogHero';
 import { BlogCard } from '@/components/blog/BlogCard';
 import { CategoryChip } from '@/components/blog/CategoryChip';
@@ -104,6 +105,7 @@ export default async function BlogIndex({ searchParams }: { searchParams: Search
           </div>
         )}
       </main>
+      <Footer />
     </>
   );
 }

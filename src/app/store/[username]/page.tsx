@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { PageSurface } from '@/components/layout/PageSurface';
 import { Avatar } from '@/components/ui/Avatar';
 import { CoverImage } from '@/components/ui/CoverImage';
@@ -367,6 +368,7 @@ export default async function SellerProfilePage({ params, searchParams }: {
           </div>
         </div>
       </div>
+      <Footer />
     </PageSurface>
   );
 }

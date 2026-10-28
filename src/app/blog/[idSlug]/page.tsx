@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { Header, HeaderSpacer } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { CategoryChip } from '@/components/blog/CategoryChip';
 import { AuthorMeta } from '@/components/blog/AuthorMeta';
 import { BlogCard } from '@/components/blog/BlogCard';
@@ -125,6 +126,7 @@ export default async function BlogSingle({ params }: { params: Params }) {
           </>
         )}
       </main>
+      <Footer />
     </>
   );
 }
