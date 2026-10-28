@@ -3,13 +3,65 @@ import type { Route } from 'next';
 import { Logo } from './Logo';
 
 /**
+ * Social profiles shown in the footer's "Follow us" column. Kept in sync
+ * with the "Follow us" block on the contact page (`/contact`).
+ */
+const socials = [
+  {
+    label: 'Facebook',
+    href: 'https://www.facebook.com/esawdabd',
+    chipClass: 'bg-[#1877F2]',
+    icon: (
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+        <path d="M13.5 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5h1.65V3.6c-.29-.04-1.27-.12-2.41-.12-2.39 0-4.02 1.46-4.02 4.13v2.29H7.6V13h2.67v8h3.23z" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Instagram',
+    href: 'https://www.instagram.com/esawdabd',
+    chipClass: 'bg-gradient-to-br from-[#F58529] via-[#DD2A7B] to-[#8134AF]',
+    icon: (
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+        <rect x="3" y="3" width="18" height="18" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.5" cy="6.5" r="0.9" fill="currentColor" stroke="none" />
+      </svg>
+    ),
+  },
+  {
+    label: 'LinkedIn',
+    href: 'https://www.linkedin.com/company/esawda/',
+    chipClass: 'bg-[#0A66C2]',
+    icon: (
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+        <path d="M6.94 5a1.94 1.94 0 1 1-3.88 0 1.94 1.94 0 0 1 3.88 0zM3.5 8.5h3.4V21H3.5V8.5zm5.5 0h3.26v1.7h.05c.45-.86 1.56-1.76 3.21-1.76 3.43 0 4.06 2.26 4.06 5.2V21h-3.4v-5.9c0-1.4-.02-3.2-1.95-3.2-1.96 0-2.26 1.53-2.26 3.1V21H9V8.5z" />
+      </svg>
+    ),
+  },
+  {
+    label: 'TikTok',
+    href: 'https://www.tiktok.com/@esawda',
+    chipClass: 'bg-black ring-1 ring-inset ring-white/25',
+    icon: (
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+        <path d="M16.5 3c.3 2.1 1.6 3.6 3.7 3.9v2.5c-1.3.1-2.5-.3-3.7-1v6.1c0 3.3-2.7 6-6 6s-6-2.7-6-6 2.7-6 6-6c.3 0 .6 0 .9.1v2.6c-.3-.1-.6-.2-.9-.2-1.9 0-3.4 1.5-3.4 3.4s1.5 3.4 3.4 3.4 3.4-1.5 3.4-3.4V3h2.6z" />
+      </svg>
+    ),
+  },
+] as const;
+
+/**
  * Site-wide footer — Mobbin-inspired dark minimal design, but more
  * compact than Mobbin's tall marketing footer.
  *
  * Layout:
  *   • Left  → brand mark + one-line tagline
- *   • Right → three tight link columns (Explore, Company, Legal)
- *   • Bottom hairline row → © notice + subtle social links
+ *   • Right → four tight columns (Explore, Company, Legal, Follow us)
+ *   • Bottom hairline row → © notice + legal links
+ *
+ * The social links mirror the "Follow us" block on the contact page, but
+ * are laid out as a vertical list so they fit the footer's link columns.
  *
  * Uses `bg-ink` (near-black navy) to match the app's design system so it
  * plays nicely with the rest of the site's palette.
@@ -58,7 +110,7 @@ export function Footer({ siteName = 'eSawda' }: { siteName?: string }) {
       />
 
       <div className="container-page relative py-14">
-        <div className="grid gap-10 md:grid-cols-[1.2fr_2fr] md:gap-16">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,2.4fr)] lg:gap-16">
           {/* ── Brand block ── */}
           <div>
             <Logo variant="onDark" />
@@ -74,8 +126,8 @@ export function Footer({ siteName = 'eSawda' }: { siteName?: string }) {
             </Link>
           </div>
 
-          {/* ── Link columns ── */}
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+          {/* ── Link columns + social column ── */}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4 md:gap-x-8">
             {cols.map((col) => (
               <div key={col.title}>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40">
@@ -95,6 +147,32 @@ export function Footer({ siteName = 'eSawda' }: { siteName?: string }) {
                 </ul>
               </div>
             ))}
+
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40">
+                Follow us
+              </p>
+              <ul className="mt-4 space-y-2.5">
+                {socials.map((s) => (
+                  <li key={s.label}>
+                    <a
+                      href={s.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${siteName} on ${s.label}`}
+                      className="group inline-flex items-center gap-2.5 rounded-full text-sm text-white/85 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+                    >
+                      <span
+                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white shadow-sm transition-transform duration-200 group-hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0 ${s.chipClass}`}
+                      >
+                        {s.icon}
+                      </span>
+                      {s.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
 
