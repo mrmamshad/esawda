@@ -110,7 +110,7 @@ export function Footer({ siteName = 'eSawda' }: { siteName?: string }) {
       />
 
       <div className="container-page relative py-14">
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,2.4fr)] lg:gap-16">
+        <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,2.4fr)] xl:gap-16">
           {/* ── Brand block ── */}
           <div>
             <Logo variant="onDark" />
