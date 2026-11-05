@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { ArrowUpRight, BadgeCheck, MapPin, PackageCheck } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
+import { versionedImage } from '@/lib/image-version';
 import type { Shop } from '@/types/api';
 
 /** Public shop profile card for the Shops directory. */
@@ -17,7 +18,7 @@ export function ShopCard({ shop }: { shop: Shop }) {
       <Link href={href} className="relative block aspect-[16/5] overflow-hidden bg-brand-900" tabIndex={-1}>
         {banner ? (
           <Image
-            src={banner}
+            src={versionedImage(banner)}
             alt=""
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"

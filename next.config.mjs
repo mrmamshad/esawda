@@ -4,9 +4,6 @@ const apiProxyTarget = process.env.API_PROXY_TARGET?.replace(/\/+$/, '');
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    // New optimizer path: old /_next/image URLs are pinned in Cloudflare's
-    // 30-day cache with responses produced while sharp was broken.
-    path: '/_next/image-v2',
     // Legacy image locations. `remotePatterns` beats the older domains list.
     remotePatterns: [
       { protocol: 'http',  hostname: '127.0.0.1', port: '8100', pathname: '/storage/**' },

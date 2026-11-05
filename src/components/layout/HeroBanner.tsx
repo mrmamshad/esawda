@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { Breadcrumb, type Crumb } from '@/components/ui/Breadcrumb';
 import { cn } from '@/lib/cn';
+import { versionedImage } from '@/lib/image-version';
 
 /**
  * Dark emerald hero banner used on the Browse page. Left half is title +
@@ -29,7 +30,7 @@ export function HeroBanner({
               className="relative -ml-4 h-56 w-40 overflow-hidden rounded-xl shadow-2xl ring-2 ring-white/10"
               style={{ transform: `translateY(${(i % 2 ? -1 : 1) * (i * 4)}px) rotate(${(i - 2) * 3}deg)` }}
             >
-              <Image src={src} alt="" fill sizes="160px" className="object-cover" unoptimized={src.startsWith('/')} />
+              <Image src={versionedImage(src)} alt="" fill sizes="160px" className="object-cover" unoptimized={src.startsWith('/')} />
             </div>
           ))}
         </div>

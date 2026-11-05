@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/cn';
 import { initials } from '@/lib/format';
+import { versionedImage } from '@/lib/image-version';
 
 type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
@@ -36,7 +37,7 @@ export function Avatar({
     <span className={cn('relative inline-flex items-center justify-center shrink-0 overflow-hidden rounded-full bg-brand-100 text-brand-800 font-semibold ring-2 ring-white shadow-sm', d.class, d.text, className)}>
       {hasSrc ? (
         <Image
-          src={src as string}
+          src={versionedImage(src as string)}
           alt={alt}
           width={d.px}
           height={d.px}
