@@ -22,7 +22,6 @@ export function ShopCard({ shop }: { shop: Shop }) {
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
             className="object-cover transition duration-500 group-hover:scale-[1.04]"
-            unoptimized
           />
         ) : (
           <>

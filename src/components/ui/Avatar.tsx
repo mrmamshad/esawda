@@ -42,7 +42,6 @@ export function Avatar({
           height={d.px}
           className="h-full w-full rounded-full object-cover"
           sizes={`${d.px}px`}
-          unoptimized
           onError={() => setFailed(true)}
         />
       ) : (
