@@ -1,0 +1,43 @@
+name: Image optimizer health
+
+on:
+  schedule:
+    # Every 6 hours. GitHub emails the repository owner when this fails.
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify live optimizer returns resized images
+        run: |
+          set -euo pipefail
+
+          nonce="$(date +%s)-${RANDOM}"
+          url="https://esawda.com/_next/image?url=%2Flogo.png&w=128&q=75&healthcheck=${nonce}"
+          headers="$(mktemp)"
+          body="$(mktemp)"
+
+          code="$(curl -sS -L \
+            -H 'Accept: image/avif,image/webp,image/png,image/*,*/*;q=0.8' \
+            -D "$headers" -o "$body" -w '%{http_code}' "$url")"
+          size="$(wc -c < "$body" | tr -d ' ')"
+          type="$(awk 'BEGIN{IGNORECASE=1} /^content-type:/{gsub(/\r/,""); print $2}' "$headers" | tail -1)"
+
+          echo "status=$code size=${size}B type=$type"
+
+          test "$code" = "200"
+          case "$type" in
+            image/*) ;;
+            *) echo "::error::optimizer returned non-image content-type: $type"; exit 1 ;;
+          esac
+
+          # /logo.png is ~72KB/2180px at source; a working optimizer returns
+          # roughly 3-4KB at w=128. A broken optimizer returns the original.
+          if [ "$size" -ge 30000 ]; then
+            echo "::error::optimizer returned $size bytes for w=128 (original file is ~72528 bytes)"
+            exit 1
+          fi
+
+          echo "Image optimizer healthy"

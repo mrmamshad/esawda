@@ -60,6 +60,10 @@ jobs:
             git reset --hard origin/main
             echo "==> after pull:"; git log --oneline -1
             npm ci --ignore-scripts
+            # Fail the deploy if sharp cannot run on this VPS CPU. Without
+            # this, Next silently serves original uploads and the site looks
+            # slow again (0.34 prebuilts require AVX2, which this host lacks).
+            node scripts/check-image-optimizer.mjs preflight
             # Clean the previous build so prerendered pages (and the root
             # layout's injected scripts) are always regenerated — without this
             # Next's build cache can reuse a stale prerender for some routes.
@@ -75,4 +79,7 @@ jobs:
               fi
               if [ "$i" = 18 ]; then echo "==> health check FAILED"; exit 1; fi
             done
+            # End-to-end check: the optimizer must return a resized image,
+            # not the 2180px original. A failing check fails the deployment.
+            node scripts/check-image-optimizer.mjs smoke http://127.0.0.1:3000
             echo "==> deploy complete on $(git rev-parse --short HEAD)"
