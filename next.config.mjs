@@ -4,6 +4,9 @@ const apiProxyTarget = process.env.API_PROXY_TARGET?.replace(/\/+$/, '');
 const nextConfig = {
   reactStrictMode: true,
   images: {
+    // Use our loader wrapper so optimizer URLs carry a cache-busting version.
+    loader: 'custom',
+    loaderFile: './src/lib/image-loader.ts',
     // Legacy image locations. `remotePatterns` beats the older domains list.
     remotePatterns: [
       { protocol: 'http',  hostname: '127.0.0.1', port: '8100', pathname: '/storage/**' },
