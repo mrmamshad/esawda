@@ -28,6 +28,30 @@ export type AdminAdRow = {
   user?: { id: number; username: string; name: string | null } | null;
 };
 
+/** Admin dates are shown in Bangladesh time, not the server/browser zone. */
+const LISTED_TIME_ZONE = 'Asia/Dhaka';
+
+function formatListedAt(iso?: string | null): string {
+  if (!iso) return '—';
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '—';
+
+  const day = date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    timeZone: LISTED_TIME_ZONE,
+  });
+  const time = date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: LISTED_TIME_ZONE,
+  });
+
+  return `${day}, ${time}`;
+}
+
 /**
  * Client-side ads table. Powered by the shared AdminTable primitive
  * (TanStack Table) so we get sorting, search, and a11y for free.
@@ -99,6 +123,25 @@ export function AdsTableClient({ initialRows }: { initialRows: AdminAdRow[] }) {
           {info.getValue() as string}
         </span>
       ),
+    },
+    {
+      id: 'listed',
+      accessorKey: 'created_at',
+      header: 'Listed',
+      cell: (info) => {
+        const iso = info.getValue() as string | null;
+        return (
+          <time
+            dateTime={iso ?? undefined}
+            title={iso ?? undefined}
+            className="whitespace-nowrap tabular-nums text-[12.5px]"
+            style={{ color: 'var(--adm-fg-muted)' }}
+          >
+            {formatListedAt(iso)}
+          </time>
+        );
+      },
+      size: 165,
     },
     {
       id: 'price',
